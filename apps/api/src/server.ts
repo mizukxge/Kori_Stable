@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
+import cookie from '@fastify/cookie';
 import { env } from '../../../config/env.js';
 
 export async function buildServer() {
@@ -38,6 +39,16 @@ export async function buildServer() {
     origin: env.CORS_ORIGIN,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+
+  // Register cookie plugin
+  await fastify.register(cookie, {
+    secret: env.SESSION_SECRET,
+    parseOptions: {
+      httpOnly: true,
+      secure: env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    },
   });
 
   // Register rate limiting

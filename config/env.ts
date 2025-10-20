@@ -17,8 +17,11 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   
+  // Database
+  DATABASE_URL: z.string(),
+  
   // Secrets (will be masked in logs)
-  DATABASE_URL: z.string().optional(),
+  SESSION_SECRET: z.string().min(32),
   JWT_SECRET: z.string().min(32).optional(),
   API_KEY: z.string().optional(),
 });
@@ -53,6 +56,7 @@ export const printConfig = () => {
   console.log('  CORS_ORIGIN:', env.CORS_ORIGIN);
   console.log('  LOG_LEVEL:', env.LOG_LEVEL);
   console.log('  DATABASE_URL:', maskSecret(env.DATABASE_URL));
+  console.log('  SESSION_SECRET:', maskSecret(env.SESSION_SECRET));
   console.log('  JWT_SECRET:', maskSecret(env.JWT_SECRET));
   console.log('  API_KEY:', maskSecret(env.API_KEY));
 };

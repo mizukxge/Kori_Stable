@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import argon2 from 'argon2';
 
 const prisma = new PrismaClient();
 
@@ -7,10 +7,10 @@ async function main() {
   console.log('🌱 Starting database seed...');
 
   // Create Super Admin
-  const superAdminPassword = await bcrypt.hash('SuperAdmin123!', 10);
+  const superAdminPassword = await argon2.hash('SuperAdmin123!');
   const superAdmin = await prisma.adminUser.upsert({
     where: { email: 'admin@kori.dev' },
-    update: {},
+    update: { password: superAdminPassword },
     create: {
       email: 'admin@kori.dev',
       password: superAdminPassword,
@@ -22,10 +22,10 @@ async function main() {
   console.log('✅ Created Super Admin:', superAdmin.email);
 
   // Create Regular Admin
-  const adminPassword = await bcrypt.hash('Admin123!', 10);
+  const adminPassword = await argon2.hash('Admin123!');
   const admin = await prisma.adminUser.upsert({
     where: { email: 'manager@kori.dev' },
-    update: {},
+    update: { password: adminPassword },
     create: {
       email: 'manager@kori.dev',
       password: adminPassword,
@@ -37,10 +37,10 @@ async function main() {
   console.log('✅ Created Admin:', admin.email);
 
   // Create Regular User
-  const userPassword = await bcrypt.hash('User123!', 10);
+  const userPassword = await argon2.hash('User123!');
   const user = await prisma.adminUser.upsert({
     where: { email: 'user@kori.dev' },
-    update: {},
+    update: { password: userPassword },
     create: {
       email: 'user@kori.dev',
       password: userPassword,
