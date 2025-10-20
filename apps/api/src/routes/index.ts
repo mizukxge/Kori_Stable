@@ -10,6 +10,8 @@ import { proposalsRoutes } from './proposals.js';
 import { publicProposalRoutes } from './publicProposal.js';
 import { templatesRoutes } from './templates.js';
 import { contractsRoutes } from './contracts.js';
+import { invoicesRoutes } from './invoices.js';
+import { paymentsRoutes } from './payments.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -44,6 +46,12 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Contract routes (admin only)
   await fastify.register(contractsRoutes);
+
+  // Invoice routes (admin only)
+  await fastify.register(invoicesRoutes);
+
+  // Payment routes (admin + webhook)
+  await fastify.register(paymentsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
