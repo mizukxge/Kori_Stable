@@ -6,8 +6,8 @@
     "seed": "tsx prisma/seed.ts"
   },
   "scripts": {
-    "dev": "node --watch src/index.js",
-    "start": "node src/index.js",
+    "dev": "tsx --watch src/index.ts",
+    "start": "node --loader tsx src/index.ts",
     "build": "tsc",
     "test": "echo \"API tests not implemented yet\" && exit 0",
     "lint": "eslint src --ext .js,.ts",
@@ -22,14 +22,18 @@
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
-    "@prisma/client": "^6.2.0",
+    "@fastify/helmet": "^11",
+    "@fastify/rate-limit": "^9",
+    "@fastify/sensible": "^5",
+    "@prisma/client": "^6.17.1",
     "bcryptjs": "^3.0.2",
     "fastify": "^4.26.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^22.10.5",
-    "prisma": "^6.2.0",
+    "pino-pretty": "^13.1.2",
+    "prisma": "^6.17.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
