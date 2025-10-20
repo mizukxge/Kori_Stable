@@ -9,7 +9,7 @@ await fastify.register(cors, {
   origin: 'http://localhost:3000'
 });
 
-fastify.get('/api/hello', async (request, reply) => {
+fastify.get('/api/hello', async (_request, _reply) => {
   return { message: 'Hello from Kori API!', timestamp: new Date().toISOString() };
 });
 

@@ -6,7 +6,9 @@
     "dev": "vite --port 3000",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "echo \"Web tests placeholder\""
+    "test": "echo \"Web tests not implemented yet\" && exit 0",
+    "lint": "eslint src --ext .jsx,.tsx",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "react": "^18.2.0",
