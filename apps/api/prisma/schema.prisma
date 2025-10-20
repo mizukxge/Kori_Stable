@@ -26,6 +26,7 @@ model AdminUser {
   contractTemplates ContractTemplate[]
   contracts         Contract[]
   invoices          Invoice[]
+  reconciliations   Reconciliation[]
   releases          Release[]
   auditLogs         AuditLog[]
 
@@ -548,6 +549,9 @@ model Payment {
   refundAmount Decimal?  @db.Decimal(10, 2)
   notes        String?
 
+  // Reconciliation
+  reconciliation Reconciliation?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -583,4 +587,82 @@ enum PaymentStatus {
   FAILED
   REFUNDED
   CANCELLED
+}
+
+// Bank Transactions - Imported from bank statements
+model BankTransaction {
+  id String @id @default(cuid())
+
+  // Transaction details
+  transactionDate DateTime
+  description     String
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  reference       String? // Bank reference number
+
+  // Bank account info
+  bankAccount   String?
+  accountNumber String?
+
+  // Import metadata
+  importBatch String // Group transactions by import batch
+  rawData     Json? // Original CSV row for reference
+
+  // Reconciliation
+  reconciled     Boolean         @default(false)
+  reconciledAt   DateTime?
+  reconciliation Reconciliation?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([transactionDate])
+  @@index([amount])
+  @@index([importBatch])
+  @@index([reconciled])
+  @@map("bank_transactions")
+}
+
+// Reconciliation - Matches between bank transactions and payments
+model Reconciliation {
+  id String @id @default(cuid())
+
+  // Bank transaction
+  bankTransactionId String          @unique
+  bankTransaction   BankTransaction @relation(fields: [bankTransactionId], references: [id], onDelete: Cascade)
+
+  // System payment (if matched)
+  paymentId String?  @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  // Matching details
+  matchType     MatchType  @default(MANUAL)
+  confidence    Int        @default(0) // 0-100%
+  matchedBy     String? // User who confirmed match
+  matchedByUser AdminUser? @relation(fields: [matchedBy], references: [id], onDelete: SetNull)
+
+  // Status
+  status ReconciliationStatus @default(PENDING)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([matchType])
+  @@map("reconciliations")
+}
+
+enum MatchType {
+  AUTO_EXACT // Exact amount and date match
+  AUTO_FUZZY // Fuzzy match with high confidence
+  MANUAL // Manually matched by user
+  SUGGESTED // System suggestion, needs confirmation
+}
+
+enum ReconciliationStatus {
+  PENDING // Not yet confirmed
+  CONFIRMED // Match confirmed
+  REJECTED // Match rejected
+  UNMATCHED // No match found
 }
