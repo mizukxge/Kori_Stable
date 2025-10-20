@@ -6,6 +6,8 @@ import { ingestRoutes } from './ingest.js';
 import { rightsRoutes } from './rights.js';
 import { galleriesRoutes } from './galleries.js';
 import { publicGalleryRoutes } from './publicGallery.js';
+import { proposalsRoutes } from './proposals.js';
+import { publicProposalRoutes } from './publicProposal.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -16,6 +18,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Public gallery routes (no auth required)
   await fastify.register(publicGalleryRoutes);
+
+  // Public proposal routes (no auth required)
+  await fastify.register(publicProposalRoutes);
 
   // Client management routes (admin only)
   await fastify.register(clientRoutes);
@@ -28,6 +33,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Gallery management routes (admin only)
   await fastify.register(galleriesRoutes);
+
+  // Proposal management routes (admin only)
+  await fastify.register(proposalsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
