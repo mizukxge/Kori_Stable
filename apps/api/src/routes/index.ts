@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
 import { authRoutes } from './auth.js';
+import { clientRoutes } from './clients.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -9,6 +10,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Authentication routes
   await fastify.register(authRoutes);
 
+  // Client management routes (admin only)
+  await fastify.register(clientRoutes);
+
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
     return { 
@@ -16,24 +20,4 @@ export async function registerRoutes(fastify: FastifyInstance) {
       timestamp: new Date().toISOString() 
     };
   });
-
-  // Example protected route
-  // Uncomment to test authentication:
-  /*
-  import { requireAuth, requireAdmin } from '../middleware/auth.js';
-  
-  fastify.get('/api/protected', { preHandler: requireAuth }, async (request, reply) => {
-    return {
-      message: 'This is a protected route',
-      user: request.user,
-    };
-  });
-
-  fastify.get('/api/admin-only', { preHandler: requireAdmin }, async (request, reply) => {
-    return {
-      message: 'This route requires admin role',
-      user: request.user,
-    };
-  });
-  */
 }
