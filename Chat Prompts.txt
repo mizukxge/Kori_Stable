@@ -1,689 +1,597 @@
+📘 MULTI-CHAT EXECUTION PLAN
+
+Project: Photography System — “Kori”
+Repository Root: E:\Applications\kori_web_stable
+
+🌍 Shared Rules for All Chats
+
+Each agent (one per chat) must:
+
+Confirm its scope and deliverables before starting.
+
+List every mini-step to reach its target.
+
+Ask the user if each required file already exists.
+
+If yes, request the user to paste its entire contents.
+
+Then output a precise patch instead of a full overwrite.
+
+Only output PowerShell commands for the user to copy/paste.
+
+The agent does not execute any commands.
+
+After every step, show:
+
+✅ What’s completed
+
+🔜 What’s next
+
+Use GitHub to save/rollback:
+
+git add .
+git commit -m "Module <##> step complete"
+
+
+Omit all “canvas” or “stable version” language.
+
+No explicit “Test Plan” sections — just verification commands.
+
+All code generation must be Windows-path safe.
+
+🔢 CHAT PROMPTS (01–19)
 01 — Monorepo Scaffold & Tooling
+You are the component owner for “Monorepo Scaffold & Tooling” for the Kori photography system.
+Root path: E:\Applications\kori_web_stable
 
-Starter Prompt
-You are the component owner for Monorepo Scaffold & Tooling of “Kori.”
-Repository root: E:\Applications\kori_web_stable
+🎯 Goal:
+Set up the monorepo folder layout, workspace configuration, scripts (dev/build/test), and basic Hello-World API + Web stubs.
 
-What to do now
+⚙️ Mini Steps:
+1. Confirm if folders and files below already exist:
+   - apps/, apps/api/, apps/web/, packages/
+   - package.json, pnpm-workspace.yaml
+   Ask the user to confirm; if they exist, request contents for patching.
+2. Create or patch workspace files.
+3. Initialize pnpm workspace.
+4. Scaffold minimal “Hello Kori” API (Fastify) and web (Vite React).
+5. Verify both run concurrently via `pnpm -r dev`.
+6. Commit progress.
 
-Confirm your scope: repo layout (apps/api, apps/web, packages), pnpm workspace, basic scripts (dev/build/test), hello-world API & Web stubs, Git initialization.
+💬 Always remind: “You will run the commands — I only confirm and output PowerShell.”
 
-You do not execute any commands. You only output the exact PowerShell I will run.
-
-You will proceed one step at a time. After each step, list ✅ completed vs. 🔜 remaining.
-
-Mini-Steps
-
-Create folders & initialize Git.
-
-Initialize pnpm workspace and root package.json.
-
-Scaffold API (Fastify) hello endpoint.
-
-Scaffold Web (Vite + React) hello page.
-
-Add root scripts to run both (pnpm -r dev).
-
-Local run verification instructions.
-
-Commit to Git.
-
-Start with Step 1 — PowerShell (output only)
-
+Example PowerShell:
+```powershell
 $root="E:\Applications\kori_web_stable"
 mkdir $root,"$root\apps","$root\apps\api","$root\apps\web","$root\packages" -Force | Out-Null
 cd $root
 git init
-git branch -M main
+pnpm init -y
 
 
-After I run Step 1, I’ll reply. You then show Step 2 commands.
-Rollback tip: git add .; git commit -m "checkpoint 01"; git checkout -b scaffold/01
+✅ After completion: folder structure ready
+🔜 Next: configure pnpm workspaces and scripts
 
-02 — Config & Secrets
 
-Starter Prompt
-You own Config & Secrets for “Kori.”
+---
+
+### **02 — Config & Secrets**
+
+
+
+You are the component owner for “Config & Secrets” for Kori.
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Build a zod-based configuration loader and .env.example.
 
-Create config/env.ts with zod validation.
+⚙️ Mini Steps:
 
-Provide .env.example for API and any shared variables.
+Confirm if these files exist:
 
-Add a safe print script to display masked config.
+config/env.ts
 
-Output only PowerShell—do not run code.
+apps/api/.env.example
 
-Mini-Steps
+env-reference.md
 
-Create folders/files.
+If any exist, ask user to paste them for patching.
 
-Install deps (zod, tsx if needed).
+Create zod schema for env vars.
 
-Author config/env.ts scaffold.
+Write .env.example with dev defaults.
 
-Create .env.example in apps/api.
+Verify loader prints masked values.
 
-Add npm scripts to run config print.
+Commit changes.
 
-Commit to Git.
-
-Step 1 — PowerShell
+Example PowerShell:
 
 $root="E:\Applications\kori_web_stable"
 mkdir "$root\config","$root\apps\api" -Force | Out-Null
-ni "$root\config\env.ts" -ItemType File -Force | Out-Null
-ni "$root\apps\api\.env.example" -ItemType File -Force | Out-Null
+ni "$root\config\env.ts","$root\apps\api\.env.example","$root\env-reference.md" -ItemType File -Force | Out-Null
 
 
-After I confirm Step 1, provide Step 2.
-Rollback tip: git commit -m "config scaffolds"; git checkout -- .
+Verification:
 
-03 — CI/CD Pipeline
+node .\config\env.ts
 
-Starter Prompt
-You own CI/CD Pipeline for “Kori.”
+
+---
+
+### **03 — CI/CD Pipeline**
+
+
+
+Component: CI/CD Pipeline
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Create GitHub workflow for lint, typecheck, build, and test.
 
-GitHub Actions ci.yml with pnpm cache, lint, typecheck, build, test.
+⚙️ Mini Steps:
 
-Optional job for PR checks and artifact upload.
+Ask user if .github\workflows\ci.yml exists.
 
-Output exact PowerShell; you don’t run anything.
+If yes, request its content to patch.
 
-Mini-Steps
+Create workflow folder and file if missing.
 
-Create workflow folder & file.
+Populate jobs for lint/typecheck/build/test.
 
-Fill ci.yml boilerplate with pnpm setup and jobs.
+Add caching for pnpm.
 
-Add status badges to README (optional).
+Run a local dry run (act optional).
 
-Commit & push.
+Commit to GitHub.
 
-Step 1 — PowerShell
+Example PowerShell:
 
 $root="E:\Applications\kori_web_stable"
 mkdir "$root\.github\workflows" -Force | Out-Null
 ni "$root\.github\workflows\ci.yml" -ItemType File -Force | Out-Null
 
 
-Rollback tip: git checkout -- .github/workflows/ci.yml
+---
 
-04 — Database & Migrations (Prisma)
+### **04 — Database & Migrations**
 
-Starter Prompt
-You own Database & Migrations.
+
+
+Component: Database & Migrations
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Define baseline Prisma schema and seed script.
 
-Prisma with baseline models: AdminUser, Session, Client, AuditLog.
+⚙️ Mini Steps:
 
-Initial migration + seed script.
+Ask if apps/api/prisma/schema.prisma or seed.ts exist.
 
-Output PowerShell only.
+If yes, request full contents to patch.
 
-Mini-Steps
+Scaffold schema (AdminUser, Session, Client, AuditLog).
 
-Ensure Prisma folders/files.
+Create seed.ts.
 
-Add schema + seed scaffolds.
+Run first migration with PowerShell:
 
-Install prisma client & CLI.
-
-Run migration (user runs).
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\prisma" -Force | Out-Null
-ni "$root\apps\api\prisma\schema.prisma" -ItemType File -Force | Out-Null
-ni "$root\apps\api\prisma\seed.ts" -ItemType File -Force | Out-Null
+cd E:\Applications\kori_web_stable\apps\api
+pnpm prisma migrate dev --name init
 
 
-Rollback tip: git restore --source=HEAD apps/api/prisma
+Commit results.
 
-05 — API Skeleton & Middlewares
 
-Starter Prompt
-You own API Skeleton & Middlewares.
+---
+
+### **05 — API Skeleton & Middlewares**
+
+
+
+Component: API Skeleton & Middlewares
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Build Fastify server with helmet, CORS, error handling, and logging.
 
-Fastify server with health/ready/version routes.
+⚙️ Mini Steps:
 
-Global error handler, request ID, basic rate limit.
+Ask if apps/api/src/server.ts exists; request content to patch if yes.
 
-Output PowerShell only.
+Add routes: /healthz, /readyz, /version.
 
-Mini-Steps
+Configure global error handler.
 
-Create API src structure.
+Run and verify:
 
-Add server.ts and entry (index.ts).
-
-Install Fastify, cookie, rate limit, pino.
-
-Add npm scripts.
-
-Run server (user runs) & verify endpoints.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\src" -Force | Out-Null
-ni "$root\apps\api\src\server.ts","$root\apps\api\src\index.ts" -ItemType File -Force | Out-Null
+pnpm -r dev
 
 
-Rollback tip: git checkout -- apps/api/src
+Commit progress.
 
-06 — Admin Auth (Sessions)
 
-Starter Prompt
-You own Admin Auth.
+---
+
+### **06 — Admin Auth (Sessions)**
+
+
+
+Component: Admin Auth (Sessions)
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Implement admin login/logout/me endpoints using session cookies.
 
-Routes: POST /auth/login, GET /auth/me, POST /auth/logout
+⚙️ Mini Steps:
 
-Session cookie, TTL env, brute-force rate limit (basic), CSRF guard for admin POSTs.
+Confirm existence of:
 
-Output PowerShell only.
+apps/api/src/auth.ts
 
-Mini-Steps
+apps/api/src/guards/admin.ts
 
-Create auth.ts and guards folder.
+Request content for patching if present.
 
-Wire routes to server with plugin registration.
+Implement Argon2 hashing, session TTL, and cookie guard.
 
-Add env vars to .env.example.
+Run API and test POST /auth/login manually.
 
-Provide curl examples for user to run.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\src\guards" -Force | Out-Null
-ni "$root\apps\api\src\auth.ts","$root\apps\api\src\guards\admin.ts" -ItemType File -Force | Out-Null
+Commit progress.
 
 
-Rollback tip: git restore apps/api/src/auth.ts
+---
 
-07 — Clients (CRM)
+### **07 — Clients (CRM)**
 
-Starter Prompt
-You own Clients (CRM).
+
+
+Component: Clients (CRM)
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Add CRUD endpoints for clients, preferences, and notes.
 
-CRUD endpoints, pagination, validation; optional notes.
+⚙️ Mini Steps:
 
-Integrate with Prisma models.
+Confirm if apps/api/src/routes/clients.ts exists.
 
-Output PowerShell only.
+Request full code for patching if so.
 
-Mini-Steps
+Create CRUD routes under /admin/clients.
 
-Create route file(s): routes/clients.ts.
+Verify with:
 
-Add CRUD handlers using Prisma.
-
-Update Prisma schema if needed.
-
-Provide curl examples.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\src\routes" -Force | Out-Null
-ni "$root\apps\api\src\routes\clients.ts" -ItemType File -Force | Out-Null
+pnpm prisma migrate dev --name clients_crm
+pnpm -r dev
 
 
-Rollback tip: git checkout -- apps/api/src/routes/clients.ts
+Commit progress.
 
-08 — Asset Ingest & Storage
 
-Starter Prompt
-You own Asset Ingest & Storage.
+---
+
+### **08 — Asset Ingest & Storage**
+
+
+
+Component: Asset Ingest & Storage
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Build upload and checksum logic; categorize RAW/EDIT/VIDEO files.
 
-Upload endpoint with size limits, checksum, storage layout, file listing.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Confirm if apps/api/src/routes/ingest.ts exists.
 
-Mini-Steps
+Patch or create.
 
-Create routes/ingest.ts.
+Add PowerShell check for file system paths.
 
-Configure multipart limits and storage paths.
+Implement checksum + EXIF extraction.
 
-Implement checksum (e.g., SHA256).
+Verify upload route manually.
 
-Provide PowerShell/curl upload example.
+Commit progress.
 
-Commit.
-
-Step 1 — PowerShell
+Example PowerShell:
 
 $root="E:\Applications\kori_web_stable"
 ni "$root\apps\api\src\routes\ingest.ts" -ItemType File -Force | Out-Null
-mkdir "$root\var\kori_storage\originals" -Force | Out-Null
 
 
-Rollback tip: git restore apps/api/src/routes/ingest.ts
+---
 
-09 — IPTC/XMP Embedder & Rights
+### **09 — IPTC/XMP Embedder & Rights/Releases**
 
-Starter Prompt
-You own IPTC/XMP Embedder & Rights Enforcement.
+
+
+Component: Metadata Embedder
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Batch embed IPTC/XMP metadata and enforce rights presets.
 
-Batch job to embed IPTC/XMP, dry-run/apply modes, rights policy checks.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Check if apps/api/src/jobs/embedder.ts exists.
 
-Mini-Steps
+Request full file if it exists for patching.
 
-Create job file jobs/embedder.ts.
+Use exiftool-vendored to write metadata fields.
 
-Define mapping config and policy stubs.
+Run example batch job in PowerShell:
 
-Add admin route to trigger job (optional).
-
-Provide example dry-run command for user.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\src\jobs" -Force | Out-Null
-ni "$root\apps\api\src\jobs\embedder.ts" -ItemType File -Force | Out-Null
+pnpm tsx apps/api/src/jobs/embedder.ts --dry-run
 
 
-Rollback tip: git checkout -- apps/api/src/jobs/embedder.ts
+Commit progress.
 
-10 — Public Galleries
 
-Starter Prompt
-You own Public Galleries.
+---
+
+### **10 — Public Galleries (App Layer)**
+
+
+
+Component: Public Galleries
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Add tokenized public routes /g/:token with password + expiry logic.
 
-Public routes with tokenized access, optional password/OTP, metadata/data endpoints.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Ask if apps/api/src/routes/publicGallery.ts exists.
 
-Mini-Steps
+Patch if needed.
 
-Create routes/publicGallery.ts.
+Add endpoints for /meta, /password, /items.
 
-Token validation and expiry checks.
+Verify with browser GET http://localhost:4000/g/:token/meta
+.
 
-JSON feed endpoints for gallery meta & items.
-
-Provide curl examples.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\publicGallery.ts" -ItemType File -Force | Out-Null
+Commit to GitHub.
 
 
-Rollback tip: git restore apps/api/src/routes/publicGallery.ts
+---
 
-11 — Delivery Substrate ADR (R2/CDN)
+### **11 — Delivery Substrate ADR (R2/CDN)**
 
-Starter Prompt
-You own Delivery Substrate ADR.
+
+
+Component: Delivery Substrate ADR
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Create architecture decision record comparing coded vs. paid CDN delivery.
 
-Author a decision record comparing “build vs buy” (R2/CDN).
+⚙️ Mini Steps:
 
-Provide minimal integration example for R2 path (config placeholders).
+Check if delivery-adr.md exists.
 
-Output PowerShell only.
+Ask user for contents if present.
 
-Mini-Steps
+Write decision summary and outcomes.
 
-Create ADR & config files.
-
-Draft decision with constraints and costs.
-
-Provide example env keys.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\delivery-adr.md","$root\r2-config.md" -ItemType File -Force | Out-Null
+Commit ADR to GitHub.
 
 
-Rollback tip: git checkout -- delivery-adr.md r2-config.md
+---
 
-12 — Proposals & Light E-Sign
+### **12 — Proposals & E-Sign**
 
-Starter Prompt
-You own Proposals & Light E-Sign.
+
+
+Component: Proposals & E-Sign
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Add routes for proposal creation, OTP acceptance, PDF/A output.
 
-Admin routes to create/send proposals, public routes to view/accept with OTP, evidence capture, PDF/A snapshot (stub).
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Confirm if apps/api/src/routes/proposals.ts exists.
 
-Mini-Steps
+Patch or create.
 
-Create routes/proposals.ts.
+Implement OTP flow + proposal acceptance.
 
-Define models in Prisma if needed.
+Run PowerShell:
 
-Implement OTP request/verify flow (stubs).
-
-Provide curl examples.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\proposals.ts" -ItemType File -Force | Out-Null
+pnpm tsx apps/api/src/routes/proposals.ts
 
 
-Rollback tip: git restore apps/api/src/routes/proposals.ts
+Commit updates.
 
-13 — Contracts & Template Manager
 
-Starter Prompt
-You own Contracts & Template Manager.
+---
+
+### **13 — Contracts & Template Manager**
+
+
+
+Component: Contracts & Template Manager
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Create CRUD for templates, merge variables, generate PDF/A contracts.
 
-Admin routes for templates, tokenized signer routes, PDF/A lock & archive (stub).
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Confirm if apps/api/src/routes/contracts.ts exists.
 
-Mini-Steps
+Request paste for patching if it does.
 
-Create routes/contracts.ts.
+Implement endpoints for /admin/contracts*.
 
-Template CRUD handlers.
+Generate PDF/A preview via PowerShell call.
 
-Sign/countersign routes (tokenized).
-
-Provide curl examples.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\contracts.ts" -ItemType File -Force | Out-Null
+Commit changes.
 
 
-Rollback tip: git restore apps/api/src/routes/contracts.ts
+---
 
-14 — Invoicing & Payments
+### **14 — Invoicing & Payments**
 
-Starter Prompt
-You own Invoicing & Payments.
+
+
+Component: Invoicing & Payments
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Build invoicing flow, payment webhooks, and VAT math.
 
-Invoice CRUD, tokenized pay link, Stripe/PayPal webhooks (stubs), VAT math.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Ask if apps/api/src/routes/invoices.ts exists.
 
-Mini-Steps
+Patch or create accordingly.
 
-Create routes/invoices.ts.
+Implement endpoints and webhook receivers.
 
-Add invoice models to Prisma if needed.
+Verify webhook route with PowerShell:
 
-Create webhook endpoints files.
-
-Provide curl examples (issue invoice, simulate webhook).
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\invoices.ts" -ItemType File -Force | Out-Null
-ni "$root\apps\api\src\payments-webhooks.ts" -ItemType File -Force | Out-Null
+curl -X POST http://localhost:4000/webhooks/stripe -d "{}"
 
 
-Rollback tip: git checkout -- apps/api/src/routes/invoices.ts apps/api/src/payments-webhooks.ts
+Commit to GitHub.
 
-15 — Reconciliation (Bank Import)
 
-Starter Prompt
-You own Reconciliation.
+---
+
+### **15 — Reconciliation (Bank Import)**
+
+
+
+Component: Reconciliation (Bank Import)
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Implement CSV import and automatic matching engine.
 
-CSV import, matching engine, export.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Confirm if apps/api/src/routes/recon.ts exists.
 
-Mini-Steps
+Patch if present.
 
-Create routes/recon.ts.
+Add import and match endpoints.
 
-CSV parse & schema validation stubs.
+Verify with PowerShell:
 
-Matching algorithm baseline.
-
-Provide PowerShell example for placing a CSV and curl import.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\recon.ts" -ItemType File -Force | Out-Null
-mkdir "$root\var\kori_storage\bank_imports" -Force | Out-Null
+pnpm tsx apps/api/src/routes/recon.ts --import ".\bank.csv"
 
 
-Rollback tip: git restore apps/api/src/routes/recon.ts
+Commit progress.
 
-16 — Accounting: Period Close
 
-Starter Prompt
-You own Accounting: Period Close.
+---
+
+### **16 — Accounting: Period Close**
+
+
+
+Component: Accounting (Period Close)
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Implement open/close/unlock workflows with journal attachments.
 
-Routes for opening/closing periods, journals, validations, attachments (stubs).
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Check for apps/api/src/routes/accounting.ts.
 
-Mini-Steps
+Request paste if exists.
 
-Create routes/accounting.ts.
+Add endpoints /api/periods* and /api/journals*.
 
-Define models (periods, journals) in Prisma if needed.
+Verify close flow manually.
 
-Implement close/open endpoints (stubs).
-
-Provide curl examples.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\routes\accounting.ts" -ItemType File -Force | Out-Null
+Commit results.
 
 
-Rollback tip: git restore apps/api/src/routes/accounting.ts
+---
 
-17 — Records & WORM Archive
+### **17 — Records & WORM Archive**
 
-Starter Prompt
-You own Records & WORM Archive.
+
+
+Component: Records & WORM Archive
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Implement record hashing, retention policies, and verification job.
 
-Long-term records store, hash verification job & admin verify route (stub).
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Ask if apps/api/src/jobs/records.ts exists.
 
-Mini-Steps
+Patch if necessary.
 
-Create jobs/records.ts.
+Implement hash verify CLI/cron job.
 
-Add verify route /admin/records/verify (optional).
+Verify with PowerShell:
 
-Provide PowerShell for placing a sample file and curl verify.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-mkdir "$root\apps\api\src\jobs" -Force | Out-Null
-ni "$root\apps\api\src\jobs\records.ts" -ItemType File -Force | Out-Null
+pnpm tsx apps/api/src/jobs/records.ts --verify
 
 
-Rollback tip: git checkout -- apps/api/src/jobs/records.ts
+Commit progress.
 
-18 — Frontend Shell & Admin UI
 
-Starter Prompt
-You own Frontend Shell & Admin UI.
+---
+
+### **18 — Frontend Shell & Admin UI**
+
+
+
+Component: Frontend Shell & Admin UI
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Set up React admin shell, login, clients, and galleries pages.
 
-React app shell with routes: /login, /clients, /g/:token, /pay/:token.
+⚙️ Mini Steps:
 
-Basic layout and navigation.
+Confirm if apps/web/src/app.tsx exists.
 
-Output PowerShell only.
+If yes, request contents for patching.
 
-Mini-Steps
+Add /login, /clients, /g/:token, /pay/:token routes.
 
-Initialize web app (Vite React).
+Verify via:
 
-Create pages/components structure.
-
-Add routes and link to API env.
-
-Start dev server (user runs) and verify.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-cd "$root\apps\web"
-pnpm create vite . --template react-ts
+pnpm -r dev
+Start-Process "http://localhost:5173"
 
 
-(If the folder isn’t empty, provide alternative init commands in next step.)
-Rollback tip: git checkout -- apps/web
+Commit results.
 
-19 — Observability & Audit
 
-Starter Prompt
-You own Observability & Audit.
+---
+
+### **19 — Observability & Audit**
+
+
+
+Component: Observability & Audit
 Root: E:\Applications\kori_web_stable
 
-Scope confirmation
+🎯 Goal:
+Add structured logging, metrics, and audit trail.
 
-Structured logging, metrics endpoint /metrics (secured), audit appenders for key mutations.
+⚙️ Mini Steps:
 
-Output PowerShell only.
+Check if apps/api/src/obs.ts exists.
 
-Mini-Steps
+Ask for existing content to patch if needed.
 
-Create obs.ts and wire pino logger.
+Implement /metrics route and audit writer.
 
-Add /metrics route (stub) with auth gate.
+Run and verify:
 
-Add audit append helper and call in critical routes (refs only).
-
-Provide curl examples to check logs/metrics.
-
-Commit.
-
-Step 1 — PowerShell
-
-$root="E:\Applications\kori_web_stable"
-ni "$root\apps\api\src\obs.ts" -ItemType File -Force | Out-Null
+Invoke-RestMethod http://localhost:4000/metrics
 
 
-Rollback tip: git restore apps/api/src/obs.ts
-
-How each agent should interact during its chat
-
-Begin with “Scope confirmed” and restate deliverables.
-
-Proceed with Step 1 only and output PowerShell.
-
-Wait for you to say “continue,” then provide Step 2, and so on.
-
-After each step, list:
-
-✅ Completed in this chat
-
-🔜 Still required in this chat
-
-Always remind: “I do not run code—copy/paste these commands into PowerShell.”
-
-Offer Git commands to checkpoint or revert when appropriate, e.g.:
-
-git add .
-git commit -m "module <NN> step <X> complete"
-# rollback to last commit if needed
-git reset --hard HEAD~1
-
-
-VERIFY:
-
-Open any chat, paste its prompt, and confirm the agent acknowledges scope, shows Step 1 with PowerShell, and promises to continue step-by-step upon your “continue”.
-
-You should not see any mention of canvases or stable-version notes.
-
-ACCEPTANCE CHECK:
-
- 19 prompts are present and actionable.
-
- Each prompt instructs the agent to output exact PowerShell and proceed step-by-step.
-
- No canvases/stable-version/test-plan instructions included.
-
- Git/GitHub usage is retained for checkpoint/rollback.
+Commit logs.
