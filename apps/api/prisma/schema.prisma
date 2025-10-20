@@ -20,6 +20,8 @@ model AdminUser {
   updatedAt DateTime @updatedAt
   
   sessions  Session[]
+  rightsPresets RightsPreset[]
+  releases      Release[]
   auditLogs AuditLog[]
   
 
@@ -79,6 +81,7 @@ model Client {
   auditLogs   AuditLog[]
   
   assets      Asset[]
+  releases    Release[]
 
   @@index([email])
   @@index([status])
@@ -159,4 +162,68 @@ enum AssetCategory {
   RAW
   EDIT
   VIDEO
+}
+// Rights Presets - Copyright and usage rights templates
+model RightsPreset {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  description     String?
+  
+  // Copyright fields
+  creator         String
+  copyrightNotice String
+  usageRights     String
+  creditLine      String?
+  instructions    String?
+  
+  // Location defaults
+  city            String?
+  state           String?
+  country         String?
+  
+  // Tags
+  keywords        String[] @default([])
+  
+  isDefault       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  
+  createdBy       String
+  createdByUser   AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("rights_presets")
+}
+
+// Model/Property Releases
+model Release {
+  id              String      @id @default(cuid())
+  type            ReleaseType
+  releaseName     String      // Name of person or property
+  releaseDate     DateTime?
+  expiryDate      DateTime?
+  
+  // File storage
+  documentPath    String?     // Path to signed release document
+  notes           String?
+  
+  // Associations
+  clientId        String?
+  client          Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  uploadedBy      String
+  uploadedByUser  AdminUser   @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([clientId])
+  @@index([type])
+  @@map("releases")
+}
+
+enum ReleaseType {
+  MODEL
+  PROPERTY
 }
