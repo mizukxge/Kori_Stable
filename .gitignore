@@ -4,3 +4,12 @@ dist
 .env.local
 *.log
 .DS_Store
+
+# Uploads - exclude temporary files
+apps/api/uploads/temp/*
+!apps/api/uploads/temp/.gitkeep
+
+# Keep directory structure
+!apps/api/uploads/RAW/.gitkeep
+!apps/api/uploads/EDIT/.gitkeep
+!apps/api/uploads/VIDEO/.gitkeep

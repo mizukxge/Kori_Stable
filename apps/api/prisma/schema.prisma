@@ -22,6 +22,9 @@ model AdminUser {
   sessions  Session[]
   auditLogs AuditLog[]
   
+
+  assets    Asset[]
+
   @@map("admin_users")
 }
 
@@ -75,6 +78,8 @@ model Client {
   
   auditLogs   AuditLog[]
   
+  assets      Asset[]
+
   @@index([email])
   @@index([status])
   @@map("clients")
@@ -114,4 +119,44 @@ model AuditLog {
   @@index([entityType])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// Assets - Uploaded files (RAW/EDIT/VIDEO)
+model Asset {
+  id            String      @id @default(cuid())
+  filename      String      // Original filename
+  storedName    String      @unique // Unique filename on disk
+  filepath      String      // Full path to file
+  mimeType      String      // MIME type (image/jpeg, video/mp4, etc.)
+  size          BigInt      // File size in bytes
+  checksum      String      @unique // SHA256 hash
+  category      AssetCategory
+  
+  // Metadata
+  width         Int?
+  height        Int?
+  duration      Float?      // Video duration in seconds
+  metadata      Json?       // EXIF and other metadata
+  
+  // Associations
+  clientId      String?
+  client        Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  uploadedBy    String
+  uploadedByUser AdminUser  @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  @@index([clientId])
+  @@index([uploadedBy])
+  @@index([category])
+  @@index([checksum])
+  @@map("assets")
+}
+
+enum AssetCategory {
+  RAW
+  EDIT
+  VIDEO
 }
