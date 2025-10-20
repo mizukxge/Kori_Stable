@@ -9,23 +9,23 @@ datasource db {
 
 // Admin Users - Authentication & Authorization
 model AdminUser {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String   // Hashed password
-  name      String
-  role      Role     @default(USER)
-  isActive  Boolean  @default(true)
-  
+  id       String  @id @default(cuid())
+  email    String  @unique
+  password String // Hashed password
+  name     String
+  role     Role    @default(USER)
+  isActive Boolean @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  sessions  Session[]
-  rightsPresets RightsPreset[]
-  releases      Release[]
-  auditLogs AuditLog[]
-  
 
-  assets    Asset[]
+  sessions      Session[]
+  rightsPresets RightsPreset[]
+  galleries     Gallery[]
+  releases      Release[]
+  auditLogs     AuditLog[]
+
+  assets Asset[]
 
   @@map("admin_users")
 }
@@ -38,17 +38,17 @@ enum Role {
 
 // Sessions - User authentication sessions
 model Session {
-  id           String   @id @default(cuid())
-  userId       String
-  token        String   @unique
-  expiresAt    DateTime
-  ipAddress    String?
-  userAgent    String?
-  
-  createdAt    DateTime @default(now())
-  
-  user         AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([token])
   @@index([expiresAt])
@@ -57,31 +57,32 @@ model Session {
 
 // Clients - Customer/Client records
 model Client {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  phone       String?
-  company     String?
-  status      ClientStatus @default(ACTIVE)
-  
+  id      String       @id @default(cuid())
+  name    String
+  email   String       @unique
+  phone   String?
+  company String?
+  status  ClientStatus @default(ACTIVE)
+
   // Address information
-  address     String?
-  city        String?
-  state       String?
-  zipCode     String?
-  country     String?   @default("US")
-  
+  address String?
+  city    String?
+  state   String?
+  zipCode String?
+  country String? @default("US")
+
   // Metadata
-  notes       String?
-  tags        String[]  @default([])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  auditLogs   AuditLog[]
-  
-  assets      Asset[]
-  releases    Release[]
+  notes String?
+  tags  String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  assets    Asset[]
+  releases  Release[]
+  galleries Gallery[]
 
   @@index([email])
   @@index([status])
@@ -97,25 +98,25 @@ enum ClientStatus {
 
 // Audit Log - Activity tracking
 model AuditLog {
-  id          String   @id @default(cuid())
-  action      String   // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN"
-  entityType  String   // e.g., "Client", "AdminUser", "Session"
-  entityId    String?  // ID of the affected entity
-  
-  userId      String?  // Who performed the action
-  clientId    String?  // Related client (if applicable)
-  
+  id         String  @id @default(cuid())
+  action     String // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN"
+  entityType String // e.g., "Client", "AdminUser", "Session"
+  entityId   String? // ID of the affected entity
+
+  userId   String? // Who performed the action
+  clientId String? // Related client (if applicable)
+
   // Details
-  changes     Json?    // Store before/after state
-  metadata    Json?    // Additional context
-  ipAddress   String?
-  userAgent   String?
-  
-  createdAt   DateTime @default(now())
-  
-  user        AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  
+  changes   Json? // Store before/after state
+  metadata  Json? // Additional context
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user   AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  client Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
   @@index([userId])
   @@index([clientId])
   @@index([action])
@@ -126,31 +127,33 @@ model AuditLog {
 
 // Assets - Uploaded files (RAW/EDIT/VIDEO)
 model Asset {
-  id            String      @id @default(cuid())
-  filename      String      // Original filename
-  storedName    String      @unique // Unique filename on disk
-  filepath      String      // Full path to file
-  mimeType      String      // MIME type (image/jpeg, video/mp4, etc.)
-  size          BigInt      // File size in bytes
-  checksum      String      @unique // SHA256 hash
-  category      AssetCategory
-  
+  id         String        @id @default(cuid())
+  filename   String // Original filename
+  storedName String        @unique // Unique filename on disk
+  filepath   String // Full path to file
+  mimeType   String // MIME type (image/jpeg, video/mp4, etc.)
+  size       BigInt // File size in bytes
+  checksum   String        @unique // SHA256 hash
+  category   AssetCategory
+
   // Metadata
-  width         Int?
-  height        Int?
-  duration      Float?      // Video duration in seconds
-  metadata      Json?       // EXIF and other metadata
-  
+  width    Int?
+  height   Int?
+  duration Float? // Video duration in seconds
+  metadata Json? // EXIF and other metadata
+
   // Associations
-  clientId      String?
-  client        Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  
-  uploadedBy    String
-  uploadedByUser AdminUser  @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
-  
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  galleries GalleryAsset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clientId])
   @@index([uploadedBy])
   @@index([category])
@@ -163,61 +166,62 @@ enum AssetCategory {
   EDIT
   VIDEO
 }
+
 // Rights Presets - Copyright and usage rights templates
 model RightsPreset {
-  id              String   @id @default(cuid())
-  name            String   @unique
-  description     String?
-  
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
   // Copyright fields
   creator         String
   copyrightNotice String
   usageRights     String
   creditLine      String?
   instructions    String?
-  
+
   // Location defaults
-  city            String?
-  state           String?
-  country         String?
-  
+  city    String?
+  state   String?
+  country String?
+
   // Tags
-  keywords        String[] @default([])
-  
-  isDefault       Boolean  @default(false)
-  isActive        Boolean  @default(true)
-  
-  createdBy       String
-  createdByUser   AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  keywords String[] @default([])
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@map("rights_presets")
 }
 
 // Model/Property Releases
 model Release {
-  id              String      @id @default(cuid())
-  type            ReleaseType
-  releaseName     String      // Name of person or property
-  releaseDate     DateTime?
-  expiryDate      DateTime?
-  
+  id          String      @id @default(cuid())
+  type        ReleaseType
+  releaseName String // Name of person or property
+  releaseDate DateTime?
+  expiryDate  DateTime?
+
   // File storage
-  documentPath    String?     // Path to signed release document
-  notes           String?
-  
+  documentPath String? // Path to signed release document
+  notes        String?
+
   // Associations
-  clientId        String?
-  client          Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
-  
-  uploadedBy      String
-  uploadedByUser  AdminUser   @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
-  
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([clientId])
   @@index([type])
   @@map("releases")
@@ -226,4 +230,54 @@ model Release {
 enum ReleaseType {
   MODEL
   PROPERTY
+}
+
+// Galleries - Public shareable collections
+model Gallery {
+  id          String    @id @default(cuid())
+  token       String    @unique // URL token for public access
+  name        String
+  description String?
+  password    String? // Hashed password (optional)
+  expiresAt   DateTime? // Gallery expiration
+  isActive    Boolean   @default(true)
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  // Assets in this gallery (many-to-many)
+  assets GalleryAsset[]
+
+  // Stats
+  viewCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([clientId])
+  @@index([expiresAt])
+  @@map("galleries")
+}
+
+// Join table for Gallery <-> Asset many-to-many relationship
+model GalleryAsset {
+  id        String @id @default(cuid())
+  galleryId String
+  assetId   String
+  position  Int    @default(0) // Order in gallery
+
+  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  asset   Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([galleryId, assetId])
+  @@index([galleryId])
+  @@index([assetId])
+  @@map("gallery_assets")
 }

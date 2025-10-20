@@ -1,0 +1,158 @@
+import { FastifyInstance } from 'fastify';
+import { GalleryService } from '../services/gallery.js';
+
+export async function publicGalleryRoutes(fastify: FastifyInstance) {
+  /**
+   * GET /g/:token/meta
+   * Get gallery metadata (public, no auth required)
+   */
+  fastify.get('/g/:token/meta', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+
+      const gallery = await GalleryService.getGalleryByToken(token);
+
+      // Return basic metadata (hide sensitive info)
+      return reply.status(200).send({
+        success: true,
+        data: {
+          name: gallery.name,
+          description: gallery.description,
+          isPasswordProtected: !!gallery.password,
+          expiresAt: gallery.expiresAt,
+          isActive: gallery.isActive,
+          viewCount: gallery.viewCount,
+          client: gallery.client ? {
+            name: gallery.client.name,
+          } : null,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error fetching gallery metadata');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /g/:token/password
+   * Verify password for protected gallery
+   */
+  fastify.post('/g/:token/password', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+      const { password } = request.body as { password: string };
+
+      if (!password) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Password is required',
+        });
+      }
+
+      const result = await GalleryService.validateAccess(token, password);
+
+      if (!result.valid) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: result.reason || 'Access denied',
+        });
+      }
+
+      request.log.info(
+        {
+          galleryToken: token,
+          galleryName: result.gallery?.name,
+        },
+        'Gallery password verified'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Password verified',
+        data: {
+          name: result.gallery.name,
+          description: result.gallery.description,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error verifying gallery password');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /g/:token/items
+   * Get gallery assets (requires password if protected)
+   */
+  fastify.get('/g/:token/items', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+      const { password } = request.query as { password?: string };
+
+      // Validate access
+      const result = await GalleryService.validateAccess(token, password);
+
+      if (!result.valid) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: result.reason || 'Access denied',
+        });
+      }
+
+      // Get gallery items
+      const items = await GalleryService.getGalleryItems(token);
+
+      request.log.info(
+        {
+          galleryToken: token,
+          itemCount: items.length,
+        },
+        'Gallery items accessed'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        data: items,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error fetching gallery items');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /g/:token
+   * Redirect to meta endpoint (convenience)
+   */
+  fastify.get('/g/:token', async (request, reply) => {
+    const { token } = request.params as { token: string };
+    return reply.redirect(301, `/g/${token}/meta`);
+  });
+}
