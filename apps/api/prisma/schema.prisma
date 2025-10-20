@@ -1,20 +1,17 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// Admin Users - Authentication & Authorization
+generator client {
+  provider = "prisma-client-js"
+}
+
 model AdminUser {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  password String // Hashed password
+  id       String @id @default(cuid())
+  email    String @unique
   name     String
-  role     Role    @default(USER)
-  isActive Boolean @default(true)
+  password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -29,8 +26,15 @@ model AdminUser {
   reconciliations   Reconciliation[]
   releases          Release[]
   auditLogs         AuditLog[]
+  assets            Asset[]
 
-  assets Asset[]
+  closedPeriods      AccountingPeriod[]  @relation("ClosedPeriods")
+  lockedPeriods      AccountingPeriod[]  @relation("LockedPeriods")
+  unlockedPeriods    AccountingPeriod[]  @relation("UnlockedPeriods")
+  createdJournals    JournalEntry[]      @relation("CreatedJournals")
+  postedJournals     JournalEntry[]      @relation("PostedJournals")
+  approvedJournals   JournalEntry[]      @relation("ApprovedJournals")
+  journalAttachments JournalAttachment[]
 
   @@map("admin_users")
 }
@@ -665,4 +669,149 @@ enum ReconciliationStatus {
   CONFIRMED // Match confirmed
   REJECTED // Match rejected
   UNMATCHED // No match found
+}
+
+// Accounting Periods - Monthly/quarterly/yearly accounting periods
+model AccountingPeriod {
+  id         String     @id @default(cuid())
+  name       String     @unique // e.g., "2025-01", "2025-Q1", "2025"
+  periodType PeriodType @default(MONTHLY)
+
+  // Date range
+  startDate DateTime
+  endDate   DateTime
+
+  // Status
+  status       PeriodStatus @default(OPEN)
+  closedAt     DateTime?
+  closedBy     String?
+  closedByUser AdminUser?   @relation("ClosedPeriods", fields: [closedBy], references: [id], onDelete: SetNull)
+
+  lockedAt     DateTime?
+  lockedBy     String?
+  lockedByUser AdminUser? @relation("LockedPeriods", fields: [lockedBy], references: [id], onDelete: SetNull)
+
+  // Unlock tracking
+  unlockedAt     DateTime?
+  unlockedBy     String?
+  unlockedByUser AdminUser? @relation("UnlockedPeriods", fields: [unlockedBy], references: [id], onDelete: SetNull)
+  unlockReason   String?
+
+  // Journal entries
+  journalEntries JournalEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@map("accounting_periods")
+}
+
+// Journal Entries - General ledger journal entries
+model JournalEntry {
+  id            String @id @default(cuid())
+  journalNumber String @unique // e.g., JE-2025-001
+
+  // Period association
+  periodId String
+  period   AccountingPeriod @relation(fields: [periodId], references: [id], onDelete: Restrict)
+
+  // Entry details
+  entryDate   DateTime
+  description String
+  reference   String? // External reference (invoice, payment, etc.)
+
+  // Lines (debits and credits)
+  lines JournalLine[]
+
+  // Attachments
+  attachments JournalAttachment[]
+
+  // Status
+  status       JournalStatus @default(DRAFT)
+  postedAt     DateTime?
+  postedBy     String?
+  postedByUser AdminUser?    @relation("PostedJournals", fields: [postedBy], references: [id], onDelete: SetNull)
+
+  // Approval workflow
+  approvedAt     DateTime?
+  approvedBy     String?
+  approvedByUser AdminUser? @relation("ApprovedJournals", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  createdBy     String
+  createdByUser AdminUser @relation("CreatedJournals", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([periodId])
+  @@index([entryDate])
+  @@index([status])
+  @@index([journalNumber])
+  @@map("journal_entries")
+}
+
+// Journal Lines - Individual debit/credit lines
+model JournalLine {
+  id             String       @id @default(cuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  position    Int     @default(0)
+  account     String // Account code/name
+  description String?
+
+  // Amount
+  debit  Decimal @default(0) @db.Decimal(10, 2)
+  credit Decimal @default(0) @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([journalEntryId])
+  @@map("journal_lines")
+}
+
+// Journal Attachments - Supporting documents
+model JournalAttachment {
+  id             String       @id @default(cuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+
+  description String?
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([journalEntryId])
+  @@map("journal_attachments")
+}
+
+enum PeriodType {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum PeriodStatus {
+  OPEN
+  CLOSED
+  LOCKED
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  APPROVED
+  VOIDED
 }

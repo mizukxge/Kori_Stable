@@ -13,6 +13,8 @@ import { contractsRoutes } from './contracts.js';
 import { invoicesRoutes } from './invoices.js';
 import { paymentsRoutes } from './payments.js';
 import { reconciliationRoutes } from './reconciliation.js';
+import { periodsRoutes } from './periods.js';
+import { journalsRoutes } from './journals.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -56,6 +58,12 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Reconciliation routes (admin only)
   await fastify.register(reconciliationRoutes);
+
+  // Accounting period routes (admin only)
+  await fastify.register(periodsRoutes);
+
+  // Journal entry routes (admin only)
+  await fastify.register(journalsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
