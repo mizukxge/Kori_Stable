@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Admin Users - Authentication & Authorization
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed password
+  name      String
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  sessions  Session[]
+  auditLogs AuditLog[]
+  
+  @@map("admin_users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+// Sessions - User authentication sessions
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  token        String   @unique
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  
+  createdAt    DateTime @default(now())
+  
+  user         AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// Clients - Customer/Client records
+model Client {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String?
+  company     String?
+  status      ClientStatus @default(ACTIVE)
+  
+  // Address information
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  country     String?   @default("US")
+  
+  // Metadata
+  notes       String?
+  tags        String[]  @default([])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  auditLogs   AuditLog[]
+  
+  @@index([email])
+  @@index([status])
+  @@map("clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  ARCHIVED
+}
+
+// Audit Log - Activity tracking
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String   // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN"
+  entityType  String   // e.g., "Client", "AdminUser", "Session"
+  entityId    String?  // ID of the affected entity
+  
+  userId      String?  // Who performed the action
+  clientId    String?  // Related client (if applicable)
+  
+  // Details
+  changes     Json?    // Store before/after state
+  metadata    Json?    // Additional context
+  ipAddress   String?
+  userAgent   String?
+  
+  createdAt   DateTime @default(now())
+  
+  user        AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  client      Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  @@index([userId])
+  @@index([clientId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

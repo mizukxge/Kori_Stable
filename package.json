@@ -12,7 +12,12 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "typecheck": "tsc --build",
-    "clean": "pnpm -r exec rm -rf node_modules dist"
+    "clean": "pnpm -r exec rm -rf node_modules dist",
+    "db:generate": "pnpm --filter @kori/api db:generate",
+    "db:migrate": "pnpm --filter @kori/api db:migrate",
+    "db:seed": "pnpm --filter @kori/api db:seed",
+    "db:studio": "pnpm --filter @kori/api db:studio",
+    "db:reset": "pnpm --filter @kori/api db:reset"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -22,7 +27,7 @@
     "@eslint/js": "^9.38.0",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
-    "eslint": "^9.18.0",
+    "eslint": "^9.38.0",
     "eslint-plugin-react": "^7.37.3",
     "eslint-plugin-react-hooks": "^5.1.0",
     "tsx": "^4.20.6",
