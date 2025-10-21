@@ -21,6 +21,7 @@ import { auditRoutes } from './audit.js';
 import { magicLinksRoutes } from './magicLinks.js';
 import { emailRoutes } from './email.js';
 import { docgenRoutes } from './docgen.js';
+import { mediaProcessRoutes } from './mediaProcess.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -88,6 +89,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Document generation routes (admin only)
   await fastify.register(docgenRoutes);
+
+  // Media processing routes (admin only)
+  await fastify.register(mediaProcessRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
