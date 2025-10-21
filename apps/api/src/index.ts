@@ -16,10 +16,10 @@ async function start() {
       host: env.API_HOST 
     });
 
-    console.log(`Ã°Å¸Å¡â‚¬ API server running on http://${env.API_HOST}:${env.API_PORT}`);
-    console.log(`Ã°Å¸â€œÅ  Health check: http://localhost:${env.API_PORT}/healthz`);
-    console.log(`Ã°Å¸â€Â Readiness check: http://localhost:${env.API_PORT}/readyz`);
-    console.log(`Ã°Å¸â€œÂ¦ Version info: http://localhost:${env.API_PORT}/version`);
+    console.log(`ÃƒÂ°Ã…Â¸Ã…Â¡Ã¢â€šÂ¬ API server running on http://${env.API_HOST}:${env.API_PORT}`);
+    console.log(`ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã…Â  Health check: http://localhost:${env.API_PORT}/healthz`);
+    console.log(`ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ‚Â Readiness check: http://localhost:${env.API_PORT}/readyz`);
+    console.log(`ÃƒÂ°Ã…Â¸Ã¢â‚¬Å“Ã‚Â¦ Version info: http://localhost:${env.API_PORT}/version`);
 
     // Graceful shutdown
     const signals = ['SIGINT', 'SIGTERM'];
@@ -28,17 +28,17 @@ async function start() {
         console.log(`\n${signal} received, shutting down gracefully...`);
         try {
           await server.close();
-          console.log('Ã¢Å“â€¦ Server closed successfully');
+          console.log('ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Server closed successfully');
           process.exit(0);
         } catch (err) {
-          console.error('Ã¢ÂÅ’ Error during shutdown:', err);
+          console.error('ÃƒÂ¢Ã‚ÂÃ…â€™ Error during shutdown:', err);
           process.exit(1);
         }
       });
     });
 
   } catch (err) {
-    console.error('Ã¢ÂÅ’ Error starting server:', err);
+    console.error('ÃƒÂ¢Ã‚ÂÃ…â€™ Error starting server:', err);
     process.exit(1);
   }
 }

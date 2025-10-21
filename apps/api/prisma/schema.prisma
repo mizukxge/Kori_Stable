@@ -43,6 +43,8 @@ model AdminUser {
   retentionPolicies   RetentionPolicy[]
   recordVerifications RecordHash[]
 
+  savedFilters SavedFilter[]
+
   @@map("admin_users")
 }
 
@@ -171,8 +173,10 @@ model Asset {
 
   galleries GalleryAsset[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Selection Selection[]
+  Comment   Comment[]
 
   @@index([clientId])
   @@index([uploadedBy])
@@ -271,7 +275,6 @@ model Gallery {
 
   // Assets in this gallery (many-to-many)
   assets GalleryAsset[]
-
 
   // Proofing sessions
   proofSets ProofSet[]
@@ -994,16 +997,15 @@ model MagicLink {
   @@map("magic_links")
 }
 
-
 // ============================================
 // PROOFING & SELECTION WORKFLOW
 // ============================================
 
 // ProofSet - A client's proofing session for a gallery
 model ProofSet {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   galleryId String
-  gallery   Gallery  @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
 
   // Session tracking
   startedAt    DateTime  @default(now())
@@ -1034,9 +1036,9 @@ model ProofSet {
 
 // Selection - Client selections (hearts, flags, rejects)
 model Selection {
-  id         String        @id @default(cuid())
+  id         String   @id @default(cuid())
   proofSetId String
-  proofSet   ProofSet      @relation(fields: [proofSetId], references: [id], onDelete: Cascade)
+  proofSet   ProofSet @relation(fields: [proofSetId], references: [id], onDelete: Cascade)
 
   assetId String
   asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
@@ -1089,4 +1091,38 @@ model Comment {
   @@index([assetId])
   @@index([parentId])
   @@map("comments")
+}
+
+// ============================================
+// SEARCH & FILTERS
+// ============================================
+
+// SavedFilter - User's saved search filters
+model SavedFilter {
+  id     String    @id @default(cuid())
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Filter details
+  name        String
+  description String?
+
+  // Search query
+  query      String? // Search query text
+  entityType String // 'client', 'asset', 'document', 'invoice', etc.
+
+  // Filter criteria (JSON)
+  filters Json // Facets: status, category, dateRange, tags, etc.
+
+  // Usage tracking
+  isDefault  Boolean   @default(false)
+  lastUsedAt DateTime?
+  usageCount Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([entityType])
+  @@map("saved_filters")
 }
