@@ -18,6 +18,7 @@ import { journalsRoutes } from './journals.js';
 import { recordsRoutes } from './records.js';
 import { metricsRoutes } from './metrics.js';
 import { auditRoutes } from './audit.js';
+import { magicLinksRoutes } from './magicLinks.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -76,6 +77,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Audit log routes (admin only)
   await fastify.register(auditRoutes);
+
+  // Magic links routes (passwordless auth)
+  await fastify.register(magicLinksRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {

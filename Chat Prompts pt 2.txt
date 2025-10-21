@@ -1,0 +1,748 @@
+⚙️ MODULE PROMPTS (20–37)
+
+Shared rules for all modules:
+
+Confirm responsibilities first.
+
+List mini-steps one by one.
+
+Before creating files, ask whether each file already exists. If yes, ask the user to paste the entire file so you can output a precise patch.
+
+You do not execute commands. You only output PowerShell for the user to copy/paste and run.
+
+After each step: report ✅ completed / 🔜 next.
+
+Use GitHub to checkpoint/rollback:
+
+git add .
+git commit -m "Module <ID> step complete"
+
+20 — Magic Links & Email Login
+You are the component owner for "Magic Links & Email Login" in Kori.
+Repo root: E:\Applications\kori_web_stable
+
+Your responsibilities (confirm back):
+- Passwordless auth: request + consume magic links (clients/admins).
+- One-time tokens, expiry, device/IP binding, audit, rate limits.
+- API: POST /auth/magic/request, POST /auth/magic/consume.
+
+Mini-steps:
+1) Ask if these exist: 
+   - apps/api/src/routes/magicLinks.ts
+   - apps/api/src/utils/magicToken.ts
+   - apps/api/prisma/schema.prisma (MagicLink model)
+   If any exist, ask the user to paste full content so you can provide a patch.
+2) Add/patch Prisma model MagicLink (id, email, tokenHash, purpose, expiresAt, usedAt?, ipHash?, uaHash?, createdAt).
+3) Implement route handlers + rate limits + audit calls.
+4) Wire email send (uses Email Service module when available; for now log link).
+5) Verify locally (request then consume).
+6) Advise commit.
+
+PowerShell to scaffold (run only if files don’t exist):
+```powershell
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\routes","$root\apps\api\src\utils" -Force | Out-Null
+ni "$root\apps\api\src\routes\magicLinks.ts","$root\apps\api\src\utils\magicToken.ts" -ItemType File -Force | Out-Null
+cd "$root\apps\api"
+pnpm prisma migrate dev --name magic_links
+pnpm -r dev
+
+
+Verification:
+
+Invoke-RestMethod http://localhost:4000/auth/magic/request -Method POST -Body '{"email":"test@example.com","purpose":"portal"}' -ContentType 'application/json'
+# After you receive a token URL in logs/email, POST it to consume:
+# Invoke-RestMethod http://localhost:4000/auth/magic/consume -Method POST -Body '{"token":"<token>"}' -ContentType 'application/json'
+
+
+Status summary after each step: show ✅ done / 🔜 next.
+
+
+---
+
+### 21 — Email Service & Templates
+
+
+Component: Email Service & Templates
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Pluggable email sender (Resend/SES/SMTP).
+
+Templates (magic link, OTP, proposal, invoice). Preview API.
+
+API: POST /admin/email/preview, POST /admin/email/send.
+
+Mini-steps:
+
+Ask if these exist:
+
+apps/api/src/plugins/email.ts
+
+apps/api/templates/
+If present, ask for the full contents to prepare a patch.
+
+Implement provider adapter + masking + retries + logging.
+
+Create default templates (Handlebars/MJML).
+
+Implement preview/send routes.
+
+Verify preview and send (stub provider OK).
+
+Advise commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\plugins","$root\apps\api\templates" -Force | Out-Null
+ni "$root\apps\api\src\plugins\email.ts" -ItemType File -Force | Out-Null
+pnpm -r dev
+
+
+Verification:
+
+Invoke-RestMethod http://localhost:4000/admin/email/preview -Method POST -Body '{"template":"magic-link","vars":{"link":"https://example"}}' -ContentType 'application/json'
+
+
+---
+
+### 22 — Document Generation Core
+
+
+Component: Document Generation Core
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Template merge (Handlebars/HTML).
+
+PDF/PDF-A render, watermark/stamp, content hash.
+
+API: POST /admin/docgen/render, POST /admin/docgen/pdfa.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/services/docgen.ts
+
+apps/api/src/routes/docgen.ts
+
+doc_templates/
+If present, ask for full content to patch.
+
+Implement render pipeline (HTML→PDF via Puppeteer or pdf-lib).
+
+Add watermark/stamp + SHA256 hash return.
+
+Create sample template(s) and artifacts folder.
+
+Expose render APIs.
+
+Verify render with sample vars; advise commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\services","$root\apps\api\src\routes","$root\doc_templates","$root\rendered" -Force | Out-Null
+ni "$root\apps\api\src\services\docgen.ts","$root\apps\api\src\routes\docgen.ts" -ItemType File -Force | Out-Null
+pnpm -r dev
+
+
+Verification:
+
+Invoke-RestMethod http://localhost:4000/admin/docgen/render -Method POST -Body '{"template":"proposal","data":{"clientName":"Acme"}}' -ContentType 'application/json'
+
+
+---
+
+### 23 — Media Processing Pipeline
+
+
+Component: Media Processing Pipeline
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Derivatives: thumbnails, AVIF/WebP, watermarked, video proxies.
+
+Async job runner + presets; backfill support.
+
+API/CLI hooks to trigger processing.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/jobs/mediaProcess.ts
+
+apps/api/src/services/imageTools.ts
+If they exist, ask for full contents to patch.
+
+Implement sharp/ffmpeg wrappers; preset config.
+
+Add job runner (CLI or route) to process by fileId.
+
+Verify derivative creation; advise commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\jobs","$root\apps\api\src\services" -Force | Out-Null
+ni "$root\apps\api\src\jobs\mediaProcess.ts","$root\apps\api\src\services\imageTools.ts" -ItemType File -Force | Out-Null
+
+
+Verification:
+
+pnpm tsx apps/api/src/jobs/mediaProcess.ts --file ".\sample.jpg" --preset "thumb"
+
+
+---
+
+### 24 — Image Optimization + CDN Rules
+
+
+Component: Image Optimization + CDN Rules
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Signed resize/crop parameters; allowlist.
+
+Cache rules + purge by prefix.
+
+API: POST /admin/cdn/purge
+
+Mini-steps:
+
+Ask if exist:
+
+apps/api/src/routes/cdn.ts
+
+apps/api/src/utils/signResize.ts
+If yes, request full content to patch.
+
+Implement signer + param validation + purge route.
+
+Output example signed URL format and usage.
+
+Verify fetch and purge; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\routes","$root\apps\api\src\utils" -Force | Out-Null
+ni "$root\apps\api\src\routes\cdn.ts","$root\apps\api\src\utils\signResize.ts" -ItemType File -Force | Out-Null
+pnpm -r dev
+
+
+---
+
+### 25 — Frontend Design System & Theme
+
+
+Component: Frontend Design System & Theme
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Design tokens (color/typography/spacing/radius/shadows).
+
+Dark mode; accessible components; motion guidelines.
+
+Optional Storybook for component previews.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/src/styles/tokens.css
+
+apps/web/src/components/ui/*
+If present, get full content to patch.
+
+Add tokens + Tailwind config extension.
+
+Create a small UI library (Button, Card, Input, Modal).
+
+(Optional) Add Storybook scaffolding.
+
+Apply theme to header/sidebar/layout.
+
+Verify dev server UI reflects theme; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\styles","$root\apps\web\src\components\ui" -Force | Out-Null
+ni "$root\apps\web\src\styles\tokens.css" -ItemType File -Force | Out-Null
+cd "$root\apps\web"
+pnpm add -D @storybook/react @storybook/addon-essentials @storybook/addon-a11y
+
+
+Verification:
+
+pnpm -r dev
+Start-Process "http://localhost:5173"
+
+
+---
+
+### 26 — Proofing & Selection Workflow
+
+
+Component: Proofing & Selection Workflow
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Client hearts/flags/comments; export selections.
+
+API: /proof/*; integrates with public gallery.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/routes/proof.ts
+
+Prisma models ProofSet, Selection, Comment
+If present, ask for full content to patch.
+
+Implement routes (heart, unheart, comment, export CSV).
+
+Add indices for performance.
+
+Verify via curl; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\proof.ts" -ItemType File -Force | Out-Null
+cd "$root\apps\api"
+pnpm prisma migrate dev --name proofing
+pnpm -r dev
+
+
+---
+
+### 27 — Client Portal Enhancements
+
+
+Component: Client Portal Enhancements
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Unified client portal: messages, invoices, downloads, documents.
+
+Magic link login flow usage.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/src/routes/portal/*
+If present, request full content to patch.
+
+Add routes: /portal/messages, /portal/invoices, /portal/files, /portal/documents.
+
+Integrate invoices API + doc downloads (signed URLs).
+
+Verify UI loads; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\routes\portal" -Force | Out-Null
+ni "$root\apps\web\src\routes\portal\index.tsx" -ItemType File -Force | Out-Null
+pnpm -r dev
+
+
+---
+
+### 28 — Search & Smart Filters
+
+
+Component: Search & Smart Filters
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Full-text + facets across assets/clients/docs.
+
+Saved filters.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/routes/search.ts
+
+search index migration(s)
+If present, request full content to patch.
+
+Implement /search with q, type, facets; pagination.
+
+Add save/list endpoints for saved filters.
+
+Verify search latency + results; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\search.ts" -ItemType File -Force | Out-Null
+
+
+Verification:
+
+Invoke-RestMethod "http://localhost:4000/search?q=alice&type=client"
+
+
+---
+
+### 29 — RBAC & Fine-Grained Permissions
+
+
+Component: RBAC & Fine-Grained Permissions
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Role-based checks across admin routes; policy rules per resource.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/middleware/rbac.ts
+
+Prisma tables roles, role_assignments, policy_rules
+If present, request full content to patch.
+
+Implement middleware to enforce policies.
+
+Add admin routes to assign roles.
+
+Verify protected endpoints require appropriate role; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\middleware" -Force | Out-Null
+ni "$root\apps\api\src\middleware\rbac.ts" -ItemType File -Force | Out-Null
+cd "$root\apps\api"
+pnpm prisma migrate dev --name roles_policies
+pnpm -r dev
+
+
+---
+
+### 30 — Notifications Center
+
+
+Component: Notifications Center
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+In-app + email + webhooks; subscription prefs; digests.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/services/notify.ts
+
+notifications tables
+If present, ask for full content to patch.
+
+Implement notify service (fan-out to email + webhook).
+
+Add /admin/notifications/* for list/retry.
+
+Verify fan-out path; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\services\notify.ts" -ItemType File -Force | Out-Null
+
+
+Verification:
+
+pnpm tsx apps/api/src/services/notify.ts --test "proposal.accepted"
+
+
+---
+
+### 31 — Internationalization & Locale Packs
+
+
+Component: i18n & Locale Packs
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+UI/doc/email localization (en-GB baseline + ≥1 extra locale).
+
+Date/number formatting; RTL readiness.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/src/locales/*
+If present, ask for full content to patch.
+
+Install and configure i18n (i18next/Lingui).
+
+Provide en + fr catalogs (example).
+
+Wire locale switcher + persistence.
+
+Verify copy changes; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\locales" -Force | Out-Null
+ni "$root\apps\web\src\locales\en.json","$root\apps\web\src\locales\fr.json" -ItemType File -Force | Out-Null
+
+
+---
+
+### 32 — Analytics & Reporting
+
+
+Component: Analytics & Reporting
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Admin dashboards: sales, bookings, gallery visits; CSV export.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/src/routes/reports/*
+If present, ask for full content to patch.
+
+Build API endpoints for metrics; add UI charts (Recharts).
+
+CSV export endpoints.
+
+Verify dashboards render; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\routes\reports" -Force | Out-Null
+ni "$root\apps\web\src\routes\reports\index.tsx" -ItemType File -Force | Out-Null
+
+
+---
+
+### 33 — Backup/Restore & Disaster Recovery
+
+
+Component: Backup/Restore & DR
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Nightly DB/files backup, offsite copy, restore CLI + runbook.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/jobs/backup.ts
+If present, request full content to patch.
+
+Implement backup strategy (DB dump + gzip + manifest + retention).
+
+Add restore CLI flags; log actions.
+
+Verify manual run; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\jobs\backup.ts" -ItemType File -Force | Out-Null
+
+
+Verification:
+
+pnpm tsx apps/api/src/jobs/backup.ts --run
+
+
+---
+
+### 34 — Admin Settings Panel
+
+
+Component: Admin Settings Panel
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+UI to manage org profile, VAT defaults, branding, feature flags.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/src/routes/admin/settings.tsx
+If present, request full content to patch.
+
+Build forms bound to /admin/settings API.
+
+Persist + reflect changes live; audit.
+
+Verify UI saves/loads; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\routes\admin" -Force | Out-Null
+ni "$root\apps\web\src\routes\admin\settings.tsx" -ItemType File -Force | Out-Null
+
+
+---
+
+### 35 — Mobile & PWA Enhancements
+
+
+Component: Mobile & PWA Enhancements
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Installable PWA, offline gallery shell, optional push.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/web/public/manifest.json
+
+apps/web/src/service-worker.ts
+If present, request full content to patch.
+
+Create manifest + service worker (cache shell, route assets).
+
+Wire prompt and icons.
+
+Verify Lighthouse PWA checks; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\web\public\manifest.json","$root\apps\web\src\service-worker.ts" -ItemType File -Force | Out-Null
+
+
+---
+
+### 36 — SEO & Social Sharing
+
+
+Component: SEO & Social Sharing
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Dynamic sitemap, robots rules, OG/Twitter cards for galleries.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/routes/sitemap.ts
+
+apps/api/public/robots.txt
+If present, request full content to patch.
+
+Build sitemap endpoint; include public gallery routes with lastmod.
+
+Add robots.txt with suitable directives.
+
+Add OG meta generation in web layer for /g/:token.
+
+Verify sitemap + robots; commit.
+
+PowerShell:
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\public" -Force | Out-Null
+ni "$root\apps\api\src\routes\sitemap.ts","$root\apps\api\public\robots.txt" -ItemType File -Force | Out-Null
+
+
+Verification:
+
+Invoke-RestMethod http://localhost:4000/sitemap.xml
+
+
+---
+
+### 37 — Security Hardening Pass
+
+
+Component: Security Hardening Pass
+Root: E:\Applications\kori_web_stable
+
+Responsibilities (confirm):
+
+Strengthen headers (CSP with nonces, HSTS, X-Frame-Options, Referrer-Policy).
+
+Tighten cookies (HttpOnly, Secure, SameSite=strict in prod).
+
+Advanced rate-limits + brute-force protections.
+
+Dependency and secret scanning guidance.
+
+Mini-steps:
+
+Ask about existing:
+
+apps/api/src/middleware/security.ts
+
+apps/api/src/server.ts (to confirm helmet/CORS/error handler)
+If present, ask for full content to patch.
+
+Implement/patch security middleware:
+
+helmet with strict options
+
+CSP with nonce per request (script-src 'self' 'nonce-<...>')
+
+HSTS for prod, Referrer-Policy: no-referrer, Permissions-Policy minimal.
+
+Strengthen session cookie flags and CSRF strategy (double-submit or same-site POSTs).
+
+Add rate-limit/slowdown for auth + magic link routes; IP/UA fingerprinting for anomalies.
+
+Provide quick verification commands; advise commit.
+
+PowerShell (only if files don’t exist):
+
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\api\src\middleware" -Force | Out-Null
+ni "$root\apps\api\src\middleware\security.ts" -ItemType File -Force | Out-Null
+pnpm -r dev
+
+
+Verification:
+
+# Check headers on a public route
+iwr http://localhost:4000/healthz -Headers @{} | Format-List *
+
+# Expected: 
+# - strict CSP with nonce
+# - HSTS (in prod)
+# - Referrer-Policy: no-referrer
+# - X-Frame-Options: DENY
+# - Set-Cookie flags: HttpOnly; Secure; SameSite=Strict (in prod)

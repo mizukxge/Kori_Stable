@@ -970,3 +970,22 @@ enum VerificationStatus {
   FAILED // Hash verification failed (tampered)
   ERROR // Error during verification
 }
+
+// Magic Link for passwordless authentication
+model MagicLink {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String    @unique // SHA256 hash of the token
+  purpose   String // 'admin_login', 'client_login', 'client_portal'
+  expiresAt DateTime
+  usedAt    DateTime?
+  ipHash    String? // SHA256 hash of requesting IP
+  uaHash    String? // SHA256 hash of user agent
+  metadata  Json? // Additional context
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("magic_links")
+}
