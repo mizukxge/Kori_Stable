@@ -36,6 +36,13 @@ model AdminUser {
   approvedJournals   JournalEntry[]      @relation("ApprovedJournals")
   journalAttachments JournalAttachment[]
 
+  // Records relations
+  archivedRecords     Record[]          @relation("ArchivedRecords")
+  disposedRecords     Record[]          @relation("DisposedRecords")
+  legalHoldRecords    Record[]          @relation("LegalHoldRecords")
+  retentionPolicies   RetentionPolicy[]
+  recordVerifications RecordHash[]
+
   @@map("admin_users")
 }
 
@@ -95,6 +102,7 @@ model Client {
   proposals Proposal[]
   contracts Contract[]
   invoices  Invoice[]
+  Record    Record[]
 
   @@index([email])
   @@index([status])
@@ -814,4 +822,151 @@ enum JournalStatus {
   POSTED
   APPROVED
   VOIDED
+}
+
+// Records - Immutable archived files with WORM compliance
+model Record {
+  id           String @id @default(cuid())
+  recordNumber String @unique // e.g., REC-2025-001
+
+  // File information
+  filename     String
+  originalPath String
+  archivePath  String @unique // Immutable storage location
+  mimeType     String
+  size         BigInt
+
+  // Cryptographic hash (SHA256)
+  hash          String @unique
+  hashAlgorithm String @default("SHA256")
+
+  // Record metadata
+  description String?
+  category    RecordCategory @default(DOCUMENT)
+  tags        String[]       @default([])
+
+  // Retention policy
+  retentionPolicyId String?
+  retentionPolicy   RetentionPolicy? @relation(fields: [retentionPolicyId], references: [id], onDelete: SetNull)
+
+  retainUntil     DateTime? // Calculated retention date
+  legalHold       Boolean    @default(false) // Prevents deletion
+  legalHoldReason String?
+  legalHoldBy     String?
+  legalHoldByUser AdminUser? @relation("LegalHoldRecords", fields: [legalHoldBy], references: [id], onDelete: SetNull)
+  legalHoldAt     DateTime?
+
+  // Verification history
+  verifications      RecordHash[]
+  lastVerifiedAt     DateTime?
+  verificationStatus VerificationStatus @default(PENDING)
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  // Audit trail
+  archivedBy     String
+  archivedByUser AdminUser @relation("ArchivedRecords", fields: [archivedBy], references: [id], onDelete: Restrict)
+  archivedAt     DateTime  @default(now())
+
+  // Disposal (if retention expired and no legal hold)
+  disposedAt     DateTime?
+  disposedBy     String?
+  disposedByUser AdminUser? @relation("DisposedRecords", fields: [disposedBy], references: [id], onDelete: SetNull)
+  disposalReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recordNumber])
+  @@index([hash])
+  @@index([category])
+  @@index([retainUntil])
+  @@index([legalHold])
+  @@index([verificationStatus])
+  @@map("records")
+}
+
+// Retention Policies - Compliance and legal retention rules
+model RetentionPolicy {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  // Retention period
+  retentionYears  Int @default(7) // e.g., 7 years for tax records
+  retentionMonths Int @default(0) // Additional months
+  retentionDays   Int @default(0) // Additional days
+
+  // Policy details
+  regulatoryBasis String? // e.g., "IRS Tax Records", "GDPR", "HIPAA"
+  category        RecordCategory?
+
+  // Status
+  isActive  Boolean @default(true)
+  isDefault Boolean @default(false)
+
+  // Records using this policy
+  records Record[]
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([isActive])
+  @@map("retention_policies")
+}
+
+// Record Hashes - Verification history
+model RecordHash {
+  id String @id @default(cuid())
+
+  recordId String
+  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  // Hash verification
+  computedHash String // Hash computed during verification
+  expectedHash String // Original hash from record
+  matched      Boolean // Whether hashes matched
+
+  // Verification details
+  verifiedAt     DateTime   @default(now())
+  verifiedBy     String? // User or system
+  verifiedByUser AdminUser? @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  // File state at verification
+  fileExists Boolean
+  fileSize   BigInt?
+
+  // Error details if verification failed
+  error String?
+
+  @@index([recordId])
+  @@index([verifiedAt])
+  @@index([matched])
+  @@map("record_hashes")
+}
+
+enum RecordCategory {
+  DOCUMENT // General documents
+  CONTRACT // Legal contracts
+  INVOICE // Financial invoices
+  TAX // Tax records
+  PHOTO // Photography files
+  VIDEO // Video files
+  CORRESPONDENCE // Emails, letters
+  LEGAL // Legal documents
+  COMPLIANCE // Compliance records
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING // Not yet verified
+  VERIFIED // Hash verified successfully
+  FAILED // Hash verification failed (tampered)
+  ERROR // Error during verification
 }
