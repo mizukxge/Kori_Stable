@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import cookie from '@fastify/cookie';
 import { env } from '../../../config/env.js';
+import { metricsMiddleware } from './observability/metricsMiddleware.js';
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -50,6 +51,9 @@ export async function buildServer() {
       sameSite: 'lax',
     },
   });
+  // Register metrics middleware to track all requests
+  fastify.addHook('onRequest', metricsMiddleware);
+
 
   // Register rate limiting
   await fastify.register(rateLimit, {

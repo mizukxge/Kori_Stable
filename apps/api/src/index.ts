@@ -16,10 +16,10 @@ async function start() {
       host: env.API_HOST 
     });
 
-    console.log(`🚀 API server running on http://${env.API_HOST}:${env.API_PORT}`);
-    console.log(`📊 Health check: http://localhost:${env.API_PORT}/healthz`);
-    console.log(`🔍 Readiness check: http://localhost:${env.API_PORT}/readyz`);
-    console.log(`📦 Version info: http://localhost:${env.API_PORT}/version`);
+    console.log(`ðŸš€ API server running on http://${env.API_HOST}:${env.API_PORT}`);
+    console.log(`ðŸ“Š Health check: http://localhost:${env.API_PORT}/healthz`);
+    console.log(`ðŸ” Readiness check: http://localhost:${env.API_PORT}/readyz`);
+    console.log(`ðŸ“¦ Version info: http://localhost:${env.API_PORT}/version`);
 
     // Graceful shutdown
     const signals = ['SIGINT', 'SIGTERM'];
@@ -28,17 +28,17 @@ async function start() {
         console.log(`\n${signal} received, shutting down gracefully...`);
         try {
           await server.close();
-          console.log('✅ Server closed successfully');
+          console.log('âœ… Server closed successfully');
           process.exit(0);
         } catch (err) {
-          console.error('❌ Error during shutdown:', err);
+          console.error('âŒ Error during shutdown:', err);
           process.exit(1);
         }
       });
     });
 
   } catch (err) {
-    console.error('❌ Error starting server:', err);
+    console.error('âŒ Error starting server:', err);
     process.exit(1);
   }
 }

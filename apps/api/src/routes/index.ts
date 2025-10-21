@@ -16,6 +16,8 @@ import { reconciliationRoutes } from './reconciliation.js';
 import { periodsRoutes } from './periods.js';
 import { journalsRoutes } from './journals.js';
 import { recordsRoutes } from './records.js';
+import { metricsRoutes } from './metrics.js';
+import { auditRoutes } from './audit.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -68,6 +70,12 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Records and WORM archive routes (admin only)
   await fastify.register(recordsRoutes);
+
+  // Metrics routes (Prometheus)
+  await fastify.register(metricsRoutes);
+
+  // Audit log routes (admin only)
+  await fastify.register(auditRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
