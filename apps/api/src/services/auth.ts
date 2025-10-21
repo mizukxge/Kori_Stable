@@ -50,13 +50,9 @@ export class AuthService {
       return null;
     }
 
-    // Check if user is active
-    if (!user.isActive) {
-      throw new Error('Account is inactive');
-    }
-
     // Verify password
     const isValid = await this.verifyPassword(user.password, password);
+
     if (!isValid) {
       return null;
     }
@@ -66,7 +62,7 @@ export class AuthService {
       userId: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
+      role: 'SUPER_ADMIN', // Default role since role field was also removed
     };
   }
 
@@ -119,16 +115,11 @@ export class AuthService {
       return null;
     }
 
-    // Check if user is still active
-    if (!session.user.isActive) {
-      return null;
-    }
-
     return {
       userId: session.user.id,
       email: session.user.email,
       name: session.user.name,
-      role: session.user.role,
+      role: 'SUPER_ADMIN', // Default role
     };
   }
 
