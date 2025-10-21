@@ -22,8 +22,12 @@ import { magicLinksRoutes } from './magicLinks.js';
 import { emailRoutes } from './email.js';
 import { docgenRoutes } from './docgen.js';
 import { mediaProcessRoutes } from './mediaProcess.js';
+import { cdnRoutes } from './cdn.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
+  // CDN & Image Optimization routes (public image serving + admin management)
+  await fastify.register(cdnRoutes);
+
   // Health check routes (public)
   await fastify.register(healthRoutes);
 
