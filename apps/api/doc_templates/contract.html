@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contract - {{contractNumber}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 11pt;
+      line-height: 1.8;
+      color: #1f2937;
+      padding: 60px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px solid #1f2937;
+      padding-bottom: 20px;
+      margin-bottom: 40px;
+    }
+    .header h1 {
+      font-size: 24pt;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .header .contract-number {
+      color: #6b7280;
+      font-size: 12pt;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .section h2 {
+      font-size: 14pt;
+      margin-bottom: 15px;
+      color: #1f2937;
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 5px;
+    }
+    .section p {
+      margin-bottom: 15px;
+      text-align: justify;
+    }
+    .parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin: 30px 0;
+      padding: 20px;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+    .party h3 {
+      margin-bottom: 10px;
+      font-size: 12pt;
+    }
+    .signature-section {
+      margin-top: 60px;
+      page-break-inside: avoid;
+    }
+    .signature-block {
+      margin-top: 40px;
+    }
+    .signature-line {
+      border-top: 1px solid #1f2937;
+      margin-top: 50px;
+      padding-top: 5px;
+    }
+    .date-line {
+      border-top: 1px solid #1f2937;
+      margin-top: 50px;
+      padding-top: 5px;
+      width: 200px;
+    }
+    ul, ol {
+      margin-left: 30px;
+      margin-bottom: 15px;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    .clause-number {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>{{title}}</h1>
+    <div class="contract-number">Contract No. {{contractNumber}}</div>
+    <div style="margin-top: 10px; color: #6b7280;">{{date contractDate}}</div>
+  </div>
+
+  <div class="parties">
+    <div class="party">
+      <h3>Service Provider:</h3>
+      {{#if providerName}}
+      <div><strong>{{providerName}}</strong></div>
+      {{/if}}
+      {{#if providerAddress}}
+      <div>{{providerAddress}}</div>
+      {{/if}}
+      {{#if providerEmail}}
+      <div>Email: {{providerEmail}}</div>
+      {{/if}}
+      {{#if providerPhone}}
+      <div>Phone: {{providerPhone}}</div>
+      {{/if}}
+    </div>
+
+    <div class="party">
+      <h3>Client:</h3>
+      <div><strong>{{clientName}}</strong></div>
+      {{#if clientAddress}}
+      <div>{{clientAddress}}</div>
+      {{/if}}
+      {{#if clientEmail}}
+      <div>Email: {{clientEmail}}</div>
+      {{/if}}
+      {{#if clientPhone}}
+      <div>Phone: {{clientPhone}}</div>
+      {{/if}}
+    </div>
+  </div>
+
+  {{#if introduction}}
+  <div class="section">
+    <p>{{introduction}}</p>
+  </div>
+  {{/if}}
+
+  <div class="section">
+    <h2>1. Services</h2>
+    <p>{{servicesDescription}}</p>
+  </div>
+
+  {{#if deliverables}}
+  <div class="section">
+    <h2>2. Deliverables</h2>
+    <p>{{deliverables}}</p>
+  </div>
+  {{/if}}
+
+  {{#if compensation}}
+  <div class="section">
+    <h2>3. Compensation</h2>
+    <p>{{compensation}}</p>
+  </div>
+  {{/if}}
+
+  {{#if timeline}}
+  <div class="section">
+    <h2>4. Timeline</h2>
+    <p>{{timeline}}</p>
+  </div>
+  {{/if}}
+
+  {{#if cancellation}}
+  <div class="section">
+    <h2>5. Cancellation Policy</h2>
+    <p>{{cancellation}}</p>
+  </div>
+  {{/if}}
+
+  {{#if intellectualProperty}}
+  <div class="section">
+    <h2>6. Intellectual Property Rights</h2>
+    <p>{{intellectualProperty}}</p>
+  </div>
+  {{/if}}
+
+  {{#if liability}}
+  <div class="section">
+    <h2>7. Liability</h2>
+    <p>{{liability}}</p>
+  </div>
+  {{/if}}
+
+  {{#if additionalTerms}}
+  <div class="section">
+    <h2>8. Additional Terms</h2>
+    <p style="white-space: pre-line;">{{additionalTerms}}</p>
+  </div>
+  {{/if}}
+
+  <div class="signature-section">
+    <p><strong>IN WITNESS WHEREOF</strong>, the parties have executed this agreement as of the date first written above.</p>
+
+    <div class="signature-block">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <div>
+          <div><strong>Service Provider:</strong></div>
+          <div class="signature-line">
+            {{#if providerName}}{{providerName}}{{else}}Signature{{/if}}
+          </div>
+          <div class="date-line">Date</div>
+        </div>
+
+        <div>
+          <div><strong>Client:</strong></div>
+          <div class="signature-line">
+            {{clientName}}
+          </div>
+          <div class="date-line">Date</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

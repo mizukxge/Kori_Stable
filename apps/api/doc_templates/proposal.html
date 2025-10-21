@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proposal - {{proposalNumber}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 12pt;
+      line-height: 1.6;
+      color: #333;
+      padding: 40px;
+    }
+    .header {
+      border-bottom: 3px solid #2563eb;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #2563eb;
+      font-size: 28pt;
+      margin-bottom: 10px;
+    }
+    .header .subtitle {
+      color: #6b7280;
+      font-size: 14pt;
+    }
+    .info-section {
+      margin-bottom: 30px;
+    }
+    .info-section h2 {
+      color: #1f2937;
+      font-size: 16pt;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 5px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .info-label {
+      font-weight: bold;
+      color: #4b5563;
+    }
+    .info-value {
+      color: #1f2937;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .items-table th {
+      background-color: #f3f4f6;
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      border-bottom: 2px solid #d1d5db;
+    }
+    .items-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .items-table .text-right {
+      text-align: right;
+    }
+    .totals {
+      margin-top: 30px;
+      float: right;
+      width: 300px;
+    }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .totals-row.total {
+      font-weight: bold;
+      font-size: 14pt;
+      border-top: 2px solid #2563eb;
+      border-bottom: 2px solid #2563eb;
+      margin-top: 10px;
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    .footer {
+      clear: both;
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      color: #6b7280;
+      font-size: 10pt;
+    }
+    .page-break {
+      page-break-after: always;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>PROPOSAL</h1>
+    <div class="subtitle">{{proposalNumber}}</div>
+  </div>
+
+  <div class="info-section">
+    <h2>Proposal Details</h2>
+    <div class="info-grid">
+      <div class="info-label">Proposal Number:</div>
+      <div class="info-value">{{proposalNumber}}</div>
+      
+      <div class="info-label">Date:</div>
+      <div class="info-value">{{date proposalDate}}</div>
+      
+      {{#if validUntil}}
+      <div class="info-label">Valid Until:</div>
+      <div class="info-value">{{date validUntil}}</div>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h2>Client Information</h2>
+    <div class="info-grid">
+      <div class="info-label">Client Name:</div>
+      <div class="info-value">{{clientName}}</div>
+      
+      {{#if clientEmail}}
+      <div class="info-label">Email:</div>
+      <div class="info-value">{{clientEmail}}</div>
+      {{/if}}
+      
+      {{#if clientPhone}}
+      <div class="info-label">Phone:</div>
+      <div class="info-value">{{clientPhone}}</div>
+      {{/if}}
+      
+      {{#if clientAddress}}
+      <div class="info-label">Address:</div>
+      <div class="info-value">{{clientAddress}}</div>
+      {{/if}}
+    </div>
+  </div>
+
+  <div class="info-section">
+    <h2>Project Details</h2>
+    <p><strong>{{title}}</strong></p>
+    {{#if description}}
+    <p style="margin-top: 10px;">{{description}}</p>
+    {{/if}}
+  </div>
+
+  {{#if items}}
+  <div class="info-section">
+    <h2>Services & Pricing</h2>
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="text-right">Quantity</th>
+          <th class="text-right">Rate</th>
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each items}}
+        <tr>
+          <td>{{this.description}}</td>
+          <td class="text-right">{{this.quantity}}</td>
+          <td class="text-right">{{currency ../currency this.rate}}</td>
+          <td class="text-right">{{currency ../currency (multiply this.quantity this.rate)}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <div class="totals-row">
+        <span>Subtotal:</span>
+        <span>{{currency currency subtotal}}</span>
+      </div>
+      {{#if taxRate}}
+      <div class="totals-row">
+        <span>Tax ({{taxRate}}%):</span>
+        <span>{{currency currency taxAmount}}</span>
+      </div>
+      {{/if}}
+      {{#if discount}}
+      <div class="totals-row">
+        <span>Discount:</span>
+        <span>-{{currency currency discount}}</span>
+      </div>
+      {{/if}}
+      <div class="totals-row total">
+        <span>Total:</span>
+        <span>{{currency currency total}}</span>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  {{#if terms}}
+  <div class="info-section" style="clear: both; margin-top: 100px;">
+    <h2>Terms & Conditions</h2>
+    <p style="white-space: pre-line;">{{terms}}</p>
+  </div>
+  {{/if}}
+
+  <div class="footer">
+    <p>Thank you for your business!</p>
+    {{#if companyName}}
+    <p>{{companyName}}</p>
+    {{/if}}
+    {{#if companyEmail}}
+    <p>{{companyEmail}} {{#if companyPhone}}• {{companyPhone}}{{/if}}</p>
+    {{/if}}
+  </div>
+</body>
+</html>
