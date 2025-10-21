@@ -1,29 +1,53 @@
 {
-  "name": "@kori/web",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite --port 3000",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "echo \"Web tests not implemented yet\" && exit 0",
-    "lint": "eslint src --ext .jsx,.tsx",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "axios": "^1.12.2",
-    "lucide-react": "^0.546.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^7.9.4"
-  },
-  "devDependencies": {
-    "@types/react": "^18.2.66",
-    "@types/react-dom": "^18.2.22",
-    "@vitejs/plugin-react": "^4.2.1",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.15",
-    "vite": "^5.2.0"
-  }
+    "name": "@kori/web",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite --port 3000",
+        "build": "vite build",
+        "preview": "vite preview",
+        "test": "echo \"Web tests not implemented yet\" && exit 0",
+        "lint": "eslint src --ext .jsx,.tsx",
+        "typecheck": "tsc --noEmit",
+        "storybook": "storybook dev -p 6006",
+        "build-storybook": "storybook build"
+    },
+    "dependencies": {
+        "@radix-ui/react-dialog": "^1.1.15",
+        "@radix-ui/react-dropdown-menu": "^2.1.16",
+        "@radix-ui/react-popover": "^1.1.15",
+        "@radix-ui/react-select": "^2.2.6",
+        "@radix-ui/react-slot": "^1.2.3",
+        "@radix-ui/react-switch": "^1.2.6",
+        "@radix-ui/react-tabs": "^1.1.13",
+        "@radix-ui/react-toast": "^1.2.15",
+        "@radix-ui/react-tooltip": "^1.2.8",
+        "axios": "^1.12.2",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "framer-motion": "^12.23.24",
+        "lucide-react": "^0.546.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^7.9.4",
+        "tailwind-merge": "^3.3.1"
+    },
+    "devDependencies": {
+        "@storybook/addon-a11y": "8.4.6",
+        "@storybook/addon-essentials": "8.4.6",
+        "@storybook/addon-interactions": "8.4.6",
+        "@storybook/react": "8.4.6",
+        "@storybook/react-vite": "8.4.6",
+        "@storybook/test": "8.4.6",
+        "@tailwindcss/forms": "^0.5.10",
+        "@tailwindcss/typography": "^0.5.19",
+        "@types/react": "^18.2.66",
+        "@types/react-dom": "^18.2.22",
+        "@vitejs/plugin-react": "^4.2.1",
+        "autoprefixer": "^10.4.17",
+        "postcss": "^8.4.35",
+        "storybook": "8.4.6",
+        "tailwindcss": "3.4.1",
+        "vite": "^5.2.0"
+    }
 }
