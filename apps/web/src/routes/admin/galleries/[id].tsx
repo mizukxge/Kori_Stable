@@ -17,8 +17,9 @@ export default function GalleryAdminPage() {
   const { id } = useParams<{ id: string }>();
   const [gallery, setGallery] = useState<any>(null);
   const [assets, setAssets] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [settings, setSettings] = useState<GallerySettings>({
-    aspectRatio: 'original',
+    aspectRatio: 'square',
     showGutters: true,
     showCaptions: 'hover',
     showFavorites: true,
@@ -37,12 +38,19 @@ export default function GalleryAdminPage() {
         description: 'Wedding Photography - June 2025',
       });
       
-      setAssets([
-        { id: '1', filename: 'photo1.jpg', path: '/path/1', mimeType: 'image/jpeg' },
-        { id: '2', filename: 'photo2.jpg', path: '/path/2', mimeType: 'image/jpeg' },
-        { id: '3', filename: 'photo3.jpg', path: '/path/3', mimeType: 'image/jpeg' },
-        { id: '4', filename: 'photo4.jpg', path: '/path/4', mimeType: 'image/jpeg' },
-      ]);
+      // Generate 24 test photos for proper grid testing
+      const testAssets = Array.from({ length: 24 }, (_, i) => ({
+        id: `asset-${i + 1}`,
+        filename: `wedding-photo-${String(i + 1).padStart(3, '0')}.jpg`,
+        path: `/path/${i + 1}`,
+        mimeType: 'image/jpeg',
+        thumbnailPath: `/thumb/${i + 1}`,
+      }));
+      
+      setAssets(testAssets);
+      
+      // Set some initial favorites for testing
+      setFavorites(new Set(['asset-1', 'asset-5', 'asset-12']));
       
       setLoading(false);
     }, 500);
@@ -54,8 +62,23 @@ export default function GalleryAdminPage() {
     console.log('Asset clicked:', assetId);
   };
 
+  const handleFavoriteToggle = (assetId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(assetId)) {
+        newFavorites.delete(assetId);
+        console.log('❌ Removed from favorites:', assetId);
+      } else {
+        newFavorites.add(assetId);
+        console.log('✅ Added to favorites:', assetId);
+      }
+      return newFavorites;
+    });
+  };
+
   const handleSettingChange = (key: keyof GallerySettings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    console.log(`Setting changed: ${key} =`, value);
   };
 
   if (loading) {
@@ -101,21 +124,19 @@ export default function GalleryAdminPage() {
             <Grid3x3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{settings.aspectRatio}</div>
+            <div className="text-2xl font-bold capitalize">{settings.aspectRatio}</div>
             <p className="text-xs text-muted-foreground">Current aspect ratio</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Display Options</CardTitle>
+            <CardTitle className="text-sm font-medium">Favorites</CardTitle>
             <Settings className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {[settings.showGutters, settings.showFavorites].filter(Boolean).length}
-            </div>
-            <p className="text-xs text-muted-foreground">Active settings</p>
+            <div className="text-2xl font-bold">{favorites.size}</div>
+            <p className="text-xs text-muted-foreground">Marked as favorite</p>
           </CardContent>
         </Card>
 
@@ -145,13 +166,13 @@ export default function GalleryAdminPage() {
               <select
                 id="aspectRatio"
                 value={settings.aspectRatio}
-                onChange={(e) => handleSettingChange('aspectRatio', e.target.value)}
+                onChange={(e) => handleSettingChange('aspectRatio', e.target.value as any)}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
+                <option value="square">Square (1:1)</option>
+                <option value="portrait">Portrait (3:4)</option>
+                <option value="landscape">Landscape (4:3)</option>
                 <option value="original">Original</option>
-                <option value="square">Square</option>
-                <option value="portrait">Portrait</option>
-                <option value="landscape">Landscape</option>
               </select>
             </div>
 
@@ -161,7 +182,7 @@ export default function GalleryAdminPage() {
               <select
                 id="showCaptions"
                 value={settings.showCaptions}
-                onChange={(e) => handleSettingChange('showCaptions', e.target.value)}
+                onChange={(e) => handleSettingChange('showCaptions', e.target.value as any)}
                 className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="always">Always Show</option>
@@ -196,8 +217,20 @@ export default function GalleryAdminPage() {
           </div>
 
           <div className="flex gap-2">
-            <Button>Apply Settings</Button>
-            <Button variant="outline">Reset to Default</Button>
+            <Button onClick={() => console.log('Settings applied:', settings)}>
+              Apply Settings
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setSettings({
+                aspectRatio: 'square',
+                showGutters: true,
+                showCaptions: 'hover',
+                showFavorites: true,
+              })}
+            >
+              Reset to Default
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -206,14 +239,18 @@ export default function GalleryAdminPage() {
       <Card>
         <CardHeader>
           <CardTitle>Gallery Photos</CardTitle>
-          <CardDescription>Click any photo to open in lightbox view</CardDescription>
+          <CardDescription>
+            Click any photo to open in lightbox view • {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <GridTheme
             galleryId={id!}
             assets={assets}
             settings={settings}
+            favorites={favorites}
             onAssetClick={handleAssetClick}
+            onFavoriteToggle={handleFavoriteToggle}
           />
         </CardContent>
       </Card>

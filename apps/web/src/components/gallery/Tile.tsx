@@ -1,4 +1,6 @@
 import React from 'react';
+import { Heart } from 'lucide-react';
+import { cn } from '../../lib/utils';
 
 interface TileProps {
   asset: {
@@ -18,7 +20,7 @@ interface TileProps {
 
 export const Tile: React.FC<TileProps> = ({
   asset,
-  aspectRatio = 'original',
+  aspectRatio = 'square',
   showCaption = 'hover',
   showFavorite = true,
   isFavorite = false,
@@ -28,42 +30,72 @@ export const Tile: React.FC<TileProps> = ({
   return (
     <button
       type="button"
-      className="tile-button relative w-full overflow-hidden rounded bg-gray-100 hover:ring-2 hover:ring-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className={cn(
+        'tile-button group relative w-full overflow-hidden rounded-lg bg-muted',
+        'transition-all duration-200',
+        'hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:scale-[1.02]',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        // Apply aspect ratio classes directly
+        aspectRatio === 'square' && 'aspect-square',
+        aspectRatio === 'portrait' && 'aspect-[3/4]',
+        aspectRatio === 'landscape' && 'aspect-[4/3]',
+        aspectRatio === 'original' && 'aspect-square min-h-[200px]' // fallback for original
+      )}
       onClick={onClick}
       aria-label={`View ${asset.filename}`}
     >
-      <div className={`tile-image-container aspect-${aspectRatio === 'square' ? 'square' : 'auto'}`}>
-        {/* Placeholder - will be replaced with actual image */}
-        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-          <span className="text-xs text-gray-400">{asset.filename}</span>
+      {/* Image container with gradient background */}
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 via-muted to-accent/5">
+        <div className="text-center px-4">
+          <div className="mx-auto mb-3 h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span className="text-4xl">📷</span>
+          </div>
+          <span className="text-xs text-muted-foreground font-medium line-clamp-2">
+            {asset.filename}
+          </span>
         </div>
       </div>
 
       {/* Caption overlay */}
       {showCaption !== 'never' && (
         <div
-          className={`tile-caption absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 text-white text-xs ${
-            showCaption === 'hover' ? 'opacity-0 hover:opacity-100 transition-opacity' : ''
-          }`}
+          className={cn(
+            'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4',
+            'text-white text-sm font-medium',
+            showCaption === 'hover'
+              ? 'opacity-0 group-hover:opacity-100 transition-opacity duration-200'
+              : 'opacity-100'
+          )}
         >
-          {asset.filename}
+          <p className="truncate">{asset.filename}</p>
+          <p className="text-xs text-white/80 mt-1">Click to view</p>
         </div>
       )}
 
-      {/* Favorite indicator */}
+      {/* Favorite button */}
       {showFavorite && (
         <button
           type="button"
-          className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white"
+          className={cn(
+            'absolute top-3 right-3 p-2 rounded-lg z-10',
+            'transition-all duration-200',
+            'backdrop-blur-md shadow-lg',
+            isFavorite
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-white/90 text-muted-foreground hover:bg-white hover:text-primary hover:scale-110'
+          )}
           onClick={(e) => {
             e.stopPropagation();
             onFavoriteToggle?.();
           }}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         >
-          {isFavorite ? '??' : '??'}
+          <Heart className={cn('h-5 w-5', isFavorite && 'fill-current')} />
         </button>
       )}
+
+      {/* Hover overlay effect */}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 pointer-events-none" />
     </button>
   );
 };
