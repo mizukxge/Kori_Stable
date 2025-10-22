@@ -45,6 +45,17 @@ model AdminUser {
 
   savedFilters SavedFilter[]
 
+
+  userRoles              UserRole[]
+  assignedRoles          UserRole[]         @relation("AssignedRoles")
+  grantedRolePermissions RolePermission[]
+
+
+  notifications             Notification[]
+  notificationPreferences   NotificationPreference[]
+  notificationDigests       NotificationDigest[]
+  webhookEndpoints          WebhookEndpoint[]
+
   @@map("admin_users")
 }
 
@@ -1125,4 +1136,500 @@ model SavedFilter {
   @@index([userId])
   @@index([entityType])
   @@map("saved_filters")
+}
+
+
+// ============================================
+// RBAC & PERMISSIONS
+// ============================================
+
+// SystemRole - Predefined system roles
+model SystemRole {
+  id          String  @id @default(cuid())
+  name        String  @unique // SUPER_ADMIN, ADMIN, EDITOR, VIEWER, etc.
+  displayName String // Human-readable name
+  description String?
+  
+  // Role hierarchy level (higher = more permissions)
+  level Int @default(0)
+  
+  // System flags
+  isSystem  Boolean @default(false) // Cannot be deleted
+  isDefault Boolean @default(false) // Assigned to new users
+  isActive  Boolean @default(true)
+  
+  // Permissions
+  permissions RolePermission[]
+  
+  // User assignments
+  userRoles UserRole[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([name])
+  @@index([level])
+  @@map("system_roles")
+}
+
+// UserRole - Many-to-many relationship between users and roles
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  roleId String
+  role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  // Assignment metadata
+  assignedBy     String?
+  assignedByUser AdminUser? @relation("AssignedRoles", fields: [assignedBy], references: [id], onDelete: SetNull)
+  assignedAt     DateTime   @default(now())
+  
+  // Scope (optional - for limiting role to specific resources)
+  scope     String? // e.g., "client:abc123" to limit to one client
+  expiresAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, roleId, scope]) // User can have same role with different scopes
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+// Permission - Granular permission definitions
+model Permission {
+  id       String  @id @default(cuid())
+  resource String // Resource type: "clients", "invoices", "assets", etc.
+  action   String // Action: "create", "read", "update", "delete", "export", etc.
+  
+  // Combined permission name: "clients:read", "invoices:delete"
+  name String @unique
+  
+  displayName String
+  description String?
+  
+  // Grouping
+  category String? // "Content", "Finance", "Admin", etc.
+  
+  // Permission flags
+  isSystem   Boolean @default(true) // System-defined permissions
+  isActive   Boolean @default(true)
+  isDangerous Boolean @default(false) // Requires extra confirmation
+  
+  // Role assignments
+  rolePermissions RolePermission[]
+  
+  // Policy rules
+  policyRules PolicyRule[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([resource, action])
+  @@index([name])
+  @@index([resource])
+  @@map("permissions")
+}
+
+// RolePermission - Many-to-many between roles and permissions
+model RolePermission {
+  id String @id @default(cuid())
+  
+  roleId String
+  role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  // Grant metadata
+  grantedBy     String?
+  grantedByUser AdminUser? @relation(fields: [grantedBy], references: [id], onDelete: SetNull)
+  grantedAt     DateTime   @default(now())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// PolicyRule - Fine-grained access control rules
+model PolicyRule {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  // Rule definition
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  // Rule conditions (JSON-based)
+  // Example: { "field": "ownerId", "operator": "equals", "value": "$userId" }
+  // Example: { "field": "status", "operator": "in", "value": ["DRAFT", "PENDING"] }
+  conditions Json
+  
+  // Rule behavior
+  effect      PolicyEffect @default(ALLOW) // ALLOW or DENY
+  priority    Int          @default(0) // Higher priority = evaluated first
+  description String?
+  
+  // Status
+  isActive Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([permissionId])
+  @@index([priority])
+  @@map("policy_rules")
+}
+
+enum PolicyEffect {
+  ALLOW
+  DENY
+}
+
+// PermissionCache - Cache for permission checks (optional optimization)
+model PermissionCache {
+  id String @id @default(cuid())
+  
+  userId       String
+  permissionId String
+  resourceId   String? // Specific resource being accessed
+  
+  // Cached result
+  hasPermission Boolean
+  
+  // Cache metadata
+  computedAt DateTime @default(now())
+  expiresAt  DateTime
+  
+  @@unique([userId, permissionId, resourceId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("permission_cache")
+}
+
+// ============================================
+// NOTIFICATIONS CENTER
+// ============================================
+
+// Notification - In-app notifications for users
+model Notification {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notification details
+  type     NotificationType // Event type
+  title    String
+  message  String           @db.Text
+  category String? // "info", "success", "warning", "error"
+  
+  // Related entity
+  entityType String? // "invoice", "client", "asset", etc.
+  entityId   String?
+  
+  // Additional data (JSON)
+  metadata Json?
+  
+  // Actions
+  actionUrl  String? // URL to navigate to
+  actionText String? // Button text
+  
+  // Status
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  isDismissed Boolean   @default(false)
+  dismissedAt DateTime?
+  
+  // Priority
+  priority NotificationPriority @default(NORMAL)
+  
+  // Expiration
+  expiresAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  // Client events
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_MESSAGE
+  
+  // Invoice events
+  INVOICE_CREATED
+  INVOICE_SENT
+  INVOICE_PAID
+  INVOICE_OVERDUE
+  INVOICE_REMINDER
+  
+  // Payment events
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  PAYMENT_REFUNDED
+  
+  // Contract/Proposal events
+  PROPOSAL_CREATED
+  PROPOSAL_SENT
+  PROPOSAL_VIEWED
+  PROPOSAL_ACCEPTED
+  PROPOSAL_DECLINED
+  CONTRACT_SIGNED
+  CONTRACT_EXPIRING
+  
+  // Gallery events
+  GALLERY_CREATED
+  GALLERY_SHARED
+  GALLERY_VIEWED
+  GALLERY_EXPIRING
+  
+  // Proofing events
+  PROOF_SELECTION_MADE
+  PROOF_COMMENT_ADDED
+  PROOF_COMPLETED
+  
+  // Asset events
+  ASSET_UPLOADED
+  ASSET_PROCESSED
+  ASSET_FAILED
+  
+  // User events
+  USER_INVITED
+  USER_ROLE_CHANGED
+  
+  // System events
+  SYSTEM_MAINTENANCE
+  SYSTEM_UPDATE
+  BACKUP_COMPLETED
+  BACKUP_FAILED
+  
+  // Custom
+  CUSTOM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// NotificationPreference - User notification subscription settings
+model NotificationPreference {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Channel preferences
+  emailEnabled   Boolean @default(true)
+  inAppEnabled   Boolean @default(true)
+  webhookEnabled Boolean @default(false)
+  
+  // Event-specific preferences
+  eventType NotificationType
+  enabled   Boolean          @default(true)
+  
+  // Digest preferences
+  digestEnabled   Boolean              @default(false)
+  digestFrequency NotificationDigestFrequency @default(DAILY)
+  digestTime      String? // HH:MM format, e.g., "09:00"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, eventType])
+  @@index([userId])
+  @@map("notification_preferences")
+}
+
+enum NotificationDigestFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// NotificationDigest - Scheduled digest emails
+model NotificationDigest {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  frequency NotificationDigestFrequency
+  
+  // Digest content
+  notificationIds String[] // Array of notification IDs included
+  emailSent       Boolean  @default(false)
+  emailSentAt     DateTime?
+  
+  // Period covered
+  periodStart DateTime
+  periodEnd   DateTime
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([emailSent])
+  @@index([periodStart])
+  @@map("notification_digests")
+}
+
+// WebhookEndpoint - Webhook delivery targets
+model WebhookEndpoint {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Endpoint details
+  name        String
+  url         String
+  secret      String? // Webhook signing secret
+  description String?
+  
+  // Event subscriptions
+  events String[] @default([]) // Array of NotificationType
+  
+  // Status
+  isActive       Boolean @default(true)
+  isVerified     Boolean @default(false)
+  verifiedAt     DateTime?
+  lastPingAt     DateTime?
+  lastSuccessAt  DateTime?
+  lastFailureAt  DateTime?
+  failureCount   Int     @default(0)
+  consecutiveFailures Int @default(0)
+  
+  // Retry configuration
+  maxRetries     Int @default(3)
+  retryBackoff   Int @default(60) // Seconds
+  timeoutSeconds Int @default(30)
+  
+  // Headers (JSON)
+  headers Json?
+  
+  // Deliveries
+  deliveries WebhookDelivery[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isActive])
+  @@map("webhook_endpoints")
+}
+
+// WebhookDelivery - Webhook delivery attempts tracking
+model WebhookDelivery {
+  id String @id @default(cuid())
+  
+  endpointId String
+  endpoint   WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  
+  // Event details
+  eventType NotificationType
+  eventId   String // ID of the notification or event
+  payload   Json // Full webhook payload
+  
+  // Delivery status
+  status       WebhookDeliveryStatus @default(PENDING)
+  attempts     Int                   @default(0)
+  maxAttempts  Int                   @default(3)
+  nextRetryAt  DateTime?
+  
+  // Response
+  responseStatus Int? // HTTP status code
+  responseBody   String? @db.Text
+  responseTime   Int? // Milliseconds
+  
+  // Error tracking
+  error          String? @db.Text
+  lastAttemptAt  DateTime?
+  succeededAt    DateTime?
+  failedAt       DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([endpointId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  SENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+// EmailLog - Track all emails sent
+model EmailLog {
+  id String @id @default(cuid())
+  
+  // Recipient
+  to      String
+  cc      String?
+  bcc     String?
+  from    String
+  replyTo String?
+  
+  // Content
+  subject  String
+  template String? // Template name if using templates
+  
+  // Status
+  status       EmailStatus @default(PENDING)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  bouncedAt    DateTime?
+  complainedAt DateTime?
+  
+  // Tracking
+  messageId      String? // Provider message ID
+  providerStatus String?
+  error          String? @db.Text
+  
+  // Metadata
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([to])
+  @@index([status])
+  @@index([createdAt])
+  @@map("email_logs")
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
 }
