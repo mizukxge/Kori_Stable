@@ -56,6 +56,10 @@ model AdminUser {
   notificationDigests       NotificationDigest[]
   webhookEndpoints          WebhookEndpoint[]
 
+
+  settings             Setting[]
+  settingHistory       SettingHistory[]
+
   @@map("admin_users")
 }
 
@@ -1632,4 +1636,110 @@ enum EmailStatus {
   BOUNCED
   COMPLAINED
   FAILED
+}
+
+// ============================================
+// ADMIN SETTINGS & ORGANIZATION
+// ============================================
+
+// Organization - Main organization/company profile
+model Organization {
+  id String @id @default(cuid())
+  
+  // Basic information
+  name        String
+  legalName   String?
+  email       String
+  phone       String?
+  website     String?
+  
+  // Address
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postcode     String?
+  country      String @default("GB")
+  
+  // Tax information
+  vatNumber     String?
+  taxId         String?
+  defaultTaxRate Decimal @default(20) @db.Decimal(5, 2) // Default VAT rate
+  
+  // Branding
+  logoUrl         String?
+  primaryColor    String? // Hex color
+  secondaryColor  String?
+  accentColor     String?
+  
+  // Feature flags
+  features Json @default("{}")
+  
+  // Settings
+  timezone String @default("Europe/London")
+  locale   String @default("en-GB")
+  currency String @default("GBP")
+  
+  // Metadata
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("organizations")
+}
+
+// Setting - Key-value settings storage
+model Setting {
+  id String @id @default(cuid())
+  
+  // Setting key (unique)
+  key   String @unique
+  
+  // Setting value (JSON for flexibility)
+  value Json
+  
+  // Metadata
+  category    String? // "email", "notification", "branding", etc.
+  description String?
+  isPublic    Boolean @default(false) // Can be exposed to frontend
+  isEncrypted Boolean @default(false) // Is value encrypted
+  
+  // Change tracking
+  lastChangedBy     String?
+  lastChangedByUser AdminUser? @relation(fields: [lastChangedBy], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@index([isPublic])
+  @@map("settings")
+}
+
+// SettingHistory - Audit log for setting changes
+model SettingHistory {
+  id String @id @default(cuid())
+  
+  settingKey String
+  
+  // Change details
+  oldValue Json?
+  newValue Json
+  
+  // Who changed it
+  changedBy     String
+  changedByUser AdminUser @relation(fields: [changedBy], references: [id], onDelete: Cascade)
+  
+  // Additional context
+  ipAddress String?
+  userAgent String?
+  reason    String? // Optional reason for change
+  
+  createdAt DateTime @default(now())
+  
+  @@index([settingKey])
+  @@index([changedBy])
+  @@index([createdAt])
+  @@map("setting_history")
 }

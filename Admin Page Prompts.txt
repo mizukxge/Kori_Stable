@@ -1,0 +1,473 @@
+Shared Rules (apply to every component below)
+
+Confirm responsibilities first.
+
+Before creating any file, ask whether it already exists. If yes, ask me to paste the entire file; you will then output a precise patch.
+
+You do not run code. You only output exact PowerShell for me to copy/paste.
+
+After each numbered step:
+
+Provide the PowerShell to run.
+
+Provide a Git commit command immediately after.
+
+Provide a Testing block (commands + what to look for).
+
+Use this Git pattern every time:
+
+git add .
+git commit -m "<ComponentID> Step <N>: <short description>"
+
+After every step, show:
+
+✅ What’s completed
+
+🔜 What’s next
+
+
+Root path: E:\Applications\kori_web_stable
+
+AG1 — Gallery Theme: Grid
+You own “AG1 — Gallery Theme: Grid”.
+Responsibilities (confirm):
+- Grid theme with uniform row height, smart crop fallback, responsive cols (6/5/4/3/2), infinite scroll, preload next 2 rows, fade-in, a11y focus, reduced motion, admin toggles (aspect, gutters, captions, favorites).
+
+Step 1 — Check/Scaffold files
+Ask if these exist; if yes, request full content to patch:
+- apps/web/src/components/gallery/GridTheme.tsx
+- apps/web/src/components/gallery/Tile.tsx
+- apps/web/src/routes/admin/galleries/[id].tsx
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\components\gallery" -Force | Out-Null
+ni "$root\apps\web\src\components\gallery\GridTheme.tsx","$root\apps\web\src\components\gallery\Tile.tsx" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AG1 Step 1: Scaffold Grid theme files"
+Testing:
+pnpm -r dev
+# Open an admin gallery edit page; confirm components load without runtime errors.
+
+Step 2 — Implement responsive grid + gutters
+PowerShell:
+# (You will paste patches I provide; then run dev)
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG1 Step 2: Responsive columns + gutter controls"
+Testing:
+Resize browser to breakpoints; verify 6/5/4/3/2 columns; toggle gutters in admin UI.
+
+Step 3 — Infinite scroll + preload + fade-in
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG1 Step 3: Infinite scroll + preload + reveal animations"
+Testing:
+Scroll large gallery: observe intersection observer loading and smooth fade-in (or no animation if prefers-reduced-motion).
+
+Step 4 — Admin toggles (aspect, captions, favorites)
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG1 Step 4: Admin toggles wired to gallery settings"
+Testing:
+Change toggles and ensure immediate UI effect; captions follow hover/always/never.
+
+Step 5 — Keyboard & a11y wiring to Lightbox
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG1 Step 5: Tile buttons + focus ring + Lightbox handoff"
+Testing:
+Tab through tiles (visible focus), Enter to open Lightbox; Shift+Tab/Tab cycle correctly back to grid on close.
+
+AG2 — Lightbox & Metadata Peek
+You own “AG2 — Lightbox & Metadata Peek”.
+Responsibilities (confirm):
+- Modal lightbox, ← → Esc nav, focus trap, metadata peek (EXIF/IPTC), favorite toggle, copy link, permission-aware download.
+
+Step 1 — Check/Scaffold files
+Ask if exist; request paste to patch:
+- apps/web/src/components/gallery/Lightbox.tsx
+- apps/web/src/lib/meta.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\components\gallery","$root\apps\web\src\lib" -Force | Out-Null
+ni "$root\apps\web\src\components\gallery\Lightbox.tsx","$root\apps\web\src\lib\meta.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AG2 Step 1: Scaffold Lightbox + metadata utils"
+Testing:
+pnpm -r dev
+# Open any photo; Lightbox skeleton mounts without errors.
+
+Step 2 — Keyboard/focus trap + reduced motion
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG2 Step 2: Focus trap + keyboard controls + reduced motion"
+Testing:
+Open Lightbox, use Left/Right/Esc; ensure focus is trapped; Esc closes and restores focus to tile.
+
+Step 3 — Metadata peek + lazy load
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG2 Step 3: Metadata peek (EXIF/IPTC) with lazy loading"
+Testing:
+Open metadata panel; check title/caption/keywords appear; network panel shows deferred fetch.
+
+Step 4 — Favorite, copy link, permission-aware download
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AG2 Step 4: Actions wired (favorite/copy/download with permissions)"
+Testing:
+Toggle favorite → persists; copy link copies the deep link; download disabled when share disallows it.
+
+AW1 — Watermarking Presets + Token Watermarking
+You own “AW1 — Watermarking Presets + Token Watermarking”.
+Responsibilities (confirm):
+- Visible watermark for Samples (BR overlay, 20% opacity, padding 2%, text scale 2.2% long edge, logo 8% short edge).
+- Finals: no visible WM; token watermarking (invisible) ON for both.
+- Apply at derivative generation; per-gallery override; audit token hash in link metadata.
+
+Env to append (I will run):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+WM_VISIBLE_SAMPLES=bottom_right
+WM_VISIBLE_OPACITY=0.20
+WM_VISIBLE_PADDING_PCT=2
+WM_VISIBLE_SCALE_TEXT_PCT=2.2
+WM_VISIBLE_SCALE_LOGO_PCT=8
+WM_TOKEN_SAMPLES=on
+WM_TOKEN_FINALS=on
+"@
+
+Step 1 — Existence check & route for settings
+Ask if exist; request paste:
+- apps/api/src/services/imageTools.ts
+- apps/api/src/jobs/mediaProcess.ts
+- apps/api/src/routes/deliverySettings.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\deliverySettings.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AW1 Step 1: Delivery settings route scaffold"
+Testing:
+pnpm -r dev
+# GET/POST delivery settings returns defaults.
+
+Step 2 — Visible WM on Sample derivatives; token WM for all
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AW1 Step 2: Derivative pipeline applies visible+token watermarking"
+Testing:
+Trigger derivative job on sample; inspect output image (visible WM on sample, none on finals). Check audit/log for token payload hash.
+
+Step 3 — Per-gallery override + audit recording
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AW1 Step 3: Per-gallery WM override + audit"
+Testing:
+Toggle override → regenerate sample derivative → confirm no visible WM; audit shows change.
+
+AL1 — Magic Links with Email OTP
+You own “AL1 — Magic Links with Email OTP”.
+Responsibilities (confirm):
+- Passwordless links; OTP on first device open (6 digits, 5-min), lockout after 6 failures for 15 min, Samples 7d / Finals 14d expiry, revoke + renew.
+
+Env (I will append):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+LINK_REQUIRE_PASSWORD=false
+LINK_REQUIRE_EMAIL_OTP=true
+LINK_EXPIRY_SAMPLES_DAYS=7
+LINK_EXPIRY_FINALS_DAYS=14
+LINK_MAX_FAILED_OTP=6
+"@
+
+Step 1 — Existence check & scaffold OTP route
+Ask if exist; request paste:
+- apps/api/src/routes/share.ts
+- apps/api/src/routes/otp.ts
+- apps/api/src/routes/magicLinks.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\otp.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AL1 Step 1: OTP route scaffold"
+Testing:
+pnpm -r dev
+# POST /otp/request returns ok (dev stub provider).
+
+Step 2 — Device bind, expiry & lockout logic
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AL1 Step 2: OTP device bind + expiry + lockout"
+Testing:
+Request OTP, fail 6x → subsequent attempts blocked 15 min; successful OTP works.
+
+Step 3 — Admin UI: create link, copy, send email
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AL1 Step 3: Admin share form + copy/send"
+Testing:
+Create share from admin, copy URL, open in private window → OTP prompt on first open; second open on same device skips OTP.
+
+AF1 — Finals Downloads Auto-Enable (+ ZIP)
+You own “AF1 — Finals Downloads Auto-Enable (+ ZIP)”.
+Responsibilities (confirm):
+- When invoice → Paid, linked share download=enabled.
+- Temporary disable per link (24h).
+- Per-image and ZIP bundle downloads (size cap), checksum, resumable.
+
+Env (I will append):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+FINAL_DOWNLOADS_ON_PAYMENT=true
+FINAL_DOWNLOADS_REQUIRE_ADMIN_TOGGLE=false
+ZIP_BUNDLE_ENABLED=true
+ZIP_BUNDLE_MAX_GB=10
+"@
+
+Step 1 — Existence check & scaffold routes/jobs
+Ask if exist; request paste:
+- apps/api/src/routes/invoices.ts
+- apps/api/src/routes/downloads.ts
+- apps/api/src/jobs/zipBundle.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\downloads.ts","$root\apps\api\src\jobs\zipBundle.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AF1 Step 1: Downloads route + ZIP job scaffolds"
+Testing:
+pnpm -r dev
+# Routes mount without error.
+
+Step 2 — Toggle by payment & audit
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AF1 Step 2: Auto-enable downloads on invoice paid + audit"
+Testing:
+Mark demo invoice paid → share shows downloads enabled; audit contains downloads_enabled_by=payment.
+
+Step 3 — ZIP bundle (cap + expiry + checksum)
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AF1 Step 3: ZIP bundle generation and gated download"
+Testing:
+Request ZIP for finals link; size respects cap; download link expires with share; checksum shown.
+
+AD1 — Document Template Registry & Variable Validation
+You own “AD1 — Document Template Registry & Variable Validation”.
+Responsibilities (confirm):
+- Registry with group/slug/version/content_md/variables/required/locale.
+- Variable rules: dates DD MMM YYYY (Europe/London), GBP 2dp, fallbacks {client.company|client.name}, email/phone validation, computed helpers.
+
+Step 1 — Existence check & scaffold
+Ask if exist; request paste:
+- apps/api/src/routes/docTemplates.ts
+- apps/api/src/services/vars.ts
+- doc_templates/
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\doc_templates" -Force | Out-Null
+ni "$root\apps\api\src\routes\docTemplates.ts","$root\apps\api\src\services\vars.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AD1 Step 1: Doc template routes + vars service scaffolds"
+Testing:
+pnpm -r dev
+# GET/POST docTemplates works with placeholders.
+
+Step 2 — Versioning + validation + computed helpers
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AD1 Step 2: Template versioning, validation, computed helpers"
+Testing:
+Create/modify template → version must bump; invalid email/phone rejected; VAT compute returns 2dp.
+
+Step 3 — Preview endpoint with sample data
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AD1 Step 3: Preview render endpoint"
+Testing:
+POST preview returns merged HTML/PDF artifact path.
+
+AE1 — E-Sign Routing & Evidence
+You own “AE1 — E-Sign Routing & Evidence”.
+Responsibilities (confirm):
+- Multi-signer, typed signatures, OTP at signing, initials per page default ON, sequential routing, countersign, evidence report.
+
+Env (I will append):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+ESIGN_MULTI_SIGNER=true
+ESIGN_SIGNATURE_MODE=typed
+ESIGN_REQUIRE_OTP=true
+ESIGN_REQUIRE_INITIALS_ON_EACH_PAGE=true
+ESIGN_ROUTING_MODE=sequential
+"@
+
+Step 1 — Existence check & scaffold
+Ask if exist; request paste:
+- apps/api/src/routes/sign.ts
+- apps/api/src/services/esign.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+ni "$root\apps\api\src\routes\sign.ts","$root\apps\api\src\services\esign.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AE1 Step 1: E-sign route + service scaffolds"
+Testing:
+pnpm -r dev
+# Routes mount, health OK.
+
+Step 2 — Routing model, OTP at signing, initials overlay
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AE1 Step 2: Signer routing + OTP + initials"
+Testing:
+Send doc to two signers; ensure 2nd cannot sign before 1st (sequential); OTP required; initials rendered.
+
+Step 3 — Evidence report + final hash + countersign
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AE1 Step 3: Evidence bundle + countersign"
+Testing:
+Completed doc includes evidence JSON/PDF and content hash; studio countersign appended.
+
+AI1 — Import Enhancements (Folder DnD, Chunking, Dedupe, Progress)
+You own “AI1 — Import Enhancements”.
+Responsibilities (confirm):
+- Folder upload (`webkitdirectory`), 12MB chunks, concurrency 5, resumable; phash+filename+size dedupe; progress bars; queue/backpressure.
+
+Env (I will append):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+UPLOAD_BROWSER_FOLDER=true
+UPLOAD_CHUNK_MB=12
+UPLOAD_CONCURRENCY=5
+GALLERY_MAX_GB=50
+DUPLICATE_DETECTION=phash
+"@
+
+Step 1 — Existence check (UI + server)
+Ask if exist; request paste:
+- apps/web/src/routes/admin/import.tsx
+- apps/api/src/routes/ingest.ts
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AI1 Step 1: Confirmed existing import endpoints/UI (no file ops)"
+Testing:
+Open /admin/import; current page loads.
+
+Step 2 — Client chunker + resumable protocol
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AI1 Step 2: Client chunking + resumable upload"
+Testing:
+Upload a folder; network shows chunked POSTs; resumes after network blip.
+
+Step 3 — Dedupe + progress + queue backpressure
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AI1 Step 3: Dedupe by phash/filename/size + progress UI + queue"
+Testing:
+Re-upload same folder → duplicates skipped with explanation; overall/ per-file progress accurate.
+
+AS1 — Admin Settings (Delivery, Watermarks, Links, Downloads)
+You own “AS1 — Admin Settings”.
+Responsibilities (confirm):
+- Central UI: watermark presets, token WM, magic link defaults (OTP/expiry), finals download policy, ZIP bundling, derivative sizes (fixed), CDN URL-param policy.
+
+Env (I will append):
+Add-Content "E:\Applications\kori_web_stable\apps\api\.env" @"
+CDN_DERIVATIVES=thumb:400,grid:900,lightbox:1600,finals:3600
+CDN_ALLOW_URL_PARAMS=false
+"@
+
+Step 1 — Existence check & scaffold UI/route
+Ask if exist; request paste:
+- apps/web/src/routes/admin/settings/delivery.tsx
+- apps/api/src/routes/deliverySettings.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\apps\web\src\routes\admin\settings" -Force | Out-Null
+ni "$root\apps\web\src\routes\admin\settings\delivery.tsx" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AS1 Step 1: Settings page scaffold"
+Testing:
+pnpm -r dev
+# Page loads with placeholder controls.
+
+Step 2 — Persist + apply settings to new shares/derivatives
+PowerShell:
+pnpm -r dev
+Git:
+git add .
+git commit -m "AS1 Step 2: Persisted delivery settings + applied to new artifacts"
+Testing:
+Change watermark/expiry defaults; create a new share & derivative → settings reflected.
+
+AQ1 — Demo Seed (End-to-End QA)
+You own “AQ1 — Demo Seed”.
+Responsibilities (confirm):
+- Seed: 1 client, 20 images, 1 Sample gallery (Grid/Masonry), 1 Finals link (paid), 1 proposal, 1 contract, invoices, shares; print URLs/tokens; reset action.
+
+Step 1 — Existence check & scaffold
+Ask if exist; request paste:
+- tools/seed-demo.ts
+PowerShell:
+$root="E:\Applications\kori_web_stable"
+mkdir "$root\tools" -Force | Out-Null
+ni "$root\tools\seed-demo.ts" -ItemType File -Force | Out-Null
+Git:
+git add .
+git commit -m "AQ1 Step 1: Seed demo script scaffold"
+Testing:
+pnpm tsx tools/seed-demo.ts
+# Should print created entities + share URLs.
+
+Step 2 — Add reset flag and richer sample data
+PowerShell:
+pnpm tsx tools/seed-demo.ts --reset
+Git:
+git add .
+git commit -m "AQ1 Step 2: Seed reset + richer demo data"
+Testing:
+Run again; confirm idempotent reset; links re-issued; admin can click through full flow import→gallery→share→doc→sign.

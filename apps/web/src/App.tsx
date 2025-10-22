@@ -9,12 +9,68 @@ import { PortalMessages } from './pages/portal/Messages';
 import { PortalInvoices } from './pages/portal/Invoices';
 import { PortalFiles } from './pages/portal/Files';
 import { PortalDocuments } from './pages/portal/Documents';
+import { AdminDashboard } from './pages/admin/Dashboard';
+import { AdminClients } from './pages/admin/Clients';
+import { AdminAssets } from './pages/admin/Assets';
+import { AdminDocuments } from './pages/admin/Documents';
+import { AdminSettings } from './pages/admin/Settings';
+import GalleryAdminPage from './routes/admin/galleries/[id]';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="kori-theme">
       <BrowserRouter>
         <Routes>
+          {/* Admin Routes */}
+          <Route
+            path="/"
+            element={
+              <Layout>
+                <AdminDashboard />
+              </Layout>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <Layout>
+                <AdminClients />
+              </Layout>
+            }
+          />
+          <Route
+            path="/assets"
+            element={
+              <Layout>
+                <AdminAssets />
+              </Layout>
+            }
+          />
+          <Route
+            path="/documents"
+            element={
+              <Layout>
+                <AdminDocuments />
+              </Layout>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Layout>
+                <AdminSettings />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/galleries/:id"
+            element={
+              <Layout>
+                <GalleryAdminPage />
+              </Layout>
+            }
+          />
+
           {/* Design System Demo */}
           <Route
             path="/design-system"
@@ -69,9 +125,6 @@ function App() {
               </PortalLayout>
             }
           />
-
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/portal" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

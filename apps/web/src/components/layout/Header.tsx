@@ -1,7 +1,6 @@
 import { Menu } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { ThemeToggle } from '../ThemeToggle';
-import { LocaleSwitcher } from '../LocaleSwitcher';
 
 interface HeaderProps {
   onMenuClick?: () => void;
@@ -25,7 +24,6 @@ export function Header({ onMenuClick }: HeaderProps) {
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
-          <LocaleSwitcher />
           <ThemeToggle />
           
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-medium">
