@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -16,6 +16,7 @@ interface TileProps {
   isFavorite?: boolean;
   onClick?: () => void;
   onFavoriteToggle?: () => void;
+  animationDelay?: number;
 }
 
 export const Tile: React.FC<TileProps> = ({
@@ -26,7 +27,29 @@ export const Tile: React.FC<TileProps> = ({
   isFavorite = false,
   onClick,
   onFavoriteToggle,
+  animationDelay = 0,
 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Check for prefers-reduced-motion
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    // If reduced motion, show immediately
+    if (mediaQuery.matches) {
+      setIsVisible(true);
+    } else {
+      // Trigger fade-in after delay
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, animationDelay);
+
+      return () => clearTimeout(timer);
+    }
+  }, [animationDelay]);
+
   return (
     <button
       type="button"
@@ -39,8 +62,15 @@ export const Tile: React.FC<TileProps> = ({
         aspectRatio === 'square' && 'aspect-square',
         aspectRatio === 'portrait' && 'aspect-[3/4]',
         aspectRatio === 'landscape' && 'aspect-[4/3]',
-        aspectRatio === 'original' && 'aspect-square min-h-[200px]' // fallback for original
+        aspectRatio === 'original' && 'aspect-square min-h-[200px]',
+        // Fade-in animation
+        !prefersReducedMotion && 'opacity-0 translate-y-4',
+        isVisible && !prefersReducedMotion && 'animate-fade-in',
+        prefersReducedMotion && 'opacity-100'
       )}
+      style={{
+        animationDelay: prefersReducedMotion ? '0ms' : `${animationDelay}ms`,
+      }}
       onClick={onClick}
       aria-label={`View ${asset.filename}`}
     >
