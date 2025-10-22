@@ -17,6 +17,8 @@ interface TileProps {
   onClick?: () => void;
   onFavoriteToggle?: () => void;
   animationDelay?: number;
+  isFocused?: boolean;
+  index?: number;
 }
 
 export const Tile: React.FC<TileProps> = ({
@@ -28,20 +30,19 @@ export const Tile: React.FC<TileProps> = ({
   onClick,
   onFavoriteToggle,
   animationDelay = 0,
+  isFocused = false,
+  index = 0,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    // Check for prefers-reduced-motion
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     setPrefersReducedMotion(mediaQuery.matches);
 
-    // If reduced motion, show immediately
     if (mediaQuery.matches) {
       setIsVisible(true);
     } else {
-      // Trigger fade-in after delay
       const timer = setTimeout(() => {
         setIsVisible(true);
       }, animationDelay);
@@ -58,12 +59,11 @@ export const Tile: React.FC<TileProps> = ({
         'transition-all duration-200',
         'hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:scale-[1.02]',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-        // Apply aspect ratio classes directly
+        isFocused && 'ring-2 ring-primary ring-offset-2',
         aspectRatio === 'square' && 'aspect-square',
         aspectRatio === 'portrait' && 'aspect-[3/4]',
         aspectRatio === 'landscape' && 'aspect-[4/3]',
         aspectRatio === 'original' && 'aspect-square min-h-[200px]',
-        // Fade-in animation
         !prefersReducedMotion && 'opacity-0 translate-y-4',
         isVisible && !prefersReducedMotion && 'animate-fade-in',
         prefersReducedMotion && 'opacity-100'
@@ -72,9 +72,10 @@ export const Tile: React.FC<TileProps> = ({
         animationDelay: prefersReducedMotion ? '0ms' : `${animationDelay}ms`,
       }}
       onClick={onClick}
-      aria-label={`View ${asset.filename}`}
+      aria-label={`View ${asset.filename}, photo ${index + 1}`}
+      tabIndex={0}
+      role="gridcell"
     >
-      {/* Image container with gradient background */}
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 via-muted to-accent/5">
         <div className="text-center px-4">
           <div className="mx-auto mb-3 h-16 w-16 rounded-xl bg-primary/10 flex items-center justify-center">
@@ -86,15 +87,15 @@ export const Tile: React.FC<TileProps> = ({
         </div>
       </div>
 
-      {/* Caption overlay */}
       {showCaption !== 'never' && (
         <div
           className={cn(
             'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4',
             'text-white text-sm font-medium',
             showCaption === 'hover'
-              ? 'opacity-0 group-hover:opacity-100 transition-opacity duration-200'
-              : 'opacity-100'
+              ? 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-200'
+              : 'opacity-100',
+            isFocused && showCaption === 'hover' && 'opacity-100'
           )}
         >
           <p className="truncate">{asset.filename}</p>
@@ -102,7 +103,6 @@ export const Tile: React.FC<TileProps> = ({
         </div>
       )}
 
-      {/* Favorite button */}
       {showFavorite && (
         <button
           type="button"
@@ -119,13 +119,22 @@ export const Tile: React.FC<TileProps> = ({
             onFavoriteToggle?.();
           }}
           aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          tabIndex={-1}
         >
           <Heart className={cn('h-5 w-5', isFavorite && 'fill-current')} />
         </button>
       )}
 
-      {/* Hover overlay effect */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 pointer-events-none" />
+      <div className={cn(
+        'absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200 pointer-events-none',
+        isFocused && 'bg-black/10'
+      )} />
+
+      {isFocused && (
+        <div className="absolute top-3 left-3 px-2 py-1 rounded-md bg-primary text-primary-foreground text-xs font-medium">
+          Selected
+        </div>
+      )}
     </button>
   );
 };

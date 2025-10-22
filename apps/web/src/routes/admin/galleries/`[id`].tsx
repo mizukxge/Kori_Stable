@@ -84,14 +84,14 @@ export default function GalleryAdminPage() {
     if (asset) {
       setSelectedAsset(asset);
       setLightboxOpen(true);
-      console.log('✅ Opening lightbox for:', assetId);
+      console.log('âœ… Opening lightbox for:', assetId);
     }
   };
 
   const handleCloseLightbox = () => {
     setLightboxOpen(false);
     setSelectedAsset(null);
-    console.log('❌ Lightbox closed');
+    console.log('âŒ Lightbox closed');
   };
 
   const handleLightboxNext = () => {
@@ -117,10 +117,10 @@ export default function GalleryAdminPage() {
       const newFavorites = new Set(prev);
       if (newFavorites.has(assetId)) {
         newFavorites.delete(assetId);
-        console.log('❌ Removed from favorites:', assetId);
+        console.log('âŒ Removed from favorites:', assetId);
       } else {
         newFavorites.add(assetId);
-        console.log('✅ Added to favorites:', assetId);
+        console.log('âœ… Added to favorites:', assetId);
       }
       return newFavorites;
     });
@@ -287,7 +287,7 @@ export default function GalleryAdminPage() {
           <CardHeader>
             <CardTitle>Gallery Photos</CardTitle>
             <CardDescription>
-              Click any photo to open in lightbox view • {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
+              Click any photo to open in lightbox view â€¢ {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -301,6 +301,7 @@ export default function GalleryAdminPage() {
               onLoadMore={loadMore}
               hasMore={hasMore}
               loadingMore={loadingMore}
+            disableKeyboardNav={lightboxOpen}
             />
           </CardContent>
         </Card>
