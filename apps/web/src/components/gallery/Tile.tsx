@@ -52,7 +52,7 @@ export const Tile: React.FC<TileProps> = ({
         'tile-button group relative overflow-hidden rounded-lg bg-muted transition-all duration-300',
         'hover:scale-[1.02] hover:shadow-lg',
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
-        'animate-fadeIn opacity-0',
+        
         isFocused && 'ring-2 ring-primary ring-offset-2',
         aspectRatioClass
       )}

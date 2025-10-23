@@ -131,16 +131,27 @@ export default function PublicGalleryPage() {
 
       const data = await response.json();
       
-      // Transform API response to match our format
-      const assets = data.data.map((item: any) => ({
-        id: item.asset.id,
-        filename: item.asset.filename,
-        path: `http://localhost:3001/uploads/${item.asset.category}/${item.asset.storedName}`,
-        thumbnailPath: `http://localhost:3001/uploads/${item.asset.category}/${item.asset.storedName}`,
-        mimeType: item.asset.mimeType,
-      }));
+     // Transform API response to match our format
+      const assets = data.data.map((asset: any) => {
+        // Extract category and storedName from filepath
+        // filepath format: "uploads\\EDIT\\filename.jpg"
+        const pathParts = asset.filepath.split('\\');
+        const category = pathParts[1]; // EDIT, RAW, VIDEO
+        const storedName = pathParts[2]; // actual filename
+        
+        console.log('Extracted:', { category, storedName, fullPath: `http://localhost:3001/uploads/${category}/${storedName}` });
+        
+        return {
+          id: asset.id,
+          filename: asset.filename,
+          path: `http://localhost:3001/uploads/${category}/${storedName}`,
+          thumbnailPath: `http://localhost:3001/uploads/${category}/${storedName}`,
+          mimeType: asset.mimeType,
+        };
+      });
 
       setGalleryItems(assets);
+      console.log('📸 Set gallery items:', assets);
       console.log(`✅ Loaded ${assets.length} gallery items`);
     } catch (err) {
       console.error('❌ Failed to load gallery items:', err);
@@ -370,15 +381,17 @@ export default function PublicGalleryPage() {
                 </CardContent>
               </Card>
             ) : (
-              <GridTheme
-                galleryId={token || ''}
-                assets={galleryItems}
-                settings={{
-                  aspectRatio: 'original',
-                  showGutters: true,
-                  showCaptions: 'hover',
-                  showFavorites: true,
-                }}
+              <>
+                {console.log('🎨 Rendering GridTheme with:', galleryItems)}
+                <GridTheme
+                  galleryId={token || ''}
+                  assets={galleryItems}
+                  settings={{
+                    aspectRatio: 'square',
+                    showGutters: true,
+                    showCaptions: 'hover',
+                    showFavorites: true,
+                  }}
                 favorites={favorites}
                 onAssetClick={handleAssetClick}
                 onFavoriteToggle={handleFavoriteToggle}
@@ -386,6 +399,7 @@ export default function PublicGalleryPage() {
                 hasMore={false}
                 loadingMore={false}
               />
+              </>
             )}
           </div>
         </div>
