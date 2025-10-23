@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, ChevronLeft, ChevronRight, Heart, Download, Link2, Info, Check, Loader2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Heart, Download, Link2, Info, Check, CheckCircle, Loader2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
 
@@ -40,6 +40,8 @@ export function Lightbox({
   
   const [showMetadata, setShowMetadata] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const [imageError, setImageError] = useState(false);
   
@@ -383,9 +385,43 @@ export function Lightbox({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     console.log('📥 Download initiated for:', asset.filename);
-    // TODO: Implement actual download
+    setDownloading(true);
+    setDownloadSuccess(false);
+    
+    try {
+      // Fetch the image
+      const response = await fetch(asset.path);
+      const blob = await response.blob();
+      
+      // Create a download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = asset.filename || 'photo.jpg';
+      
+      // Trigger download
+      document.body.appendChild(link);
+      link.click();
+      
+      // Cleanup
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      console.log('✅ Download complete:', asset.filename);
+      setDownloading(false);
+      setDownloadSuccess(true);
+      
+      // Reset success indicator after 2 seconds
+      setTimeout(() => {
+        setDownloadSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('❌ Download failed:', error);
+      setDownloading(false);
+      alert('Failed to download image. Please try again.');
+    }
   };
 
   const handleFavorite = (e: React.MouseEvent) => {
@@ -539,12 +575,32 @@ export function Lightbox({
                 e.stopPropagation();
                 handleDownload();
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
+              disabled={downloading}
+              className={cn(
+                "w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300",
+                downloading && "opacity-50 cursor-not-allowed",
+                downloadSuccess 
+                  ? "text-green-500 hover:bg-green-500/10" 
+                  : "text-white hover:bg-white/10"
+              )}
               aria-label="Download"
             >
-              <Download className="h-5 w-5" />
+              <div className="relative w-5 h-5">
+                <Download 
+                  className={cn(
+                    "h-5 w-5 absolute inset-0 transition-all duration-300",
+                    downloadSuccess ? "opacity-0 scale-0" : "opacity-100 scale-100",
+                    downloading && "animate-pulse"
+                  )}
+                />
+                <CheckCircle 
+                  className={cn(
+                    "h-5 w-5 absolute inset-0 transition-all duration-300",
+                    downloadSuccess ? "opacity-100 scale-100" : "opacity-0 scale-0"
+                  )}
+                />
+              </div>
             </button>
-
             {/* Info Button */}
             <button
               type="button"
