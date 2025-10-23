@@ -14,6 +14,7 @@ import { AdminClients } from './pages/admin/Clients';
 import { AdminAssets } from './pages/admin/Assets';
 import { AdminDocuments } from './pages/admin/Documents';
 import { AdminSettings } from './pages/admin/Settings';
+import GalleriesIndex from './routes/admin/galleries/index';
 import GalleryAdminPage from './routes/admin/galleries/[id]';
 
 function App() {
@@ -59,6 +60,16 @@ function App() {
             element={
               <Layout>
                 <AdminSettings />
+              </Layout>
+            }
+          />
+          
+          {/* Gallery Routes - LIST MUST COME BEFORE DETAIL */}
+          <Route
+            path="/admin/galleries"
+            element={
+              <Layout>
+                <GalleriesIndex />
               </Layout>
             }
           />
