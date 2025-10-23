@@ -63,8 +63,21 @@ export const Tile: React.FC<TileProps> = ({
       tabIndex={0}
       aria-label={`View ${asset.filename}`}
     >
-      {/* Placeholder Image with fade-in */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
+      {/* Thumbnail Image */}
+      <img
+        src={asset.thumbnailPath || asset.path}
+        alt={asset.filename}
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
+        onError={(e) => {
+          // Fallback to placeholder on error
+          e.currentTarget.style.display = 'none';
+          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+        }}
+      />
+      
+      {/* Fallback Placeholder (hidden by default) */}
+      <div className="absolute inset-0 hidden flex items-center justify-center bg-gradient-to-br from-muted to-muted/50">
         <div className="text-6xl opacity-20">📷</div>
       </div>
 

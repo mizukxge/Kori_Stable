@@ -45,13 +45,17 @@ export default function GalleryAdminPage() {
         description: 'Wedding Photography - June 2025',
       });
       
-      const testAssets = Array.from({ length: 60 }, (_, i) => ({
-        id: `asset-${i + 1}`,
-        filename: `wedding-photo-${String(i + 1).padStart(3, '0')}.jpg`,
-        path: `/path/${i + 1}`,
-        mimeType: 'image/jpeg',
-        thumbnailPath: `/thumb/${i + 1}`,
-      }));
+      const testAssets = Array.from({ length: 60 }, (_, i) => {
+        // Use different seed numbers for variety (200-259)
+        const seed = 200 + i;
+        return {
+          id: `asset-${i + 1}`,
+          filename: `wedding-photo-${String(i + 1).padStart(3, '0')}.jpg`,
+          path: `https://picsum.photos/seed/${seed}/1920/1280`, // Full HD image
+          thumbnailPath: `https://picsum.photos/seed/${seed}/600/400`, // Thumbnail
+          mimeType: 'image/jpeg',
+        };
+      });
       
       setAllAssets(testAssets);
       setDisplayedAssets(testAssets.slice(0, ITEMS_PER_PAGE));
