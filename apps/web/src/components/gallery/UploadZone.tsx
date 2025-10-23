@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Loader2, Image as ImageIcon, File } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
+import { uploadAsset, addAssetsToGallery } from '../../lib/api';
 
 interface UploadFile {
   id: string;
@@ -140,31 +141,59 @@ export function UploadZone({
     console.log(`🗑️ Removed file from queue: ${id}`);
   };
 
-  // Simulate upload (replace with actual API call)
-  const simulateUpload = (file: UploadFile): Promise<void> => {
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += Math.random() * 30;
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === file.id ? { ...f, progress: 100, status: 'success' } : f
-            )
-          );
-          console.log(`✅ Upload complete: ${file.file.name}`);
-          resolve();
-        } else {
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === file.id ? { ...f, progress: Math.round(progress) } : f
-            )
-          );
-        }
-      }, 300);
-    });
+  // Real upload to API
+  const uploadFileToAPI = async (uploadFile: UploadFile): Promise<string | null> => {
+    try {
+      // Update to uploading status
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadFile.id ? { ...f, status: 'uploading', progress: 0 } : f
+        )
+      );
+
+      // Simulate progress (actual progress tracking requires chunked upload)
+      const progressInterval = setInterval(() => {
+        setFiles((prev) =>
+          prev.map((f) => {
+            if (f.id === uploadFile.id && f.progress < 90) {
+              return { ...f, progress: Math.min(f.progress + Math.random() * 20, 90) };
+            }
+            return f;
+          })
+        );
+      }, 200);
+
+      // Upload to API
+      const response = await uploadAsset(uploadFile.file);
+
+      clearInterval(progressInterval);
+
+      // Update to success
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadFile.id
+            ? { ...f, progress: 100, status: 'success' }
+            : f
+        )
+      );
+
+      console.log(`✅ Uploaded: ${response.data.filename} (ID: ${response.data.id})`);
+      return response.data.id;
+    } catch (error) {
+      console.error(`❌ Upload failed: ${uploadFile.file.name}`, error);
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === uploadFile.id
+            ? {
+                ...f,
+                status: 'error',
+                error: error instanceof Error ? error.message : 'Upload failed',
+              }
+            : f
+        )
+      );
+      return null;
+    }
   };
 
   // Start upload
@@ -174,14 +203,23 @@ export function UploadZone({
 
     console.log(`🚀 Starting upload of ${pendingFiles.length} files to gallery ${galleryId}`);
 
-    // Update all pending files to uploading
-    setFiles((prev) =>
-      prev.map((f) => (f.status === 'pending' ? { ...f, status: 'uploading' } : f))
-    );
-
-    // Upload files (simulate for now - replace with actual API calls)
+    // Upload files to API
+    const uploadedAssetIds: string[] = [];
     for (const file of pendingFiles) {
-      await simulateUpload(file);
+      const assetId = await uploadFileToAPI(file);
+      if (assetId) {
+        uploadedAssetIds.push(assetId);
+      }
+    }
+
+    // Add assets to gallery if any succeeded
+    if (uploadedAssetIds.length > 0 && galleryId) {
+      try {
+        await addAssetsToGallery(galleryId, uploadedAssetIds);
+        console.log(`✅ Added ${uploadedAssetIds.length} assets to gallery ${galleryId}`);
+      } catch (error) {
+        console.error('❌ Failed to add assets to gallery:', error);
+      }
     }
 
     // Call completion callback

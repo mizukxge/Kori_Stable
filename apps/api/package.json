@@ -28,6 +28,7 @@
     "@fastify/rate-limit": "^9",
     "@fastify/sensible": "^5",
     "@fastify/session": "^10",
+    "@fastify/static": "6",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "@prisma/client": "^6.17.1",

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
+import { getGallery } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
@@ -36,24 +37,52 @@ export default function GalleryAdminPage() {
 
   const ITEMS_PER_PAGE = 12;
 
-  useEffect(() => {
-    setLoading(true);
+  // Load gallery data from API
+  const loadGallery = async () => {
+    if (!id) return;
     
-    setTimeout(() => {
+    setLoading(true);
+    try {
+      const response = await getGallery(id);
+      const galleryData = response.data;
+
       setGallery({
-        id,
-        name: 'Sample Gallery',
-        description: 'Wedding Photography - June 2025',
+        id: galleryData.id,
+        name: galleryData.name,
+        description: galleryData.description || '',
+      });
+
+      // Transform API assets to match our format
+      const assets = galleryData.assets.map((ga: any) => ({
+        id: ga.asset.id,
+        filename: ga.asset.filename,
+        // Use filepath from API to construct URL
+        path: `http://localhost:3001/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+        thumbnailPath: `http://localhost:3001/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+        mimeType: ga.asset.mimeType,
+      }));
+
+      setAllAssets(assets);
+      setDisplayedAssets(assets.slice(0, ITEMS_PER_PAGE));
+      setHasMore(assets.length > ITEMS_PER_PAGE);
+      
+      console.log(`✅ Loaded gallery: ${galleryData.name} with ${assets.length} assets`);
+    } catch (error) {
+      console.error('❌ Failed to load gallery:', error);
+      // Fallback to mock data on error
+      setGallery({
+        id: id || 'error',
+        name: 'Sample Gallery (API Error)',
+        description: 'Could not connect to API - showing mock data',
       });
       
       const testAssets = Array.from({ length: 60 }, (_, i) => {
-        // Use different seed numbers for variety (200-259)
         const seed = 200 + i;
         return {
           id: `asset-${i + 1}`,
           filename: `wedding-photo-${String(i + 1).padStart(3, '0')}.jpg`,
-          path: `https://picsum.photos/seed/${seed}/1920/1280`, // Full HD image
-          thumbnailPath: `https://picsum.photos/seed/${seed}/600/400`, // Thumbnail
+          path: `https://picsum.photos/seed/${seed}/1920/1280`,
+          thumbnailPath: `https://picsum.photos/seed/${seed}/600/400`,
           mimeType: 'image/jpeg',
         };
       });
@@ -62,8 +91,13 @@ export default function GalleryAdminPage() {
       setDisplayedAssets(testAssets.slice(0, ITEMS_PER_PAGE));
       setHasMore(testAssets.length > ITEMS_PER_PAGE);
       setFavorites(new Set(['asset-1', 'asset-5', 'asset-12']));
+    } finally {
       setLoading(false);
-    }, 500);
+    }
+  };
+
+  useEffect(() => {
+    loadGallery();
   }, [id]);
 
   const loadMore = () => {
@@ -80,7 +114,7 @@ export default function GalleryAdminPage() {
       setPage(nextPage);
       setHasMore(endIndex < allAssets.length);
       setLoadingMore(false);
-      console.log(`Loaded page ${nextPage}: ${newAssets.length} more photos`);
+      console.log(`📄 Loaded page ${nextPage}: ${newAssets.length} more photos`);
     }, 500);
   };
 
@@ -133,7 +167,7 @@ export default function GalleryAdminPage() {
 
   const handleSettingChange = (key: keyof GallerySettings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
-    console.log(`Setting changed: ${key} =`, value);
+    console.log(`⚙️ Setting changed: ${key} =`, value);
   };
 
   if (loading) {
@@ -269,7 +303,7 @@ export default function GalleryAdminPage() {
             </div>
 
             <div className="flex gap-2">
-              <Button onClick={() => console.log('Settings applied:', settings)}>
+              <Button onClick={() => console.log('⚙️ Settings applied:', settings)}>
                 Apply Settings
               </Button>
               <Button
@@ -301,9 +335,9 @@ export default function GalleryAdminPage() {
           <CardContent>
             <UploadZone
               galleryId={id || 'test'}
-              onUploadComplete={(files) => {
-                console.log('✅ Upload complete:', files);
-                console.log('Upload complete!');
+              onUploadComplete={async (files) => {
+                console.log('✅ Upload complete - refreshing gallery...');
+                await loadGallery();
               }}
             />
           </CardContent>
