@@ -315,6 +315,13 @@ export default function GalleryAdminPage() {
         onPrevious={handleLightboxPrevious}
         hasNext={hasNext}
         hasPrevious={hasPrevious}
+        isFavorite={selectedAsset !== null && favorites.has(selectedAsset.id)}
+        onFavoriteToggle={() => {
+          if (selectedAsset) {
+            console.log('💗 Lightbox calling handleFavoriteToggle for:', selectedAsset.id);
+            handleFavoriteToggle(selectedAsset.id);
+          }
+        }}
       />
     </>
   );

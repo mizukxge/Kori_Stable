@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { Lightbox } from '../../../components/gallery/Lightbox';
@@ -56,7 +56,12 @@ export default function GalleryAdminPage() {
       setAllAssets(testAssets);
       setDisplayedAssets(testAssets.slice(0, ITEMS_PER_PAGE));
       setHasMore(testAssets.length > ITEMS_PER_PAGE);
-      setFavorites(new Set(['asset-1', 'asset-5', 'asset-12']));
+      
+      // Initialize favorites
+      const initialFavorites = new Set(['asset-1', 'asset-5', 'asset-12']);
+      setFavorites(initialFavorites);
+      console.log('🎬 Gallery loaded. Initial favorites:', Array.from(initialFavorites));
+      
       setLoading(false);
     }, 500);
   }, [id]);
@@ -84,27 +89,32 @@ export default function GalleryAdminPage() {
     if (asset) {
       setSelectedAsset(asset);
       setLightboxOpen(true);
-      console.log('âœ… Opening lightbox for:', assetId);
+      const isFav = favorites.has(asset.id);
+      console.log('✅ Opening lightbox:', assetId, '| isFavorite:', isFav, '| All favorites:', Array.from(favorites));
     }
   };
 
   const handleCloseLightbox = () => {
     setLightboxOpen(false);
     setSelectedAsset(null);
-    console.log('âŒ Lightbox closed');
+    console.log('❌ Lightbox closed');
   };
 
   const handleLightboxNext = () => {
     const currentIndex = displayedAssets.findIndex(a => a.id === selectedAsset?.id);
     if (currentIndex < displayedAssets.length - 1) {
-      setSelectedAsset(displayedAssets[currentIndex + 1]);
+      const nextAsset = displayedAssets[currentIndex + 1];
+      setSelectedAsset(nextAsset);
+      console.log('➡️ Next asset:', nextAsset.id, '| isFavorite:', favorites.has(nextAsset.id));
     }
   };
 
   const handleLightboxPrevious = () => {
     const currentIndex = displayedAssets.findIndex(a => a.id === selectedAsset?.id);
     if (currentIndex > 0) {
-      setSelectedAsset(displayedAssets[currentIndex - 1]);
+      const prevAsset = displayedAssets[currentIndex - 1];
+      setSelectedAsset(prevAsset);
+      console.log('⬅️ Previous asset:', prevAsset.id, '| isFavorite:', favorites.has(prevAsset.id));
     }
   };
 
@@ -112,19 +122,26 @@ export default function GalleryAdminPage() {
   const hasNext = currentIndex < displayedAssets.length - 1;
   const hasPrevious = currentIndex > 0;
 
-  const handleFavoriteToggle = (assetId: string) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(assetId)) {
+  // Memoized favorite toggle with extensive logging
+  const handleFavoriteToggle = useCallback((assetId: string) => {
+    console.log('🔄 handleFavoriteToggle called for:', assetId);
+    
+    setFavorites(prevFavorites => {
+      const newFavorites = new Set(prevFavorites);
+      const wasFavorite = newFavorites.has(assetId);
+      
+      if (wasFavorite) {
         newFavorites.delete(assetId);
-        console.log('âŒ Removed from favorites:', assetId);
+        console.log('❌ REMOVED from favorites:', assetId);
       } else {
         newFavorites.add(assetId);
-        console.log('âœ… Added to favorites:', assetId);
+        console.log('✅ ADDED to favorites:', assetId);
       }
+      
+      console.log('📊 New favorites list:', Array.from(newFavorites));
       return newFavorites;
     });
-  };
+  }, []);
 
   const handleSettingChange = (key: keyof GallerySettings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
@@ -146,6 +163,16 @@ export default function GalleryAdminPage() {
       </div>
     );
   }
+
+  // Calculate current asset favorite status
+  const currentAssetIsFavorite = selectedAsset ? favorites.has(selectedAsset.id) : false;
+  
+  // Log whenever selectedAsset or favorites changes
+  useEffect(() => {
+    if (selectedAsset) {
+      console.log('🔍 State check - Asset:', selectedAsset.id, '| isFavorite:', favorites.has(selectedAsset.id));
+    }
+  }, [selectedAsset, favorites]);
 
   return (
     <>
@@ -287,7 +314,7 @@ export default function GalleryAdminPage() {
           <CardHeader>
             <CardTitle>Gallery Photos</CardTitle>
             <CardDescription>
-              Click any photo to open in lightbox view â€¢ {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
+              Click any photo to open in lightbox view • {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -301,13 +328,13 @@ export default function GalleryAdminPage() {
               onLoadMore={loadMore}
               hasMore={hasMore}
               loadingMore={loadingMore}
-            disableKeyboardNav={lightboxOpen}
+              disableKeyboardNav={lightboxOpen}
             />
           </CardContent>
         </Card>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox with explicit favorite state */}
       <Lightbox
         isOpen={lightboxOpen}
         asset={selectedAsset}
@@ -316,6 +343,13 @@ export default function GalleryAdminPage() {
         onPrevious={handleLightboxPrevious}
         hasNext={hasNext}
         hasPrevious={hasPrevious}
+        isFavorite={currentAssetIsFavorite}
+        onFavoriteToggle={() => {
+          if (selectedAsset) {
+            console.log('💗 Lightbox onFavoriteToggle triggered for:', selectedAsset.id);
+            handleFavoriteToggle(selectedAsset.id);
+          }
+        }}
       />
     </>
   );

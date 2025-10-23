@@ -44,26 +44,27 @@ export const GridTheme: React.FC<GridThemeProps> = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
 
-  // Infinite scroll
+  // ✅ AG1 STEP 3: INFINITE SCROLL WITH INTERSECTION OBSERVER
   useEffect(() => {
     if (!onLoadMore || !hasMore || loadingMore) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          console.log('🔄 Loading more assets...');
+          console.log('🔄 Intersection detected - Loading more assets...');
           onLoadMore();
         }
       },
       {
         root: null,
-        rootMargin: '200px',
+        rootMargin: '200px', // Start loading 200px before reaching the sentinel
         threshold: 0,
       }
     );
 
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
+      console.log('👀 Infinite scroll observer attached');
     }
 
     return () => {
@@ -73,27 +74,22 @@ export const GridTheme: React.FC<GridThemeProps> = ({
     };
   }, [onLoadMore, hasMore, loadingMore]);
 
+  // Get current column count based on screen size
   const getColumnCount = () => {
     if (typeof window === 'undefined') return 2;
     const width = window.innerWidth;
-    if (width >= 1536) return 6;
-    if (width >= 1280) return 5;
-    if (width >= 1024) return 4;
-    if (width >= 768) return 3;
-    return 2;
+    if (width >= 1536) return 6; // 2xl
+    if (width >= 1280) return 5; // xl
+    if (width >= 1024) return 4; // lg
+    if (width >= 768) return 3;  // md
+    return 2; // sm
   };
 
-  // Keyboard navigation - ONLY when lightbox is CLOSED
+  // ✅ AG1 STEP 3: KEYBOARD NAVIGATION (disabled when lightbox is open)
   useEffect(() => {
-    if (assets.length === 0) return;
+    if (disableKeyboardNav || assets.length === 0) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // CRITICAL: Block ALL arrow keys when lightbox is open
-      if (disableKeyboardNav) {
-        console.log('🚫 Grid keyboard nav DISABLED (lightbox open)');
-        return;
-      }
-
       const cols = getColumnCount();
       let newIndex = focusedIndex;
 
@@ -150,6 +146,7 @@ export const GridTheme: React.FC<GridThemeProps> = ({
 
   return (
     <div className="grid-theme-container">
+      {/* ✅ AG1 STEP 3: RESPONSIVE GRID */}
       <div
         ref={gridRef}
         className={cn(
@@ -184,6 +181,7 @@ export const GridTheme: React.FC<GridThemeProps> = ({
         ))}
       </div>
 
+      {/* ✅ AG1 STEP 3: LOADING MORE INDICATOR */}
       {loadingMore && (
         <div className="flex justify-center py-8">
           <div className="flex items-center gap-2 text-muted-foreground">
@@ -193,22 +191,33 @@ export const GridTheme: React.FC<GridThemeProps> = ({
         </div>
       )}
 
-      {hasMore && !loadingMore && <div ref={loadMoreRef} className="h-20" />}
+      {/* ✅ AG1 STEP 3: INFINITE SCROLL SENTINEL */}
+      {hasMore && !loadingMore && (
+        <div ref={loadMoreRef} className="h-20" aria-hidden="true" />
+      )}
 
+      {/* ✅ AG1 STEP 3: END OF CONTENT INDICATOR */}
       {!hasMore && assets.length > 0 && (
         <div className="flex justify-center py-8">
-          <p className="text-sm text-muted-foreground">All {assets.length} photos loaded</p>
+          <p className="text-sm text-muted-foreground">
+            All {assets.length} photos loaded
+          </p>
         </div>
       )}
 
+      {/* ✅ AG1 STEP 3: EMPTY STATE */}
       {assets.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="mx-auto mb-4 h-24 w-24 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span className="text-6xl">📷</span>
+          </div>
           <p className="text-lg font-medium text-muted-foreground">No photos in this gallery</p>
           <p className="mt-1 text-sm text-muted-foreground">Upload photos to get started</p>
         </div>
       )}
 
-      {!disableKeyboardNav && (
+      {/* ✅ AG1 STEP 3: KEYBOARD NAVIGATION HINTS */}
+      {!disableKeyboardNav && assets.length > 0 && (
         <div className="mt-4 text-center text-xs text-muted-foreground">
           <p>
             Use <kbd className="px-1.5 py-0.5 rounded bg-muted border">←</kbd>{' '}
