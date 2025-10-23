@@ -3,7 +3,9 @@ import { useParams } from 'react-router-dom';
 import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Label } from '../../components/ui/Label';
-import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Lock, Eye, EyeOff, Heart, Download } from 'lucide-react';
+import { GridTheme } from '../../components/gallery/GridTheme';
+import { Lightbox } from '../../components/gallery/Lightbox';
 
 interface GalleryMeta {
   name: string;
@@ -17,6 +19,14 @@ interface GalleryMeta {
   };
 }
 
+interface GalleryAsset {
+  id: string;
+  filename: string;
+  path: string;
+  thumbnailPath?: string;
+  mimeType: string;
+}
+
 export default function PublicGalleryPage() {
   const { token } = useParams<{ token: string }>();
   const [loading, setLoading] = useState(true);
@@ -27,11 +37,27 @@ export default function PublicGalleryPage() {
   const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasAccess, setHasAccess] = useState(false);
+  
+  // Gallery items state
+  const [galleryItems, setGalleryItems] = useState<GalleryAsset[]>([]);
+  const [loadingItems, setLoadingItems] = useState(false);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  
+  // Lightbox state
+  const [selectedAsset, setSelectedAsset] = useState<any>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   // Load gallery metadata
   useEffect(() => {
     loadGalleryMeta();
   }, [token]);
+
+  // Load gallery items when access is granted
+  useEffect(() => {
+    if (hasAccess && token) {
+      loadGalleryItems();
+    }
+  }, [hasAccess, token]);
 
   const loadGalleryMeta = async () => {
     if (!token) return;
@@ -85,6 +111,44 @@ export default function PublicGalleryPage() {
     }
   };
 
+  const loadGalleryItems = async () => {
+    if (!token) return;
+
+    setLoadingItems(true);
+
+    try {
+      const url = password 
+        ? `http://localhost:3001/g/${token}/items?password=${encodeURIComponent(password)}`
+        : `http://localhost:3001/g/${token}/items`;
+
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        console.error('Failed to load gallery items');
+        setLoadingItems(false);
+        return;
+      }
+
+      const data = await response.json();
+      
+      // Transform API response to match our format
+      const assets = data.data.map((item: any) => ({
+        id: item.asset.id,
+        filename: item.asset.filename,
+        path: `http://localhost:3001/uploads/${item.asset.category}/${item.asset.storedName}`,
+        thumbnailPath: `http://localhost:3001/uploads/${item.asset.category}/${item.asset.storedName}`,
+        mimeType: item.asset.mimeType,
+      }));
+
+      setGalleryItems(assets);
+      console.log(`✅ Loaded ${assets.length} gallery items`);
+    } catch (err) {
+      console.error('❌ Failed to load gallery items:', err);
+    } finally {
+      setLoadingItems(false);
+    }
+  };
+
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token || !password) return;
@@ -118,6 +182,52 @@ export default function PublicGalleryPage() {
       setVerifying(false);
     }
   };
+
+  const handleAssetClick = (assetId: string) => {
+    const asset = galleryItems.find(a => a.id === assetId);
+    if (asset) {
+      setSelectedAsset(asset);
+      setLightboxOpen(true);
+      console.log('✅ Opening lightbox for:', assetId);
+    }
+  };
+
+  const handleCloseLightbox = () => {
+    setLightboxOpen(false);
+    setSelectedAsset(null);
+  };
+
+  const handleLightboxNext = () => {
+    const currentIndex = galleryItems.findIndex(a => a.id === selectedAsset?.id);
+    if (currentIndex < galleryItems.length - 1) {
+      setSelectedAsset(galleryItems[currentIndex + 1]);
+    }
+  };
+
+  const handleLightboxPrevious = () => {
+    const currentIndex = galleryItems.findIndex(a => a.id === selectedAsset?.id);
+    if (currentIndex > 0) {
+      setSelectedAsset(galleryItems[currentIndex - 1]);
+    }
+  };
+
+  const handleFavoriteToggle = (assetId: string) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(assetId)) {
+        newFavorites.delete(assetId);
+        console.log('❌ Removed from favorites:', assetId);
+      } else {
+        newFavorites.add(assetId);
+        console.log('✅ Added to favorites:', assetId);
+      }
+      return newFavorites;
+    });
+  };
+
+  const currentIndex = selectedAsset ? galleryItems.findIndex(a => a.id === selectedAsset.id) : -1;
+  const hasNext = currentIndex < galleryItems.length - 1;
+  const hasPrevious = currentIndex > 0;
 
   // Loading state
   if (loading) {
@@ -209,36 +319,94 @@ export default function PublicGalleryPage() {
   // Gallery content (has access)
   if (hasAccess && galleryMeta) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-          {/* Header */}
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold mb-2">{galleryMeta.name}</h1>
-            {galleryMeta.description && (
-              <p className="text-lg text-muted-foreground">
-                {galleryMeta.description}
-              </p>
+      <>
+        <div className="min-h-screen bg-background">
+          <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+            {/* Header */}
+            <div className="mb-8 text-center">
+              <h1 className="text-4xl font-bold mb-2">{galleryMeta.name}</h1>
+              {galleryMeta.description && (
+                <p className="text-lg text-muted-foreground">
+                  {galleryMeta.description}
+                </p>
+              )}
+              {galleryMeta.client && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  by {galleryMeta.client.name}
+                </p>
+              )}
+            </div>
+
+            {/* Selection Summary */}
+            {favorites.size > 0 && (
+              <Card className="mb-6">
+                <CardContent className="p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                    <span className="font-medium">
+                      {favorites.size} photo{favorites.size !== 1 ? 's' : ''} selected
+                    </span>
+                  </div>
+                  <Button size="sm" variant="outline">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Selected
+                  </Button>
+                </CardContent>
+              </Card>
             )}
-            {galleryMeta.client && (
-              <p className="text-sm text-muted-foreground mt-2">
-                by {galleryMeta.client.name}
-              </p>
+
+            {/* Gallery Grid */}
+            {loadingItems ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading photos...</p>
+                </CardContent>
+              </Card>
+            ) : galleryItems.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <p className="text-muted-foreground">No photos in this gallery yet</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <GridTheme
+                galleryId={token || ''}
+                assets={galleryItems}
+                settings={{
+                  aspectRatio: 'original',
+                  showGutters: true,
+                  showCaptions: 'hover',
+                  showFavorites: true,
+                }}
+                favorites={favorites}
+                onAssetClick={handleAssetClick}
+                onFavoriteToggle={handleFavoriteToggle}
+                onLoadMore={() => {}}
+                hasMore={false}
+                loadingMore={false}
+              />
             )}
           </div>
-
-          {/* Gallery content will go here */}
-          <Card>
-            <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">
-                Gallery photos will be displayed here
-              </p>
-              <p className="text-sm text-muted-foreground mt-2">
-                (CG1 Step 2: Photo grid coming next!)
-              </p>
-            </CardContent>
-          </Card>
         </div>
-      </div>
+
+        {/* Lightbox */}
+        <Lightbox
+          isOpen={lightboxOpen}
+          asset={selectedAsset}
+          onClose={handleCloseLightbox}
+          onNext={handleLightboxNext}
+          onPrevious={handleLightboxPrevious}
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+          isFavorite={selectedAsset !== null && favorites.has(selectedAsset.id)}
+          onFavoriteToggle={() => {
+            if (selectedAsset) {
+              handleFavoriteToggle(selectedAsset.id);
+            }
+          }}
+        />
+      </>
     );
   }
 
