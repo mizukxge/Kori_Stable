@@ -1,3 +1,4 @@
+import PublicGalleryPage from './routes/gallery/[token]';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/providers/ThemeProvider';
 import { Layout } from './components/layout/Layout';
@@ -22,6 +23,12 @@ function App() {
     <ThemeProvider defaultTheme="system" storageKey="kori-theme">
       <BrowserRouter>
         <Routes>
+          {/* Public Gallery Route - No auth required */}
+          <Route
+            path="/gallery/:token"
+            element={<PublicGalleryPage />}
+          />
+
           {/* Admin Routes */}
           <Route
             path="/"
