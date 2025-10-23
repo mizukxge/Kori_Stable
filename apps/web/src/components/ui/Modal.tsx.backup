@@ -54,27 +54,27 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
       onClick={handleBackdropClick}
     >
       <div
         ref={modalRef}
         className={cn(
-          'relative w-full bg-card rounded-lg shadow-xl',
+          'relative w-full bg-white rounded-lg shadow-xl',
           sizeClasses[size]
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">{title}</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
             {description && (
-              <p className="text-sm text-muted-foreground mt-1">{description}</p>
+              <p className="text-sm text-gray-600 mt-1">{description}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-muted-foreground hover:text-muted-foreground hover:bg-muted rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

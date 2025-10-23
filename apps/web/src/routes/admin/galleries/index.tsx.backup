@@ -465,7 +465,7 @@ export default function GalleriesIndex() {
               placeholder="Search galleries..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground"
+              className="w-full pl-10 pr-4 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -475,7 +475,7 @@ export default function GalleriesIndex() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground"
+              className="px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="date">Last Modified</option>
               <option value="name">Name</option>
@@ -821,7 +821,7 @@ export default function GalleriesIndex() {
                 }
                 placeholder="e.g., Beautiful outdoor ceremony and reception"
                 rows={3}
-                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring bg-background text-foreground placeholder:text-muted-foreground"
+                className="w-full px-3 py-2 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
+import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
@@ -283,6 +284,28 @@ export default function GalleryAdminPage() {
                 Reset to Default
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Upload Photos */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ImageIcon className="w-5 h-5" />
+              Upload Photos
+            </CardTitle>
+            <CardDescription>
+              Add photos to this gallery
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UploadZone
+              galleryId={id || 'test'}
+              onUploadComplete={(files) => {
+                console.log('✅ Upload complete:', files);
+                console.log('Upload complete!');
+              }}
+            />
           </CardContent>
         </Card>
 
