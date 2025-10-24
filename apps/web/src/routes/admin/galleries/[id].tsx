@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
 import { Settings, Grid3x3, Image as ImageIcon,  Share2, Copy, Mail, QrCode as QRCodeIcon  } from 'lucide-react';
+import QRCode from 'react-qr-code';
 
 interface GallerySettings {
   aspectRatio: 'square' | 'portrait' | 'landscape' | 'original';
@@ -415,7 +416,7 @@ export default function GalleryAdminPage() {
           onClick={() => setShareModalOpen(false)}
         >
           <div onClick={(e) => e.stopPropagation()}>
-            <Card className="w-full max-w-md">
+            <Card className="w-full max-w-xl">
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Share Gallery</span>
@@ -436,49 +437,71 @@ export default function GalleryAdminPage() {
                   </p>
                 </div>
 
-                {/* Share Link */}
-                <div>
-                  <Label className="text-sm font-medium">Gallery Link</Label>
-                  <div className="flex gap-2 mt-2">
-                    <input
-                      type="text"
-                      readOnly
-                      value={`${window.location.origin}/gallery/${gallery.token}`}
-                      className="flex-1 px-3 py-2 border border-input bg-background rounded-lg text-sm"
-                    />
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={handleCopyShareLink}
-                    >
-                      {shareLinkCopied ? (
-                        <>✓ Copied</>
-                      ) : (
-                        <><Copy className="w-4 h-4" /></>
-                      )}
-                    </Button>
-                  </div>
-                </div>
+                {/* Two Column Layout: Link on left, QR on right */}
+                <div className="grid grid-cols-2 gap-6 pt-4">
+                  {/* Left Column: Share Link & Actions */}
+                  <div className="space-y-4">
+                    {/* Share Link */}
+                    <div>
+                      <Label className="text-sm font-medium">Gallery Link</Label>
+                      <div className="flex gap-2 mt-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={`${window.location.origin}/gallery/${gallery.token}`}
+                          className="flex-1 px-3 py-2 border border-input bg-background rounded-lg text-sm"
+                        />
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCopyShareLink}
+                        >
+                          {shareLinkCopied ? (
+                            <>✓</>
+                          ) : (
+                            <><Copy className="w-4 h-4" /></>
+                          )}
+                        </Button>
+                      </div>
+                    </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={handleEmailShare}
-                  >
-                    <Mail className="w-4 h-4 mr-2" />
-                    Email Link
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    onClick={() => {
-                      window.open(`/gallery/${gallery.token}`, '_blank');
-                    }}
-                  >
-                    👁️ Preview
-                  </Button>
+                    {/* Action Buttons */}
+                    <div className="space-y-2">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleEmailShare}
+                      >
+                        <Mail className="w-4 h-4 mr-2" />
+                        Email Link
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          window.open(`/gallery/${gallery.token}`, '_blank');
+                        }}
+                      >
+                        👁️ Preview Gallery
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Right Column: QR Code */}
+                  <div className="flex items-center justify-center">
+                    <div className="text-center space-y-3">
+                      <div className="bg-white p-3 rounded-lg inline-block shadow-sm">
+                        <QRCode 
+                          value={`${window.location.origin}/gallery/${gallery.token}`}
+                          size={160}
+                          level="M"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Scan to view
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Stats */}
