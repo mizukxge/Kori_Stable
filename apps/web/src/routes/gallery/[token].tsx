@@ -47,7 +47,25 @@ export default function PublicGalleryPage() {
   // Lightbox state
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+const [copySuccess, setCopySuccess] = useState(false);
 
+  const handleCopyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setCopySuccess(true);
+    console.log('📋 Copied gallery link:', url);
+    
+    setTimeout(() => {
+      setCopySuccess(false);
+    }, 2000);
+  };
+
+  const handleClearSelections = () => {
+    if (confirm(`Clear all ${favorites.size} selections?`)) {
+      setFavorites(new Set());
+      console.log('🗑️ Cleared all selections');
+    }
+  };
   // Load gallery metadata
   useEffect(() => {
     loadGalleryMeta();
@@ -421,26 +439,68 @@ export default function PublicGalleryPage() {
                   by {galleryMeta.client.name}
                 </p>
               )}
+              
+              {/* Share Button */}
+              <div className="mt-4">
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={handleCopyLink}
+                >
+                  {copySuccess ? (
+                    <>✓ Link Copied!</>
+                  ) : (
+                    <>📋 Share Gallery</>
+                  )}
+                </Button>
+              </div>
             </div>
-
+{/* Expiration Warning */}
+            {galleryMeta.expiresAt && (
+              <Card className="mb-6 border-orange-500">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 text-orange-600">
+                    <span className="text-xl">⏰</span>
+                    <span className="text-sm">
+                      This gallery expires on {new Date(galleryMeta.expiresAt).toLocaleDateString('en-GB', { 
+                        day: 'numeric', 
+                        month: 'long', 
+                        year: 'numeric' 
+                      })}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
             {/* Selection Summary */}
             {favorites.size > 0 && (
               <Card className="mb-6">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-red-500 fill-red-500" />
-                    <span className="font-medium">
-                      {favorites.size} photo{favorites.size !== 1 ? 's' : ''} selected
-                    </span>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div className="flex items-center gap-2">
+                      <Heart className="w-5 h-5 text-red-500 fill-red-500" />
+                      <span className="font-medium">
+                        {favorites.size} photo{favorites.size !== 1 ? 's' : ''} selected
+                      </span>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={handleClearSelections}
+                      >
+                        Clear All
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        onClick={handleDownloadSelected}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Download ZIP ({favorites.size})
+                      </Button>
+                    </div>
                   </div>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={handleDownloadSelected}
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Selected ({favorites.size})
-                  </Button>
                 </CardContent>
               </Card>
             )}
@@ -477,6 +537,10 @@ export default function PublicGalleryPage() {
                 loadingMore={false}
               />
             )}
+            {/* Footer Stats */}
+            <div className="mt-8 text-center text-sm text-muted-foreground">
+              <p>{galleryItems.length} photo{galleryItems.length !== 1 ? 's' : ''} • Viewed {galleryMeta.viewCount} time{galleryMeta.viewCount !== 1 ? 's' : ''}</p>
+            </div>
           </div>
         </div>
 
