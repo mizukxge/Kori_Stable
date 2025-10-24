@@ -7,7 +7,7 @@ import { getGallery } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
-import { Settings, Grid3x3, Image as ImageIcon } from 'lucide-react';
+import { Settings, Grid3x3, Image as ImageIcon,  Share2, Copy, Mail, QrCode as QRCodeIcon  } from 'lucide-react';
 
 interface GallerySettings {
   aspectRatio: 'square' | 'portrait' | 'landscape' | 'original';
@@ -28,6 +28,8 @@ export default function GalleryAdminPage() {
     showCaptions: 'hover',
     showFavorites: true,
   });
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -36,6 +38,23 @@ export default function GalleryAdminPage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   const ITEMS_PER_PAGE = 12;
+  const handleCopyShareLink = () => {
+    const shareUrl = `${window.location.origin}/gallery/${gallery.token}`;
+    navigator.clipboard.writeText(shareUrl);
+    setShareLinkCopied(true);
+    console.log('📋 Copied share link:', shareUrl);
+    
+    setTimeout(() => {
+      setShareLinkCopied(false);
+    }, 2000);
+  };
+
+  const handleEmailShare = () => {
+    const shareUrl = `${window.location.origin}/gallery/${gallery.token}`;
+    const subject = `Gallery: ${gallery.name}`;
+    const body = `View the gallery here: ${shareUrl}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  };
 
   // Load gallery data from API
   const loadGallery = async () => {
@@ -46,11 +65,7 @@ export default function GalleryAdminPage() {
       const response = await getGallery(id);
       const galleryData = response.data;
 
-      setGallery({
-        id: galleryData.id,
-        name: galleryData.name,
-        description: galleryData.description || '',
-      });
+      setGallery(galleryData);
 
       // Transform API assets to match our format
       const assets = galleryData.assets.map((ga: any) => ({
@@ -190,9 +205,18 @@ export default function GalleryAdminPage() {
     <>
       <div className="space-y-8">
         {/* Page Header */}
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
-          <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
+            <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShareModalOpen(true)}
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Share Gallery
+          </Button>
         </div>
 
         {/* Gallery Stats */}
@@ -384,6 +408,99 @@ export default function GalleryAdminPage() {
           }
         }}
       />
-    </>
+      {/* Share Modal */}
+      {shareModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4"
+          onClick={() => setShareModalOpen(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Share Gallery</span>
+                  <button
+                    onClick={() => setShareModalOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Gallery Info */}
+                <div>
+                  <h3 className="font-semibold mb-1">{gallery.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {displayedAssets.length} photos
+                  </p>
+                </div>
+
+                {/* Share Link */}
+                <div>
+                  <Label className="text-sm font-medium">Gallery Link</Label>
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={`${window.location.origin}/gallery/${gallery.token}`}
+                      className="flex-1 px-3 py-2 border border-input bg-background rounded-lg text-sm"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCopyShareLink}
+                    >
+                      {shareLinkCopied ? (
+                        <>✓ Copied</>
+                      ) : (
+                        <><Copy className="w-4 h-4" /></>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleEmailShare}
+                  >
+                    <Mail className="w-4 h-4 mr-2" />
+                    Email Link
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      window.open(`/gallery/${gallery.token}`, '_blank');
+                    }}
+                  >
+                    👁️ Preview
+                  </Button>
+                </div>
+
+                {/* Stats */}
+                <div className="pt-4 border-t">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Views:</span>
+                    <span className="font-medium">{gallery.viewCount || 0}</span>
+                  </div>
+                  {gallery.expiresAt && (
+                    <div className="flex justify-between text-sm mt-2">
+                      <span className="text-muted-foreground">Expires:</span>
+                      <span className="font-medium">
+                        {new Date(gallery.expiresAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+      </>
   );
 }
