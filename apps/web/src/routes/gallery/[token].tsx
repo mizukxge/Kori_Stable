@@ -4,6 +4,7 @@ import { Card, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Label } from '../../components/ui/Label';
 import { Lock, Eye, EyeOff, Heart, Download } from 'lucide-react';
+import JSZip from 'jszip';
 import { GridTheme } from '../../components/gallery/GridTheme';
 import { Lightbox } from '../../components/gallery/Lightbox';
 
@@ -58,6 +59,34 @@ export default function PublicGalleryPage() {
       loadGalleryItems();
     }
   }, [hasAccess, token]);
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    if (token) {
+      const stored = localStorage.getItem(`gallery-favorites-${token}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setFavorites(new Set(parsed));
+          console.log('✅ Loaded favorites from localStorage:', parsed.length);
+        } catch (e) {
+          console.error('Failed to parse stored favorites');
+        }
+      }
+    }
+  }, [token]);
+
+  // Save favorites to localStorage whenever they change
+  useEffect(() => {
+    if (token) {
+      if (favorites.size > 0) {
+        localStorage.setItem(`gallery-favorites-${token}`, JSON.stringify(Array.from(favorites)));
+        console.log('💾 Saved favorites to localStorage:', favorites.size);
+      } else {
+        localStorage.removeItem(`gallery-favorites-${token}`);
+      }
+    }
+  }, [favorites, token]);
 
   const loadGalleryMeta = async () => {
     if (!token) return;
@@ -131,15 +160,13 @@ export default function PublicGalleryPage() {
 
       const data = await response.json();
       
-     // Transform API response to match our format
+      // Transform API response to match our format
       const assets = data.data.map((asset: any) => {
         // Extract category and storedName from filepath
         // filepath format: "uploads\\EDIT\\filename.jpg"
         const pathParts = asset.filepath.split('\\');
         const category = pathParts[1]; // EDIT, RAW, VIDEO
         const storedName = pathParts[2]; // actual filename
-        
-        console.log('Extracted:', { category, storedName, fullPath: `http://localhost:3001/uploads/${category}/${storedName}` });
         
         return {
           id: asset.id,
@@ -151,7 +178,6 @@ export default function PublicGalleryPage() {
       });
 
       setGalleryItems(assets);
-      console.log('📸 Set gallery items:', assets);
       console.log(`✅ Loaded ${assets.length} gallery items`);
     } catch (err) {
       console.error('❌ Failed to load gallery items:', err);
@@ -234,6 +260,55 @@ export default function PublicGalleryPage() {
       }
       return newFavorites;
     });
+  };
+
+  const handleDownloadSelected = async () => {
+    if (favorites.size === 0) return;
+
+    console.log('📥 Creating ZIP with', favorites.size, 'selected photos');
+
+    try {
+      // Get selected assets
+      const selectedAssets = galleryItems.filter(item => favorites.has(item.id));
+
+      // Create ZIP file
+      const zip = new JSZip();
+
+      // Add each photo to ZIP
+      for (const asset of selectedAssets) {
+        try {
+          const response = await fetch(asset.path);
+          const blob = await response.blob();
+          zip.file(asset.filename, blob);
+          console.log('✅ Added to ZIP:', asset.filename);
+        } catch (error) {
+          console.error('Failed to add to ZIP:', asset.filename, error);
+        }
+      }
+
+      // Generate ZIP file
+      console.log('📦 Generating ZIP file...');
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // Create download link
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Clean gallery name for filename (remove special chars)
+      const cleanName = galleryMeta?.name.replace(/[^a-z0-9]/gi, '-') || 'gallery';
+      link.download = `Selected-${cleanName}.zip`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      console.log('✅ ZIP download complete');
+    } catch (error) {
+      console.error('❌ Failed to create ZIP:', error);
+      alert('Failed to create ZIP file. Please try again.');
+    }
   };
 
   const currentIndex = selectedAsset ? galleryItems.findIndex(a => a.id === selectedAsset.id) : -1;
@@ -358,9 +433,13 @@ export default function PublicGalleryPage() {
                       {favorites.size} photo{favorites.size !== 1 ? 's' : ''} selected
                     </span>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={handleDownloadSelected}
+                  >
                     <Download className="w-4 h-4 mr-2" />
-                    Download Selected
+                    Download Selected ({favorites.size})
                   </Button>
                 </CardContent>
               </Card>
@@ -381,17 +460,15 @@ export default function PublicGalleryPage() {
                 </CardContent>
               </Card>
             ) : (
-              <>
-                {console.log('🎨 Rendering GridTheme with:', galleryItems)}
-                <GridTheme
-                  galleryId={token || ''}
-                  assets={galleryItems}
-                  settings={{
-                    aspectRatio: 'square',
-                    showGutters: true,
-                    showCaptions: 'hover',
-                    showFavorites: true,
-                  }}
+              <GridTheme
+                galleryId={token || ''}
+                assets={galleryItems}
+                settings={{
+                  aspectRatio: 'square',
+                  showGutters: true,
+                  showCaptions: 'hover',
+                  showFavorites: true,
+                }}
                 favorites={favorites}
                 onAssetClick={handleAssetClick}
                 onFavoriteToggle={handleFavoriteToggle}
@@ -399,7 +476,6 @@ export default function PublicGalleryPage() {
                 hasMore={false}
                 loadingMore={false}
               />
-              </>
             )}
           </div>
         </div>
