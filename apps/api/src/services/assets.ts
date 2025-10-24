@@ -135,8 +135,11 @@ export class AssetService {
     });
 
     if (existing) {
-      throw new Error('Asset with this checksum already exists (duplicate file)');
-    }
+        console.log('ℹ️  Asset already exists, returning existing asset:', existing.id);
+        // Return the existing asset instead of throwing an error
+        // This allows the same photo to be added to multiple galleries
+        return existing;
+      }
 
     const category = this.categorizeAsset(file.mimetype);
     const ext = path.extname(file.filename);

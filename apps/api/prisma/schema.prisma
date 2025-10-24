@@ -187,6 +187,7 @@ model Asset {
   uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
 
   galleries GalleryAsset[]
+  galleryCover Gallery[] @relation("GalleryCoverPhoto")
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -291,6 +292,10 @@ model Gallery {
   // Assets in this gallery (many-to-many)
   assets GalleryAsset[]
 
+  // Cover photo
+  coverPhotoId String?
+  coverPhoto   Asset?  @relation("GalleryCoverPhoto", fields: [coverPhotoId], references: [id], onDelete: SetNull)
+
   // Proofing sessions
   proofSets ProofSet[]
 
@@ -312,6 +317,7 @@ model GalleryAsset {
   galleryId String
   assetId   String
   position  Int    @default(0) // Order in gallery
+  isFavorite Boolean @default(false) // Favorite in this gallery
 
   gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
   asset   Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)

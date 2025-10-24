@@ -99,3 +99,63 @@ export async function getGallery(galleryId: string): Promise<GalleryResponse> {
 
   return response.json();
 }
+
+export async function createGallery(data: {
+  name: string;
+  description?: string;
+  clientId?: string;
+}): Promise<{ success: boolean; data: any }> {
+  const response = await fetch(`${API_BASE_URL}/admin/galleries`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create gallery');
+  }
+
+  return response.json();
+}
+
+export async function getAllGalleries(): Promise<{ success: boolean; data: any[] }> {
+  const response = await fetch(`${API_BASE_URL}/admin/galleries`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch galleries');
+  }
+
+  return response.json();
+}
+export async function toggleGalleryAssetFavorite(
+  galleryId: string,
+  assetId: string,
+  isFavorite: boolean
+): Promise<{ success: boolean; data: any }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}/assets/${assetId}/favorite`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ isFavorite }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to toggle favorite');
+  }
+
+  return response.json();
+}

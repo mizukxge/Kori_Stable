@@ -5,6 +5,7 @@ import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
 import { Label } from '../../../components/ui/Label';
+import { createGallery, getAllGalleries } from '../../../lib/api';
 
 // Mock gallery data - will be replaced with API call later
 const INITIAL_GALLERIES = [
@@ -115,14 +116,39 @@ export default function GalleriesIndex() {
 
   // Simulate loading galleries
   useEffect(() => {
-    console.log('📦 Loading galleries...');
-    setTimeout(() => {
+    loadGalleries();
+  }, []);
+
+  const loadGalleries = async () => {
+    console.log('📦 Loading galleries from API...');
+    setIsLoading(true);
+    
+    try {
+      const response = await getAllGalleries();
+      const galleriesData = response.data.map((g: any) => ({
+        id: g.id,
+        name: g.name,
+        description: g.description || '',
+        clientName: g.client?.name || '',
+        coverPhoto: g.coverPhotoUrl || `https://picsum.photos/seed/${g.id}/600/400`,
+        photoCount: g._count?.assets || 0,
+        favoriteCount: g.favoriteCount || 0,
+        createdAt: g.createdAt,
+        updatedAt: g.updatedAt,
+      }));
+      
+      setGalleries(galleriesData);
+      setFilteredGalleries(galleriesData);
+      console.log('✅ Loaded', galleriesData.length, 'galleries from API');
+    } catch (error) {
+      console.error('❌ Failed to load galleries:', error);
+      // Fallback to mock data if API fails
       setGalleries(INITIAL_GALLERIES);
       setFilteredGalleries(INITIAL_GALLERIES);
+    } finally {
       setIsLoading(false);
-      console.log('✅ Loaded', INITIAL_GALLERIES.length, 'galleries');
-    }, 500);
-  }, []);
+    }
+  };
 
   // Filter galleries based on search
   useEffect(() => {
@@ -229,7 +255,7 @@ export default function GalleriesIndex() {
     setIsCreateModalOpen(true);
   };
 
-  const handleSubmitCreate = (e: React.FormEvent) => {
+  const handleSubmitCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -237,21 +263,27 @@ export default function GalleriesIndex() {
       return;
     }
 
-    const newGallery: Gallery = {
-      id: `gallery-${Date.now()}`,
-      name: formData.name,
-      description: formData.description,
-      clientName: formData.clientName,
-      coverPhoto: `https://picsum.photos/seed/gallery${Date.now()}/600/400`,
-      photoCount: 0,
-      favoriteCount: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    try {
+      console.log('📤 Creating gallery:', formData.name);
+      
+      const response = await createGallery({
+        name: formData.name,
+        description: formData.description,
+        // Don't send clientId for now - backend expects UUID, not name
+        // clientId: formData.clientName,
+      });
 
-    setGalleries([newGallery, ...galleries]);
-    setIsCreateModalOpen(false);
-    console.log('✅ Created gallery:', newGallery.name);
+      console.log('✅ Gallery created:', response.data);
+      
+      setIsCreateModalOpen(false);
+      
+      // Redirect to the new gallery page
+      window.location.href = `/admin/galleries/${response.data.id}`;
+      
+    } catch (error) {
+      console.error('❌ Failed to create gallery:', error);
+      setFormErrors({ name: 'Failed to create gallery. Please try again.' });
+    }
   };
 
   // Edit Gallery

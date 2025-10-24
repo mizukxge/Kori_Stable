@@ -111,13 +111,44 @@ export class GalleryService {
         client: {
           select: { name: true, email: true },
         },
+        coverPhoto: {
+          select: {
+            id: true,
+            storedName: true,
+            category: true,
+          },
+        },
+        assets: {
+          include: {
+            asset: {
+              select: {
+                id: true,
+                storedName: true,
+                category: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
         _count: {
-          select: { assets: true },
+          select: { 
+            assets: true,
+          },
         },
       },
     });
 
-    return galleries;
+    // Map galleries to include cover photo URL
+    // Map galleries to include cover photo URL and favorite count
+    return galleries.map(gallery => ({
+      ...gallery,
+      coverPhotoUrl: gallery.coverPhoto
+        ? `http://localhost:3001/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
+        : gallery.assets[0]?.asset
+        ? `http://localhost:3001/uploads/${gallery.assets[0].asset.category}/${gallery.assets[0].asset.storedName}`
+        : null,
+      favoriteCount: gallery.assets.filter(ga => ga.isFavorite).length,
+    }));
   }
 
   /**
@@ -131,6 +162,13 @@ export class GalleryService {
           select: { name: true, email: true },
         },
         client: true,
+        coverPhoto: {
+          select: {
+            id: true,
+            storedName: true,
+            category: true,
+          },
+        },
         assets: {
           include: {
             asset: true,
@@ -166,7 +204,6 @@ export class GalleryService {
 
     return gallery;
   }
-
   /**
    * Validate gallery access
    */
@@ -422,5 +459,23 @@ export class GalleryService {
       passwordProtected,
       totalViews: totalViews._sum.viewCount || 0,
     };
+  }
+  /**
+   * Toggle favorite status for an asset in a gallery
+   */
+  static async toggleFavorite(galleryId: string, assetId: string, isFavorite: boolean) {
+    const galleryAsset = await prisma.galleryAsset.update({
+      where: {
+        galleryId_assetId: {
+          galleryId,
+          assetId,
+        },
+      },
+      data: {
+        isFavorite,
+      },
+    });
+
+    return galleryAsset;
   }
 }

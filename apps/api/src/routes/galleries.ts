@@ -306,4 +306,34 @@ export async function galleriesRoutes(fastify: FastifyInstance) {
       throw error;
     }
   });
+  /**
+   * PATCH /admin/galleries/:galleryId/assets/:assetId/favorite
+   * Toggle favorite status for an asset in a gallery
+   */
+  fastify.patch('/admin/galleries/:galleryId/assets/:assetId/favorite', async (request, reply) => {
+    try {
+      const { galleryId, assetId } = request.params as { galleryId: string; assetId: string };
+      const { isFavorite } = request.body as { isFavorite: boolean };
+
+      const galleryAsset = await GalleryService.toggleFavorite(galleryId, assetId, isFavorite);
+
+      request.log.info(
+        {
+          galleryId,
+          assetId,
+          isFavorite,
+          userId: request.user!.userId,
+        },
+        'Gallery asset favorite toggled'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        data: galleryAsset,
+      });
+    } catch (error) {
+      request.log.error(error, 'Error toggling favorite');
+      throw error;
+    }
+  });
 }

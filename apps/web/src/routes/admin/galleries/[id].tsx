@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
-import { getGallery } from '../../../lib/api';
+import { getGallery, toggleGalleryAssetFavorite } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
@@ -79,6 +79,16 @@ export default function GalleryAdminPage() {
       }));
 
       setAllAssets(assets);
+      
+      // Extract favorites from gallery assets
+      const favoriteIds = new Set(
+        galleryData.assets
+          .filter((ga: any) => ga.isFavorite)
+          .map((ga: any) => ga.asset.id)
+      );
+      setFavorites(favoriteIds);
+      console.log(`💖 Loaded ${favoriteIds.size} favorites`);
+      
       setDisplayedAssets(assets.slice(0, ITEMS_PER_PAGE));
       setHasMore(assets.length > ITEMS_PER_PAGE);
       
@@ -167,18 +177,37 @@ export default function GalleryAdminPage() {
   const hasNext = currentIndex < displayedAssets.length - 1;
   const hasPrevious = currentIndex > 0;
 
-  const handleFavoriteToggle = (assetId: string) => {
+  const handleFavoriteToggle = async (assetId: string) => {
+    const isFavorited = favorites.has(assetId);
+    const newIsFavorite = !isFavorited;
+
+    // Optimistic update
     setFavorites(prev => {
       const newFavorites = new Set(prev);
-      if (newFavorites.has(assetId)) {
-        newFavorites.delete(assetId);
-        console.log('❌ Removed from favorites:', assetId);
-      } else {
+      if (newIsFavorite) {
         newFavorites.add(assetId);
-        console.log('✅ Added to favorites:', assetId);
+      } else {
+        newFavorites.delete(assetId);
       }
       return newFavorites;
     });
+
+    try {
+      await toggleGalleryAssetFavorite(id!, assetId, newIsFavorite);
+      console.log(newIsFavorite ? '✅ Added to favorites' : '❌ Removed from favorites', assetId);
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+      // Revert on error
+      setFavorites(prev => {
+        const revert = new Set(prev);
+        if (isFavorited) {
+          revert.add(assetId);
+        } else {
+          revert.delete(assetId);
+        }
+        return revert;
+      });
+    }
   };
 
   const handleSettingChange = (key: keyof GallerySettings, value: any) => {
