@@ -3,11 +3,11 @@ import { useParams } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
-import { getGallery, toggleGalleryAssetFavorite } from '../../../lib/api';
+import { getGallery, toggleGalleryAssetFavorite, updateGalleryPassword } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
-import { Settings, Grid3x3, Image as ImageIcon,  Share2, Copy, Mail, QrCode as QRCodeIcon  } from 'lucide-react';
+import { Settings, Grid3x3, Image as ImageIcon, Share2, Copy, Mail, QrCode as QRCodeIcon, Eye, EyeOff, Lock } from 'lucide-react';
 import QRCode from 'react-qr-code';
 
 interface GallerySettings {
@@ -37,6 +37,12 @@ export default function GalleryAdminPage() {
   const [page, setPage] = useState(1);
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [isPasswordProtected, setIsPasswordProtected] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   const ITEMS_PER_PAGE = 12;
   const handleCopyShareLink = () => {
@@ -67,6 +73,7 @@ export default function GalleryAdminPage() {
       const galleryData = response.data;
 
       setGallery(galleryData);
+      setIsPasswordProtected(!!(galleryData as any).password);
 
       // Transform API assets to match our format
       const assets = galleryData.assets.map((ga: any) => ({
@@ -214,6 +221,47 @@ export default function GalleryAdminPage() {
     setSettings(prev => ({ ...prev, [key]: value }));
     console.log(`⚙️ Setting changed: ${key} =`, value);
   };
+  const handlePasswordToggle = () => {
+    setPasswordModalOpen(true);
+    setPasswordError('');
+    setNewPassword('');
+    setConfirmPassword('');
+  };
+
+  const handlePasswordSubmit = async () => {
+    setPasswordError('');
+
+    // Validation
+    if (isPasswordProtected) {
+      if (!newPassword) {
+        setPasswordError('Password is required');
+        return;
+      }
+      if (newPassword.length < 6) {
+        setPasswordError('Password must be at least 6 characters');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setPasswordError('Passwords do not match');
+        return;
+      }
+    }
+
+    try {
+      const password = isPasswordProtected ? newPassword : null;
+      await updateGalleryPassword(id!, password);
+      
+      console.log(isPasswordProtected ? '🔒 Password set' : '🔓 Password removed');
+      setPasswordModalOpen(false);
+      
+      // Update gallery state
+      setGallery(prev => prev ? { ...prev, password: isPasswordProtected ? 'set' : null } : null);
+      
+    } catch (error) {
+      console.error('Failed to update password:', error);
+      setPasswordError('Failed to update password. Please try again.');
+    }
+  };
 
   if (loading) {
     return (
@@ -240,13 +288,22 @@ export default function GalleryAdminPage() {
             <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
             <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShareModalOpen(true)}
-          >
-            <Share2 className="w-4 h-4 mr-2" />
-            Share Gallery
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={handlePasswordToggle}
+            >
+              <Lock className="w-4 h-4 mr-2" />
+              {isPasswordProtected ? 'Password Set' : 'Set Password'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShareModalOpen(true)}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share Gallery
+            </Button>
+          </div>
         </div>
 
         {/* Gallery Stats */}
@@ -438,6 +495,121 @@ export default function GalleryAdminPage() {
           }
         }}
       />
+      {/* Password Settings Modal */}
+      {passwordModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4"
+          onClick={() => setPasswordModalOpen(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    <span>Password Protection</span>
+                  </div>
+                  <button
+                    onClick={() => setPasswordModalOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Toggle Password Protection */}
+                <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                  <div>
+                    <p className="font-medium">Password Protected</p>
+                    <p className="text-sm text-muted-foreground">
+                      Require password to view gallery
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsPasswordProtected(!isPasswordProtected)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      isPasswordProtected ? 'bg-primary' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isPasswordProtected ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Password Fields (shown when enabled) */}
+                {isPasswordProtected && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <input
+                          id="newPassword"
+                          type={showPassword ? 'text' : 'password'}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          className="w-full px-3 py-2 pr-10 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                          placeholder="Enter password (min 6 characters)"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="w-4 h-4" />
+                          ) : (
+                            <Eye className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm Password</Label>
+                      <input
+                        id="confirmPassword"
+                        type={showPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full px-3 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                        placeholder="Confirm password"
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* Error Message */}
+                {passwordError && (
+                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <p className="text-sm text-destructive">{passwordError}</p>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setPasswordModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={handlePasswordSubmit}
+                  >
+                    {isPasswordProtected ? 'Set Password' : 'Remove Password'}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
       {/* Share Modal */}
       {shareModalOpen && (
         <div 

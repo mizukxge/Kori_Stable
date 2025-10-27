@@ -336,4 +336,37 @@ export async function galleriesRoutes(fastify: FastifyInstance) {
       throw error;
     }
   });
+  /**
+   * PATCH /admin/galleries/:id/password
+   * Set or update gallery password
+   */
+  fastify.patch('/admin/galleries/:id/password', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { password } = request.body as { password: string | null };
+
+      const gallery = await GalleryService.updatePassword(id, password);
+
+      request.log.info(
+        {
+          galleryId: id,
+          hasPassword: !!password,
+          userId: request.user!.userId,
+        },
+        password ? 'Gallery password set' : 'Gallery password removed'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: password ? 'Password set successfully' : 'Password removed successfully',
+        data: {
+          id: gallery.id,
+          hasPassword: !!gallery.password,
+        },
+      });
+    } catch (error) {
+      request.log.error(error, 'Error updating gallery password');
+      throw error;
+    }
+  });
 }

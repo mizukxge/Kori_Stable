@@ -159,3 +159,26 @@ export async function toggleGalleryAssetFavorite(
 
   return response.json();
 }
+export async function updateGalleryPassword(
+  galleryId: string,
+  password: string | null
+): Promise<{ success: boolean; message: string; data: any }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}/password`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ password }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update password');
+  }
+
+  return response.json();
+}

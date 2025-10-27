@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import argon2 from 'argon2';
 
+
 const prisma = new PrismaClient();
 
 export interface CreateGalleryData {
@@ -84,6 +85,21 @@ export class GalleryService {
     return gallery;
   }
 
+  /**
+   * Update gallery password
+   */
+  static async updatePassword(galleryId: string, password: string | null) {
+    const hashedPassword = password ? await argon2.hash(password) : null;
+
+    const gallery = await prisma.gallery.update({
+      where: { id: galleryId },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return gallery;
+  }
   /**
    * List galleries (admin)
    */
