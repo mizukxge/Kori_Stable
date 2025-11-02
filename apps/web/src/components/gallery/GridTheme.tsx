@@ -13,8 +13,11 @@ interface GridThemeProps {
     showFavorites?: boolean;
   };
   favorites?: Set<string>;
+  currentCoverPhotoId?: string | null;
   onAssetClick?: (assetId: string) => void;
   onFavoriteToggle?: (assetId: string) => void;
+  onSetCover?: (assetId: string) => void;
+  onDelete?: (assetId: string) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
@@ -26,8 +29,11 @@ export const GridTheme: React.FC<GridThemeProps> = ({
   assets,
   settings = {},
   favorites = new Set(),
+  currentCoverPhotoId,
   onAssetClick,
   onFavoriteToggle,
+  onSetCover,
+  onDelete,
   onLoadMore,
   hasMore = false,
   loadingMore = false,
@@ -162,23 +168,26 @@ export const GridTheme: React.FC<GridThemeProps> = ({
         aria-label="Gallery photos"
       >
         {assets.map((asset, index) => (
-          <Tile
-            key={asset.id}
-            asset={asset}
-            aspectRatio={aspectRatio}
-            showCaption={showCaptions}
-            showFavorite={showFavorites}
-            isFavorite={favorites.has(asset.id)}
-            onClick={() => {
-              setFocusedIndex(index);
-              onAssetClick?.(asset.id);
-            }}
-            onFavoriteToggle={() => onFavoriteToggle?.(asset.id)}
-            animationDelay={index * 30}
-            isFocused={focusedIndex === index}
-            index={index}
-          />
-        ))}
+            <Tile
+              key={asset.id}
+              asset={asset}
+              aspectRatio={aspectRatio}
+              showCaption={showCaptions}
+              showFavorite={showFavorites}
+              isFavorite={favorites.has(asset.id)}
+              isCover={currentCoverPhotoId === asset.id}
+              onClick={() => {
+                setFocusedIndex(index);
+                onAssetClick?.(asset.id);
+              }}
+              onFavoriteToggle={() => onFavoriteToggle?.(asset.id)}
+              onSetCover={onSetCover ? () => onSetCover(asset.id) : undefined}
+              onDelete={onDelete ? () => onDelete(asset.id) : undefined}
+              animationDelay={index * 30}
+              isFocused={focusedIndex === index}
+              index={index}
+            />
+          ))}
       </div>
 
       {/* ✅ AG1 STEP 3: LOADING MORE INDICATOR */}

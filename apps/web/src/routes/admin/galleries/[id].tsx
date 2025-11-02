@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
-import { getGallery, toggleGalleryAssetFavorite, updateGalleryPassword } from '../../../lib/api';
+import { getGallery, toggleGalleryAssetFavorite, updateGalleryPassword, setGalleryCoverPhoto, removeAssetFromGallery } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
-import { Settings, Grid3x3, Image as ImageIcon, Share2, Copy, Mail, QrCode as QRCodeIcon, Eye, EyeOff, Lock } from 'lucide-react';
+import { Settings, Grid3x3, Image as ImageIcon, Share2, Copy, Mail, QrCode as QRCodeIcon, Eye, EyeOff, Lock, Trash2, Pencil } from 'lucide-react';
+import { updateGallery } from '../../../lib/api';
+import { deleteGallery } from '../../../lib/api';
 import QRCode from 'react-qr-code';
+import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
+
+
 
 interface GallerySettings {
   aspectRatio: 'square' | 'portrait' | 'landscape' | 'original';
@@ -17,8 +22,11 @@ interface GallerySettings {
   showFavorites: boolean;
 }
 
+const ITEMS_PER_PAGE = 12;
+
 export default function GalleryAdminPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();  
   const [gallery, setGallery] = useState<any>(null);
   const [allAssets, setAllAssets] = useState<any[]>([]);
   const [displayedAssets, setDisplayedAssets] = useState<any[]>([]);
@@ -33,8 +41,7 @@ export default function GalleryAdminPage() {
   const [shareLinkCopied, setShareLinkCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<any>(null);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -43,7 +50,12 @@ export default function GalleryAdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-
+  const [deleteGalleryModalOpen, setDeleteGalleryModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
   const ITEMS_PER_PAGE = 12;
   const handleCopyShareLink = () => {
     const shareUrl = `${window.location.origin}/gallery/${gallery.token}`;
@@ -87,7 +99,7 @@ export default function GalleryAdminPage() {
 
       setAllAssets(assets);
       
-      // Extract favorites from gallery assets
+      // Extract favorites
       const favoriteIds = new Set(
         galleryData.assets
           .filter((ga: any) => ga.isFavorite)
@@ -96,6 +108,7 @@ export default function GalleryAdminPage() {
       setFavorites(favoriteIds);
       console.log(`💖 Loaded ${favoriteIds.size} favorites`);
       
+      // Update displayed assets (show first page)
       setDisplayedAssets(assets.slice(0, ITEMS_PER_PAGE));
       setHasMore(assets.length > ITEMS_PER_PAGE);
       
@@ -132,24 +145,6 @@ export default function GalleryAdminPage() {
   useEffect(() => {
     loadGallery();
   }, [id]);
-
-  const loadMore = () => {
-    if (loadingMore || !hasMore) return;
-
-    setLoadingMore(true);
-    setTimeout(() => {
-      const nextPage = page + 1;
-      const startIndex = page * ITEMS_PER_PAGE;
-      const endIndex = startIndex + ITEMS_PER_PAGE;
-      const newAssets = allAssets.slice(startIndex, endIndex);
-      
-      setDisplayedAssets(prev => [...prev, ...newAssets]);
-      setPage(nextPage);
-      setHasMore(endIndex < allAssets.length);
-      setLoadingMore(false);
-      console.log(`📄 Loaded page ${nextPage}: ${newAssets.length} more photos`);
-    }, 500);
-  };
 
   const handleAssetClick = (assetId: string) => {
     const asset = displayedAssets.find(a => a.id === assetId);
@@ -263,6 +258,101 @@ export default function GalleryAdminPage() {
     }
   };
 
+  const handleSetCoverPhoto = async (assetId: string) => {
+    try {
+      await setGalleryCoverPhoto(id!, assetId);
+      
+      // Update gallery state with new cover
+      setGallery(prev => prev ? { ...prev, coverPhotoId: assetId } : null);
+      
+      console.log('✅ Cover photo set:', assetId);
+    } catch (error) {
+      console.error('Failed to set cover photo:', error);
+    }
+  };
+const handleDeleteAsset = async (assetId: string) => {
+    setAssetToDelete(assetId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!assetToDelete) return;
+
+    try {
+      await removeAssetFromGallery(id!, assetToDelete);
+      
+      setAllAssets(prev => prev.filter(a => a.id !== assetToDelete));
+      setDisplayedAssets(prev => prev.filter(a => a.id !== assetToDelete));
+      setFavorites(prev => {
+        const newFavorites = new Set(prev);
+        newFavorites.delete(assetToDelete);
+        return newFavorites;
+      });
+      
+      console.log('✅ Photo deleted:', assetToDelete);
+    } catch (error) {
+      console.error('Failed to delete photo:', error);
+      alert('Failed to delete photo. Please try again.');
+    } finally {
+      setAssetToDelete(null);
+    }
+  };
+
+  const handleDeleteGallery = async () => {
+    try {
+      await deleteGallery(id!);
+      console.log('✅ Gallery deleted');
+      navigate('/admin/galleries');
+    } catch (error) {
+      console.error('Failed to delete gallery:', error);
+      alert('Failed to delete gallery. Please try again.');
+    }
+  };
+const handleEditGallery = () => {
+    setEditName(gallery?.name || '');
+    setEditDescription(gallery?.description || '');
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      await updateGallery(id!, {
+        name: editName,
+        description: editDescription,
+      });
+
+      // Update local state
+      setGallery(prev => prev ? {
+        ...prev,
+        name: editName,
+        description: editDescription,
+      } : null);
+
+      console.log('✅ Gallery updated');
+      setEditModalOpen(false);
+    } catch (error) {
+      console.error('Failed to update gallery:', error);
+      alert('Failed to update gallery. Please try again.');
+    }
+  };
+  const handleLoadMore = () => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    
+    setTimeout(() => {
+      const currentLength = displayedAssets.length;
+      const nextAssets = allAssets.slice(currentLength, currentLength + ITEMS_PER_PAGE);
+      
+      setDisplayedAssets(prev => [...prev, ...nextAssets]);
+      setHasMore(currentLength + nextAssets.length < allAssets.length);
+      setLoadingMore(false);
+      
+      console.log(`📦 Loaded ${nextAssets.length} more assets`);
+    }, 500);
+  };
+
+
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -281,30 +371,47 @@ export default function GalleryAdminPage() {
 
   return (
     <>
-      <div className="space-y-8">
-        {/* Page Header */}
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
-            <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
+     <div className="space-y-8">
+          {/* Page Header */}
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleEditGallery}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handlePasswordToggle}
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                {gallery?.password ? 'Change Password' : 'Set Password'}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShareModalOpen(true)}
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share
+              </Button>
+              <Button
+                variant="outline"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={() => setDeleteGalleryModalOpen(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Gallery
+              </Button>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handlePasswordToggle}
-            >
-              <Lock className="w-4 h-4 mr-2" />
-              {isPasswordProtected ? 'Password Set' : 'Set Password'}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShareModalOpen(true)}
-            >
-              <Share2 className="w-4 h-4 mr-2" />
-              Share Gallery
-            </Button>
-          </div>
-        </div>
 
         {/* Gallery Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -464,16 +571,19 @@ export default function GalleryAdminPage() {
           </CardHeader>
           <CardContent>
             <GridTheme
-              galleryId={id!}
-              assets={displayedAssets}
-              settings={settings}
-              favorites={favorites}
-              onAssetClick={handleAssetClick}
-              onFavoriteToggle={handleFavoriteToggle}
-              onLoadMore={loadMore}
-              hasMore={hasMore}
-              loadingMore={loadingMore}
-            />
+                galleryId={id || ''}
+                assets={displayedAssets}
+                settings={settings}
+                favorites={favorites}
+                currentCoverPhotoId={gallery?.coverPhotoId}
+                onAssetClick={handleAssetClick}
+                onFavoriteToggle={handleFavoriteToggle}
+                onSetCover={handleSetCoverPhoto}
+                onDelete={handleDeleteAsset}
+                onLoadMore={handleLoadMore}
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+              />
           </CardContent>
         </Card>
       </div>
@@ -719,6 +829,100 @@ export default function GalleryAdminPage() {
                       </span>
                     </div>
                   )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+      {/* Delete Photo Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmOpen}
+        title="Delete Photo?"
+        message="Are you sure you want to remove this photo from the gallery? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setDeleteConfirmOpen(false);
+          setAssetToDelete(null);
+        }}
+      />
+
+      {/* Delete Gallery Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteGalleryModalOpen}
+        title="Delete Gallery?"
+        message={`Are you sure you want to delete "${gallery?.name}"? This will permanently remove the gallery and all ${displayedAssets.length} photos. This action cannot be undone.`}
+        confirmText="Delete Gallery"
+        cancelText="Cancel"
+        variant="danger"
+        onConfirm={handleDeleteGallery}
+        onCancel={() => setDeleteGalleryModalOpen(false)}
+      />
+
+      {/* Edit Gallery Modal */}
+      {editModalOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[9999] p-4"
+          onClick={() => setEditModalOpen(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()}>
+            <Card className="w-full max-w-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Pencil className="w-5 h-5" />
+                    <span>Edit Gallery</span>
+                  </div>
+                  <button
+                    onClick={() => setEditModalOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editName">Gallery Name</Label>
+                  <input
+                    id="editName"
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="w-full px-3 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+                    placeholder="Enter gallery name"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="editDescription">Description</Label>
+                  <textarea
+                    id="editDescription"
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-input bg-background rounded-lg focus:outline-none focus:ring-2 focus:ring-ring min-h-[100px]"
+                    placeholder="Enter gallery description"
+                  />
+                </div>
+
+                <div className="flex gap-2 pt-4">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setEditModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    onClick={handleSaveEdit}
+                    disabled={!editName.trim()}
+                  >
+                    Save Changes
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -17,6 +17,7 @@ import { AdminDocuments } from './pages/admin/Documents';
 import { AdminSettings } from './pages/admin/Settings';
 import GalleriesIndex from './routes/admin/galleries/index';
 import GalleryAdminPage from './routes/admin/galleries/[id]';
+import AdminLogin from './routes/admin/login';
 
 function App() {
   return (
@@ -29,6 +30,10 @@ function App() {
             element={<PublicGalleryPage />}
           />
 
+          {/* Admin Login - No layout */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          
           {/* Admin Routes */}
           <Route
             path="/"

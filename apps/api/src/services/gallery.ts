@@ -35,7 +35,48 @@ export class GalleryService {
   static generateToken(): string {
     return randomBytes(16).toString('hex');
   }
+  /**
+   * Remove asset from gallery
+   */
+  static async removeAssetFromGallery(galleryId: string, assetId: string) {
+    await prisma.galleryAsset.delete({
+      where: {
+        galleryId_assetId: {
+          galleryId,
+          assetId,
+        },
+      },
+    });
 
+    return { success: true };
+  }
+/**
+   * Set cover photo for gallery
+   */
+  static async setCoverPhoto(galleryId: string, assetId: string | null) {
+    const gallery = await prisma.gallery.update({
+      where: { id: galleryId },
+      data: {
+        coverPhotoId: assetId,
+      },
+      include: {
+        coverPhoto: {
+          select: {
+            id: true,
+            storedName: true,
+            category: true,
+          },
+        },
+      },
+    });
+
+    return {
+      ...gallery,
+      coverPhotoUrl: gallery.coverPhoto
+        ? `http://localhost:3001/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
+        : null,
+    };
+  }
   /**
    * Create a new gallery
    */
@@ -420,17 +461,7 @@ export class GalleryService {
     return galleryAssets;
   }
 
-  /**
-   * Remove asset from gallery
-   */
-  static async removeAssetFromGallery(galleryId: string, assetId: string) {
-    await prisma.galleryAsset.deleteMany({
-      where: {
-        galleryId,
-        assetId,
-      },
-    });
-  }
+  
 
   /**
    * Reorder assets in gallery

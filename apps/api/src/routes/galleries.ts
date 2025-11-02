@@ -336,6 +336,7 @@ export async function galleriesRoutes(fastify: FastifyInstance) {
       throw error;
     }
   });
+  
   /**
    * PATCH /admin/galleries/:id/password
    * Set or update gallery password
@@ -366,6 +367,92 @@ export async function galleriesRoutes(fastify: FastifyInstance) {
       });
     } catch (error) {
       request.log.error(error, 'Error updating gallery password');
+      throw error;
+    }
+  });
+  /**
+   * PATCH /admin/galleries/:id
+   * Update gallery details
+   */
+  fastify.patch('/admin/galleries/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as {
+        name?: string;
+        description?: string;
+        password?: string;
+        expiresAt?: string;
+        isActive?: boolean;
+      };
+
+      // Convert expiresAt string to Date if provided
+      const updateData = {
+        name: body.name,
+        description: body.description,
+        password: body.password,
+        expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
+        isActive: body.isActive,
+      };
+
+      const gallery = await GalleryService.updateGallery(
+        id,
+        updateData,
+        request.user!.userId
+      );
+
+      request.log.info(
+        {
+          galleryId: id,
+          userId: request.user!.userId,
+        },
+        'Gallery updated'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Gallery updated successfully',
+        data: gallery,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error updating gallery');
+      throw error;
+    }
+  });
+  /**
+   * PATCH /admin/galleries/:id/cover
+   * Set cover photo for gallery
+   */
+  fastify.patch('/admin/galleries/:id/cover', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const { assetId } = request.body as { assetId: string | null };
+
+      const gallery = await GalleryService.setCoverPhoto(id, assetId);
+
+      request.log.info(
+        {
+          galleryId: id,
+          assetId,
+          userId: request.user!.userId,
+        },
+        assetId ? 'Gallery cover photo set' : 'Gallery cover photo removed'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Cover photo updated successfully',
+        data: gallery,
+      });
+    } catch (error) {
+      request.log.error(error, 'Error setting cover photo');
       throw error;
     }
   });

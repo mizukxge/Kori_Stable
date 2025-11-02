@@ -38,6 +38,29 @@ export interface Gallery {
     };
   }>;
 }
+export async function setGalleryCoverPhoto(
+  galleryId: string,
+  assetId: string | null
+): Promise<{ success: boolean; message: string; data: any }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}/cover`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ assetId }),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to set cover photo');
+  }
+
+  return response.json();
+}
 
 export interface GalleryResponse {
   success: boolean;
@@ -60,6 +83,25 @@ export async function uploadAsset(file: File, clientId?: string): Promise<Upload
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Upload failed');
+  }
+
+  return response.json();
+}
+export async function removeAssetFromGallery(
+  galleryId: string,
+  assetId: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}/assets/${assetId}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to remove photo');
   }
 
   return response.json();
@@ -178,6 +220,47 @@ export async function updateGalleryPassword(
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.message || 'Failed to update password');
+  }
+
+  return response.json();
+}
+export async function deleteGallery(
+  galleryId: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}`,
+    {
+      method: 'DELETE',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete gallery');
+  }
+
+  return response.json();
+}
+export async function updateGallery(
+  galleryId: string,
+  data: { name?: string; description?: string }
+): Promise<{ success: boolean; message: string; data: any }> {
+  const response = await fetch(
+    `${API_BASE_URL}/admin/galleries/${galleryId}`,
+    {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update gallery');
   }
 
   return response.json();

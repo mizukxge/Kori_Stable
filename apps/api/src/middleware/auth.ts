@@ -19,11 +19,12 @@ export async function requireAuth(
   const sessionToken = request.cookies.sessionToken;
 
   if (!sessionToken) {
-    return reply.status(401).send({
+    reply.status(401).send({
       statusCode: 401,
       error: 'Unauthorized',
       message: 'Authentication required',
     });
+    throw new Error('Unauthorized'); // Throw to stop execution
   }
 
   // Validate session
@@ -32,12 +33,12 @@ export async function requireAuth(
   if (!user) {
     // Clear invalid cookie
     reply.clearCookie('sessionToken');
-    
-    return reply.status(401).send({
+    reply.status(401).send({
       statusCode: 401,
       error: 'Unauthorized',
       message: 'Invalid or expired session',
     });
+    throw new Error('Unauthorized'); // Throw to stop execution
   }
 
   // Attach user to request
@@ -52,40 +53,19 @@ export function requireRole(...allowedRoles: string[]) {
     // First check authentication
     await requireAuth(request, reply);
 
-    // Check role
+    // Check role (only executes if requireAuth didn't throw)
     if (!request.user || !allowedRoles.includes(request.user.role)) {
-      return reply.status(403).send({
+      reply.status(403).send({
         statusCode: 403,
         error: 'Forbidden',
         message: 'Insufficient permissions',
       });
+      throw new Error('Forbidden'); // Throw to stop execution
     }
   };
 }
-
 /**
- * Middleware to require admin role (ADMIN or SUPER_ADMIN)
+ * Middleware to require admin role
+ * Convenience wrapper for requireRole
  */
-export const requireAdmin = requireRole('ADMIN', 'SUPER_ADMIN');
-
-/**
- * Middleware to require super admin role
- */
-export const requireSuperAdmin = requireRole('SUPER_ADMIN');
-
-/**
- * Optional auth middleware - attaches user if session exists, but doesn't require it
- */
-export async function optionalAuth(
-  request: FastifyRequest,
-  _reply: FastifyReply
-): Promise<void> {
-  const sessionToken = request.cookies.sessionToken;
-
-  if (sessionToken) {
-    const user = await AuthService.validateSession(sessionToken);
-    if (user) {
-      request.user = user;
-    }
-  }
-}
+export const requireAdmin = requireRole('SUPER_ADMIN', 'ADMIN');
