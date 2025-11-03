@@ -1,0 +1,43 @@
+﻿# MANUAL MIGRATION INSTRUCTIONS
+# ==============================
+
+## Step 1: Review Enhancement Files
+Review these files before proceeding:
+- apps\api\prisma\enums-enhancement.txt
+- apps\api\prisma\new-models.txt
+- apps\api\prisma\enhanced-template.txt
+- apps\api\prisma\enhanced-contract.txt
+
+## Step 2: Backup Database
+pg_dump kori_web_dev > backup_before_contracts_$(date +%Y%m%d_%H%M%S).sql
+
+## Step 3: Update schema.prisma
+Manually update apps\api\prisma\schema.prisma:
+
+1. ADD new enums from enums-enhancement.txt to ENUMS section
+2. REPLACE model ContractTemplate with content from enhanced-template.txt
+3. REPLACE model Contract with content from enhanced-contract.txt
+4. ADD new models from new-models.txt to end of file
+
+## Step 4: Run Prisma Migration
+After schema.prisma is updated:
+
+cd apps\api
+pnpm prisma migrate dev --name add_contracts_system
+
+## Step 5: If Migration Fails, Use Manual SQL
+If Prisma migration fails, run SQL files manually:
+
+psql -U postgres -d kori_web_dev < apps\api\prisma\migrations-contracts\001_add_enums.sql
+psql -U postgres -d kori_web_dev < apps\api\prisma\migrations-contracts\002_create_tables.sql
+psql -U postgres -d kori_web_dev < apps\api\prisma\migrations-contracts\003_enhance_existing_tables.sql
+
+## Step 6: Regenerate Prisma Client
+pnpm prisma generate
+
+## Step 7: Verify
+psql -U postgres -d kori_web_dev -c "\dt" # List all tables
+psql -U postgres -d kori_web_dev -c "\dT" # List all types/enums
+
+## Rollback (if needed)
+psql -U postgres -d kori_web_dev < backup_before_contracts_YYYYMMDD_HHMMSS.sql

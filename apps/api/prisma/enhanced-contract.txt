@@ -1,0 +1,89 @@
+// ========================================
+// ENHANCED CONTRACT MODEL
+// Replace existing model Contract with this
+// ========================================
+
+model Contract {
+  id             String @id @default(cuid())
+  contractNumber String @unique // e.g., CT-2025-001
+  title          String
+  
+  // Template reference
+  templateId      String
+  template        ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion Int              @default(1)
+  
+  // Document classification (NEW)
+  documentType DocumentType?
+  eventType    EventType?
+  eventDate    DateTime?
+  
+  // Generated content
+  content   String @db.Text // Final content with variables replaced
+  variables Json           // Actual variable values used (now called variableValues in some contexts)
+  
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+  
+  proposalId String?   @unique
+  proposal   Proposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  
+  // Status (ENHANCED)
+  status   ContractStatus @default(DRAFT)
+  sentAt   DateTime?
+  viewedAt DateTime?
+  signedAt DateTime?
+  
+  // E-Signing (NEW)
+  magicLinkToken     String?   @unique
+  magicLinkExpiresAt DateTime?
+  passwordHash       String?
+  passwordFailCount  Int       @default(0)
+  
+  otpCode       String?
+  otpExpiresAt  DateTime?
+  otpVerifiedAt DateTime?
+  
+  signerEmail String?
+  signerName  String?
+  signerIp    String? // Hashed IP
+  
+  countersignedBy String?
+  countersignedAt DateTime?
+  
+  // PDF & Snapshot (ENHANCED)
+  pdfPath     String?
+  pdfHash     String? // SHA-256 hash for integrity
+  snapshotJson Json?  // Complete contract state at signing (encrypted)
+  
+  // Dates (NEW)
+  effectiveDate DateTime?
+  signByDate    DateTime?
+  expiresAt     DateTime?
+  
+  // Voiding (NEW)
+  voidedAt   DateTime?
+  voidReason String?   @db.Text
+  
+  // Relations (NEW)
+  events        ContractEvent[]
+  reminderRule  ContractReminderRule?
+  invoiceQueue  InvoiceQueue?
+  
+  // Audit
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([contractNumber])
+  @@index([status])
+  @@index([clientId])
+  @@index([templateId])
+  @@index([magicLinkToken])
+  @@index([signerEmail])
+  @@index([signByDate])
+  @@map("contracts")
+}

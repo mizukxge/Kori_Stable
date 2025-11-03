@@ -1,0 +1,73 @@
+// ========================================
+// CONTRACTS SYSTEM - ENHANCED ENUMS
+// Added: 2025-11-03
+// ========================================
+
+enum ContractStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  COUNTERSIGNED
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  VOIDED
+  CANCELLED
+}
+
+enum ContractEventType {
+  CREATED
+  SENT
+  VIEWED
+  SIGNED
+  COUNTERSIGNED
+  EXPIRED
+  VOIDED
+  LINK_LOCKED
+  REMINDER_SENT
+  PDF_VIEWED
+  PASSWORD_FAILED
+  OTP_SENT
+  OTP_VERIFIED
+  SESSION_STARTED
+  SESSION_EXPIRED
+  REISSUED
+  REACTIVATED
+}
+
+enum DocumentType {
+  SERVICE_AGREEMENT
+  BOOKING_CONTRACT
+  LICENSE_AGREEMENT
+  MODEL_RELEASE_ADULT
+  NDA
+  SUBCONTRACTOR_AGREEMENT
+  PRIVACY_CONSENT
+}
+
+enum EventType {
+  WEDDING
+  BRAND_EDITORIAL
+  EVENT
+  PORTRAIT
+}
+
+enum ClauseType {
+  MANDATORY
+  OPTIONAL
+  CONDITIONAL
+}
+
+enum ReminderFrequency {
+  ONCE
+  DAILY
+  EVERY_3_DAYS
+  WEEKLY
+}
+
+enum InvoiceSchedule {
+  ON_SIGNING
+  AFTER_EVENT
+  CUSTOM_DAYS
+}

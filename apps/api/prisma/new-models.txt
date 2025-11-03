@@ -1,0 +1,158 @@
+// ========================================
+// CLAUSE LIBRARY
+// ========================================
+
+model Clause {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  title       String
+  content     String      @db.Text
+  type        ClauseType  @default(OPTIONAL)
+  tags        String[]
+  isMandatory Boolean     @default(false)
+  sortOrder   Int         @default(0)
+  
+  // Metadata
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  
+  // Relations
+  rules       ClauseRule[]
+  
+  @@index([slug])
+  @@index([type])
+  @@index([isMandatory])
+  @@map("clauses")
+}
+
+// ========================================
+// CONDITIONAL LOGIC
+// ========================================
+
+model ClauseRule {
+  id          String   @id @default(cuid())
+  clauseId    String
+  clause      Clause   @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+  
+  // JSONLogic condition
+  condition   Json     // e.g., {"===": [{"var": "event_type"}, "WEDDING"]}
+  description String?  // Human-readable: "If event type is Wedding"
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([clauseId])
+  @@map("clause_rules")
+}
+
+// ========================================
+// PRICING RULES
+// ========================================
+
+model PricingRule {
+  id                String            @id @default(cuid())
+  templateId        String
+  template          ContractTemplate  @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  name              String            // e.g., "Wedding Pricing - Standard"
+  depositPercent    Int               @default(50)  // 50% deposit
+  balanceDueDays    Int               @default(30)  // Balance due 30 days after event
+  
+  // Payment schedule
+  schedule          Json              // Array of {percent: 50, trigger: "on_signing", daysBefore: 0}
+  
+  // Invoice automation
+  createInvoice     InvoiceSchedule   @default(ON_SIGNING)
+  invoiceDaysDelay  Int               @default(0)
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  
+  @@index([templateId])
+  @@map("pricing_rules")
+}
+
+// ========================================
+// CONTRACT EVENTS (AUDIT TRAIL)
+// ========================================
+
+model ContractEvent {
+  id            String             @id @default(cuid())
+  contractId    String
+  contract      Contract           @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  eventType     ContractEventType
+  description   String?
+  
+  // Actor (who triggered this event)
+  actorId       String?            // AdminUser ID or null for system
+  actorEmail    String?            // Client email if signing
+  actorIp       String?            // Hashed IP address
+  actorAgent    String?            // Hashed user agent
+  
+  // Metadata
+  metadata      Json?              // Additional context
+  
+  createdAt     DateTime           @default(now())
+  
+  @@index([contractId])
+  @@index([eventType])
+  @@index([createdAt])
+  @@map("contract_events")
+}
+
+// ========================================
+// CONTRACT REMINDER RULES
+// ========================================
+
+model ContractReminderRule {
+  id              String            @id @default(cuid())
+  contractId      String            @unique
+  contract        Contract          @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  // Reminder configuration
+  enabled         Boolean           @default(true)
+  frequency       ReminderFrequency @default(EVERY_3_DAYS)
+  daysBefore      Int[]             // e.g., [7, 3, 1] for reminders 7, 3, 1 days before
+  
+  // Business hours
+  sendAfter       String            @default("09:00")  // HH:mm format
+  sendBefore      String            @default("17:00")  // HH:mm format
+  
+  // State
+  lastSentAt      DateTime?
+  reminderCount   Int               @default(0)
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  @@index([contractId])
+  @@map("contract_reminder_rules")
+}
+
+// ========================================
+// INVOICE QUEUE (FOR AUTOMATION)
+// ========================================
+
+model InvoiceQueue {
+  id              String    @id @default(cuid())
+  contractId      String    @unique
+  contract        Contract  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  // Queue details
+  status          String    @default("PENDING")  // PENDING, PROCESSING, COMPLETED, FAILED
+  attempts        Int       @default(0)
+  lastAttemptAt   DateTime?
+  error           String?   @db.Text
+  
+  // Invoice data (to be determined)
+  invoiceData     Json?     // Prepared invoice data
+  
+  createdAt       DateTime  @default(now())
+  processedAt     DateTime?
+  
+  @@index([status])
+  @@index([createdAt])
+  @@map("invoice_queue")
+}
