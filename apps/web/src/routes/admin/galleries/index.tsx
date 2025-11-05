@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Grid3x3, List, Calendar, Heart, Image, Pencil, Trash2, CheckSquare, Square, Archive } from 'lucide-react';
+import { Plus, Search, Grid3x3, List, Calendar, Heart, Image, Pencil, Trash2, CheckSquare, Square, Archive, Lock } from 'lucide-react';
 import { Modal } from '../../../components/ui/Modal';
 import { Button } from '../../../components/ui/Button';
 import { Input } from '../../../components/ui/Input';
@@ -79,6 +79,7 @@ interface Gallery {
   createdAt: string;
   updatedAt: string;
   clientName: string;
+  isPasswordProtected?: boolean;
 }
 
 interface GalleryFormData {
@@ -135,6 +136,7 @@ export default function GalleriesIndex() {
         favoriteCount: g.favoriteCount || 0,
         createdAt: g.createdAt,
         updatedAt: g.updatedAt,
+        isPasswordProtected: !!g.password,
       }));
       
       setGalleries(galleriesData);
@@ -445,7 +447,7 @@ export default function GalleriesIndex() {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -459,8 +461,8 @@ export default function GalleriesIndex() {
           </div>
           <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-success/10 rounded-lg">
-                <Image className="w-5 h-5 text-success" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                <Image className="w-5 h-5 text-primary dark:text-blue-400" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Photos</p>
@@ -472,13 +474,26 @@ export default function GalleriesIndex() {
           </div>
           <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Heart className="w-5 h-5 text-destructive" />
+              <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+                <Heart className="w-5 h-5 text-destructive dark:text-red-400" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Favorites</p>
                 <p className="text-2xl font-bold text-foreground">
                   {galleries.reduce((sum, g) => sum + g.favoriteCount, 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="bg-card rounded-lg p-4 shadow-sm border border-border">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
+                <Lock className="w-5 h-5 text-amber-600 dark:text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Password Protected</p>
+                <p className="text-2xl font-bold text-foreground">
+                  {galleries.filter(g => g.isPasswordProtected).length}
                 </p>
               </div>
             </div>
@@ -610,16 +625,45 @@ export default function GalleriesIndex() {
                     : undefined
                 }
               >
-                {/* Cover Photo */}
-                <div className="aspect-[3/2] bg-muted overflow-hidden">
-                  <img
-                    src={gallery.coverPhoto}
-                    alt={gallery.name}
-                    className={`w-full h-full object-cover transition-transform duration-300 ${
-                      !isSelectionMode ? 'group-hover:scale-105' : ''
-                    }`}
-                    loading="lazy"
-                  />
+                {/* Cover Photo or Empty State */}
+                <div className="aspect-[3/2] bg-muted overflow-hidden relative">
+                  {gallery.photoCount > 0 ? (
+                    <>
+                      <img
+                        src={gallery.coverPhoto}
+                        alt={gallery.name}
+                        className={`w-full h-full object-cover transition-transform duration-300 ${
+                          !isSelectionMode ? 'group-hover:scale-105' : ''
+                        }`}
+                        loading="lazy"
+                      />
+                      {/* Photo Count Badge */}
+                      <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-xs font-medium flex items-center gap-1.5">
+                        <Image className="w-3.5 h-3.5" />
+                        {gallery.photoCount}
+                      </div>
+                      {/* Password Protected Badge */}
+                      {gallery.isPasswordProtected && (
+                        <div className="absolute top-3 left-3 bg-amber-500/90 backdrop-blur-sm text-white p-1.5 rounded-full" title="Password Protected">
+                          <Lock className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-muted/50 relative">
+                      {/* Password Protected Badge for Empty Galleries */}
+                      {gallery.isPasswordProtected && (
+                        <div className="absolute top-3 left-3 bg-amber-500/90 backdrop-blur-sm text-white p-1.5 rounded-full" title="Password Protected">
+                          <Lock className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-3">
+                        <Image className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground font-medium">No Photos</p>
+                      <p className="text-xs text-muted-foreground mt-1">Upload to get started</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content */}
@@ -632,21 +676,27 @@ export default function GalleriesIndex() {
                   </p>
 
                   {/* Client */}
-                  <p className="text-xs text-muted-foreground mb-3">{gallery.clientName}</p>
+                  <p className="text-xs text-muted-foreground mb-3 flex items-center gap-2">
+                    <span>{gallery.clientName}</span>
+                    {gallery.isPasswordProtected && (
+                      <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-500">
+                        <Lock className="w-3 h-3" />
+                        <span className="text-xs">Protected</span>
+                      </span>
+                    )}
+                  </p>
 
                   {/* Stats */}
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <Image className="w-4 h-4" />
-                      <span>{gallery.photoCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-destructive">
-                      <Heart className="w-4 h-4" />
-                      <span>{gallery.favoriteCount}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    {gallery.favoriteCount > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Heart className="w-4 h-4 text-destructive fill-red-500" />
+                        <span>{gallery.favoriteCount}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      <span>{formatDate(gallery.updatedAt)}</span>
+                      <span className="text-xs">Updated {formatDate(gallery.updatedAt)}</span>
                     </div>
                   </div>
                 </div>
@@ -718,7 +768,7 @@ export default function GalleriesIndex() {
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-border">
               {filteredGalleries.map((gallery) => (
                 <tr
                   key={gallery.id}
@@ -752,18 +802,27 @@ export default function GalleriesIndex() {
                       }
                       className="flex items-center gap-3 group"
                     >
-                      <img
-                        src={gallery.coverPhoto}
-                        alt={gallery.name}
-                        className="w-16 h-16 object-cover rounded"
-                        loading="lazy"
-                      />
+                      {gallery.photoCount > 0 ? (
+                        <img
+                          src={gallery.coverPhoto}
+                          alt={gallery.name}
+                          className="w-16 h-16 object-cover rounded"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 bg-muted rounded flex items-center justify-center">
+                          <Image className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      )}
                       <div>
-                        <p className="font-medium text-foreground group-hover:text-primary">
+                        <p className="font-medium text-foreground group-hover:text-primary flex items-center gap-2">
                           {gallery.name}
+                          {gallery.isPasswordProtected && (
+                            <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-500" title="Password Protected" />
+                          )}
                         </p>
                         <p className="text-sm text-muted-foreground line-clamp-1">
-                          {gallery.description}
+                          {gallery.description || (gallery.photoCount === 0 ? 'No photos yet' : '')}
                         </p>
                       </div>
                     </Link>
@@ -961,7 +1020,7 @@ export default function GalleriesIndex() {
           </p>
 
           {/* Selected Galleries Summary */}
-          <div className="bg-background border border-border rounded-lg p-4 mb-4 max-h-64 overflow-y-auto">
+          <div className="bg-background border border-border rounded-lg p-4 mb-4 max-h-64 overflow-y-auto scrollbar-thin">
             <h4 className="font-semibold text-foreground mb-2">Selected galleries:</h4>
             <ul className="space-y-2">
               {getSelectedGalleries().map((gallery) => (

@@ -34,7 +34,7 @@ export function PortalMessages() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Messages */}
-              <div className="space-y-4 max-h-[500px] overflow-y-auto">
+              <div className="space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin">
                 <div className="flex items-start gap-4">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     KP

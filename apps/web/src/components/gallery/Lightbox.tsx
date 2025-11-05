@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import { X, ChevronLeft, ChevronRight, Heart, Download, Link2, Info, Check, CheckCircle, Loader2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
@@ -482,7 +482,7 @@ export function Lightbox({
                   disabled={zoom <= MIN_ZOOM}
                   className={cn(
                     'w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-white',
-                    zoom <= MIN_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'
+                    zoom <= MIN_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-card/10'
                   )}
                   aria-label="Zoom out"
                 >
@@ -498,7 +498,7 @@ export function Lightbox({
                   disabled={zoom === MIN_ZOOM}
                   className={cn(
                     'w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-white',
-                    zoom === MIN_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'
+                    zoom === MIN_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-card/10'
                   )}
                   aria-label="Reset zoom"
                 >
@@ -514,14 +514,14 @@ export function Lightbox({
                   disabled={zoom >= MAX_ZOOM}
                   className={cn(
                     'w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-white',
-                    zoom >= MAX_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10'
+                    zoom >= MAX_ZOOM ? 'opacity-30 cursor-not-allowed' : 'hover:bg-card/10'
                   )}
                   aria-label="Zoom in"
                 >
                   <ZoomIn className="h-5 w-5" />
                 </button>
 
-                <div className="w-px h-6 bg-white/20 mx-1" />
+                <div className="w-px h-6 bg-card/20 mx-1" />
               </>
             )}
 
@@ -531,15 +531,15 @@ export function Lightbox({
               onClick={handleFavorite}
               className={cn(
                 'w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200',
-                'text-white hover:bg-white/10 hover:scale-110',
-                isFavorite && 'bg-white/10'
+                'text-white hover:bg-card/10 hover:scale-110',
+                isFavorite && 'bg-card/10'
               )}
               aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
               <Heart 
                 className={cn(
                   'h-5 w-5 transition-all duration-200', 
-                  isFavorite ? 'fill-current text-red-500 scale-110' : 'scale-100'
+                  isFavorite ? 'fill-current text-destructive scale-110' : 'scale-100'
                 )} 
               />
             </button>
@@ -551,7 +551,7 @@ export function Lightbox({
                 e.stopPropagation();
                 handleCopyLink();
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors relative"
+              className="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-card/10 transition-colors relative"
               aria-label="Copy link"
             >
               <Link2 
@@ -580,8 +580,8 @@ export function Lightbox({
                 "w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-300",
                 downloading && "opacity-50 cursor-not-allowed",
                 downloadSuccess 
-                  ? "text-green-500 hover:bg-green-500/10" 
-                  : "text-white hover:bg-white/10"
+                  ? "text-success hover:bg-green-500/10" 
+                  : "text-white hover:bg-card/10"
               )}
               aria-label="Download"
             >
@@ -609,15 +609,15 @@ export function Lightbox({
                 setShowMetadata(prev => !prev);
               }}
               className={cn(
-                'w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-white hover:bg-white/10',
-                showMetadata && 'bg-white/10'
+                'w-10 h-10 flex items-center justify-center rounded-lg transition-colors text-white hover:bg-card/10',
+                showMetadata && 'bg-card/10'
               )}
               aria-label="Toggle metadata"
             >
               <Info className="h-5 w-5" />
             </button>
 
-            <div className="w-px h-6 bg-white/20 mx-1" />
+            <div className="w-px h-6 bg-card/20 mx-1" />
 
             {/* Close Button */}
             <button
@@ -626,7 +626,7 @@ export function Lightbox({
                 e.stopPropagation();
                 onClose();
               }}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-white/10 transition-colors"
+              className="w-10 h-10 flex items-center justify-center rounded-lg text-white hover:bg-card/10 transition-colors"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -745,11 +745,11 @@ export function Lightbox({
         {/* Footer */}
         <div className="p-4 bg-gradient-to-t from-black/80 to-transparent shrink-0">
           <p className="text-sm text-white/80 text-center">
-            <kbd className="px-2 py-1 rounded bg-white/10 text-xs">Esc</kbd> close • 
-            <kbd className="px-2 py-1 rounded bg-white/10 text-xs">←</kbd>
-            <kbd className="px-2 py-1 rounded bg-white/10 text-xs">→</kbd> navigate •
-            <kbd className="px-2 py-1 rounded bg-white/10 text-xs">Z</kbd> zoom •
-            <kbd className="px-2 py-1 rounded bg-white/10 text-xs">Ctrl</kbd>+<kbd className="px-2 py-1 rounded bg-white/10 text-xs">Scroll</kbd> wheel zoom
+            <kbd className="px-2 py-1 rounded bg-card/10 text-xs">Esc</kbd> close • 
+            <kbd className="px-2 py-1 rounded bg-card/10 text-xs">←</kbd>
+            <kbd className="px-2 py-1 rounded bg-card/10 text-xs">→</kbd> navigate •
+            <kbd className="px-2 py-1 rounded bg-card/10 text-xs">Z</kbd> zoom •
+            <kbd className="px-2 py-1 rounded bg-card/10 text-xs">Ctrl</kbd>+<kbd className="px-2 py-1 rounded bg-card/10 text-xs">Scroll</kbd> wheel zoom
           </p>
         </div>
       </div>
@@ -786,7 +786,7 @@ export function Lightbox({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-6">
             {/* File Info */}
             <div>
               <h4 className="text-sm font-medium text-muted-foreground mb-2">File Details</h4>

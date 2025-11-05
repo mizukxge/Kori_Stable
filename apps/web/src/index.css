@@ -18,22 +18,49 @@
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
   }
   
-  /* Scrollbar styles */
+  /* Scrollbar styles - Light Mode */
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-track {
     @apply bg-muted;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/30 rounded-full;
   }
-  
+
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
+  }
+
+  /* Scrollbar styles - Dark Mode */
+  .dark .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Firefox scrollbar support */
+  .scrollbar-thin {
+    scrollbar-color: hsl(var(--color-muted-foreground) / 0.3) hsl(var(--color-muted));
+  }
+
+  .dark .scrollbar-thin {
+    scrollbar-color: hsl(var(--color-muted-foreground) / 0.3) hsl(var(--color-muted));
   }
 }
 
