@@ -8,7 +8,6 @@ import { PDFGeneratorService } from './pdf-generator.js';
 import { MagicLinkService } from './magic-link.js';
 import { sendEmail } from './email.js';
 import { contractMagicLinkEmail } from './email-templates.js';
-import { sendContractEmail, sendResendContractEmail } from './ses.js';
 
 const prisma = new PrismaClient();
 
@@ -213,34 +212,6 @@ export class ContractService {
         },
       },
     });
-
-    // Send contract email to client if client exists
-    if (contract.client && contract.client.email) {
-      try {
-        await sendContractEmail(
-          contract.client.email,
-          contract.id,
-          contract.client.name
-        );
-        console.log(`[Contract] Email sent to ${contract.client.email} for contract ${contractNumber}`);
-      } catch (error: any) {
-        console.error(`[Contract] Failed to send email for contract ${contractNumber}:`, error.message);
-        // Log the email failure but don't fail the contract creation
-        await prisma.auditLog.create({
-          data: {
-            action: 'EMAIL_FAILED',
-            entityType: 'Contract',
-            entityId: contract.id,
-            userId,
-            clientId: data.clientId,
-            metadata: {
-              contractNumber,
-              error: error.message,
-            },
-          },
-        });
-      }
-    }
 
     return contract;
   }
@@ -864,32 +835,12 @@ export class ContractService {
       },
     });
 
-    // Send resend contract email to client
-    try {
-      await sendResendContractEmail(
-        contract.client.email,
-        contractId,
-        contract.client.name
-      );
-      console.log(`[Contract] Resend email sent to ${contract.client.email} for contract ${contract.contractNumber}`);
-    } catch (error: any) {
-      console.error(`[Contract] Failed to send resend email for contract ${contract.contractNumber}:`, error.message);
-      // Log the email failure but don't fail the resend operation
-      await prisma.auditLog.create({
-        data: {
-          action: 'EMAIL_FAILED',
-          entityType: 'Contract',
-          entityId: contractId,
-          userId,
-          clientId: contract.clientId,
-          metadata: {
-            contractNumber: contract.contractNumber,
-            action: 'RESEND',
-            error: error.message,
-          },
-        },
-      });
-    }
+    // TODO: Send email to client with new magic link
+    // await sendResendContractEmail(
+    //   contract.client.email,
+    //   contractId,
+    //   contract.client.name
+    // );
 
     console.log(`Contract ${contract.contractNumber} resent to ${contract.client.email}`);
     console.log(`New magic link: ${magicLink.magicLinkUrl}`);
