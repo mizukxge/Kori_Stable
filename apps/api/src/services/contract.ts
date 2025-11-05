@@ -4,6 +4,11 @@ import { createWriteStream } from 'fs';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { TemplateService } from './template.js';
+import { PDFGeneratorService } from './pdf-generator.js';
+import { MagicLinkService } from './magic-link.js';
+import { sendEmail } from './email.js';
+import { contractMagicLinkEmail } from './email-templates.js';
+import { sendContractEmail, sendResendContractEmail } from './ses.js';
 
 const prisma = new PrismaClient();
 
@@ -209,6 +214,34 @@ export class ContractService {
       },
     });
 
+    // Send contract email to client if client exists
+    if (contract.client && contract.client.email) {
+      try {
+        await sendContractEmail(
+          contract.client.email,
+          contract.id,
+          contract.client.name
+        );
+        console.log(`[Contract] Email sent to ${contract.client.email} for contract ${contractNumber}`);
+      } catch (error: any) {
+        console.error(`[Contract] Failed to send email for contract ${contractNumber}:`, error.message);
+        // Log the email failure but don't fail the contract creation
+        await prisma.auditLog.create({
+          data: {
+            action: 'EMAIL_FAILED',
+            entityType: 'Contract',
+            entityId: contract.id,
+            userId,
+            clientId: data.clientId,
+            metadata: {
+              contractNumber,
+              error: error.message,
+            },
+          },
+        });
+      }
+    }
+
     return contract;
   }
 
@@ -342,11 +375,21 @@ export class ContractService {
       throw new Error('Only draft contracts can be sent');
     }
 
+    if (!contract.client || !contract.client.email) {
+      throw new Error('Contract must have a client with valid email');
+    }
+
     // Generate PDF if not exists
     if (!contract.pdfPath) {
       await this.generatePDF(id);
     }
 
+    // Create magic link for contract signing
+    const magicLink = await MagicLinkService.createMagicLink(id, {
+      expiresInHours: 72, // 3 days
+    });
+
+    // Update contract status
     const sent = await prisma.contract.update({
       where: { id },
       data: {
@@ -355,6 +398,31 @@ export class ContractService {
       },
     });
 
+    // Send contract via email
+    const emailTemplate = contractMagicLinkEmail({
+      recipientName: contract.client.name,
+      contractTitle: contract.title,
+      contractNumber: contract.contractNumber,
+      magicLink: magicLink.magicLinkUrl,
+      expiresInHours: 72,
+      photographerName: process.env.PHOTOGRAPHER_NAME || 'Kori Photography',
+    });
+
+    await sendEmail({
+      to: contract.client.email,
+      subject: emailTemplate.subject,
+      html: emailTemplate.html,
+      text: emailTemplate.text,
+      template: 'contract_magic_link',
+      metadata: {
+        contractId: id,
+        contractNumber: contract.contractNumber,
+        magicLinkToken: magicLink.magicLinkToken,
+        expiresAt: magicLink.expiresAt,
+      },
+    });
+
+    // Create audit log
     await prisma.auditLog.create({
       data: {
         action: 'SEND',
@@ -364,6 +432,8 @@ export class ContractService {
         clientId: contract.clientId,
       },
     });
+
+    console.log(`Contract ${contract.contractNumber} sent to ${contract.client.email}`);
 
     return sent;
   }
@@ -492,5 +562,385 @@ export class ContractService {
     });
 
     return stats;
+  }
+
+  /**
+   * Generate PDF for contract
+   */
+  static async generatePDF(contractId: string, userId?: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: {
+        template: true,
+        client: true,
+        createdByUser: true,
+      },
+    });
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    if (!contract.content && !contract.bodyHtml) {
+      throw new Error('Contract has no content to generate PDF');
+    }
+
+    // Use bodyHtml if available, otherwise use content
+    const html = contract.bodyHtml || contract.content || '';
+
+    // Generate PDF using the PDF Generator Service
+    const result = await PDFGeneratorService.generatePDF({
+      contractId: contract.id,
+      html,
+      metadata: {
+        title: contract.title,
+        author: contract.createdByUser?.name || 'Kori Photography',
+        subject: `Contract ${contract.contractNumber}`,
+        keywords: ['contract', contract.template?.name || 'agreement'],
+        creator: 'Kori Contract System',
+        producer: 'Kori PDF Generator v1.0',
+      },
+      footer: {
+        includePageNumbers: true,
+        includeDate: true,
+        customText: `Contract ${contract.contractNumber}`,
+      },
+    });
+
+    // Log the PDF generation event
+    await prisma.auditLog.create({
+      data: {
+        action: 'GENERATE_PDF',
+        entityType: 'Contract',
+        entityId: contract.id,
+        userId,
+        clientId: contract.clientId,
+        metadata: {
+          contractNumber: contract.contractNumber,
+          pdfPath: result.filePath,
+          fileHash: result.fileHash,
+          pageCount: result.pageCount,
+        },
+      },
+    });
+
+    // Update contract to mark that  has a PDF
+    return prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        pdfPath: result.filePath,
+        pdfHash: result.fileHash,
+        pdfGeneratedAt: result.generatedAt,
+      },
+      include: {
+        template: true,
+        client: true,
+        createdByUser: true,
+      },
+    });
+  }
+
+  /**
+   * Verify PDF integrity
+   */
+  static async verifyPDF(contractId: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { pdfPath: true, pdfHash: true },
+    });
+
+    if (!contract || !contract.pdfPath || !contract.pdfHash) {
+      throw new Error('Contract has no PDF to verify');
+    }
+
+    const isValid = await PDFGeneratorService.verifyPDF(
+      contract.pdfPath,
+      contract.pdfHash
+    );
+
+    return {
+      isValid,
+      pdfPath: contract.pdfPath,
+      pdfHash: contract.pdfHash,
+    };
+  }
+
+  /**
+   * Get PDF info
+   */
+  static async getPDFInfo(contractId: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { pdfPath: true },
+    });
+
+    if (!contract || !contract.pdfPath) {
+      throw new Error('Contract has no PDF');
+    }
+
+    return PDFGeneratorService.getPDFInfo(contract.pdfPath);
+  }
+
+  /**
+   * Regenerate PDF (e.g., after contract updates)
+   */
+  static async regeneratePDF(contractId: string, userId?: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      select: { pdfPath: true },
+    });
+
+    // Delete old PDF if exists
+    if (contract?.pdfPath) {
+      await PDFGeneratorService.deletePDF(contract.pdfPath);
+    }
+
+    // Generate new PDF
+    return this.generatePDF(contractId, userId);
+  }
+
+  /**
+   * Send contract to client for signing
+   */
+  static async sendContract(contractId: string, userId?: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: {
+        client: true,
+        template: true,
+      },
+    });
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    if (contract.status === 'SIGNED') {
+      throw new Error('Contract is already signed');
+    }
+
+    if (!contract.client || !contract.client.email) {
+      throw new Error('Contract has no client or client email');
+    }
+
+    // Generate PDF if not already generated
+    if (!contract.pdfPath) {
+      await this.generatePDF(contractId, userId);
+    }
+
+    // Create magic link
+    const magicLink = await MagicLinkService.createMagicLink(contractId, {
+      expiresInHours: 72, // 3 days
+      requireOTP: true,
+    });
+
+    // Update contract status to SENT
+    const updatedContract = await prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        status: ContractStatus.SENT,
+        sentAt: new Date(),
+      },
+      include: {
+        client: true,
+        template: true,
+        createdByUser: true,
+      },
+    });
+
+    // Log the send event
+    await prisma.contractEvent.create({
+      data: {
+        contractId,
+        type: 'SENT',
+        meta: {
+          clientEmail: contract.client.email,
+          magicLinkUrl: magicLink.magicLinkUrl,
+          expiresAt: magicLink.expiresAt,
+        },
+      },
+    });
+
+    // Log audit trail
+    await prisma.auditLog.create({
+      data: {
+        action: 'SEND_CONTRACT',
+        entityType: 'Contract',
+        entityId: contractId,
+        userId,
+        clientId: contract.clientId,
+        metadata: {
+          contractNumber: contract.contractNumber,
+          clientEmail: contract.client.email,
+        },
+      },
+    });
+
+    // TODO: Send email to client with magic link
+    // await EmailService.sendContractForSigning({
+    //   to: contract.client.email,
+    //   clientName: contract.client.name,
+    //   contractTitle: contract.title,
+    //   contractNumber: contract.contractNumber,
+    //   magicLinkUrl: magicLink.magicLinkUrl,
+    //   expiresAt: magicLink.expiresAt,
+    // });
+
+    console.log(`Contract sent to ${contract.client.email}`);
+    console.log(`Magic link: ${magicLink.magicLinkUrl}`);
+
+    return {
+      ...updatedContract,
+      magicLinkUrl: magicLink.magicLinkUrl,
+      magicLinkExpiresAt: magicLink.expiresAt,
+    };
+  }
+
+  /**
+   * Resend contract to client (revokes old magic link and generates new one)
+   */
+  static async resendContract(contractId: string, userId?: string) {
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: {
+        client: true,
+        template: true,
+      },
+    });
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    if (contract.status === 'SIGNED') {
+      throw new Error('Cannot resend a signed contract');
+    }
+
+    if (contract.status === 'DECLINED') {
+      throw new Error('Cannot resend a declined contract');
+    }
+
+    if (!contract.client || !contract.client.email) {
+      throw new Error('Contract has no client or client email');
+    }
+
+    // Revoke old magic link
+    await MagicLinkService.revokeMagicLink(contractId);
+
+    // Create new magic link
+    const magicLink = await MagicLinkService.createMagicLink(contractId, {
+      expiresInHours: 72, // 3 days
+      requireOTP: true,
+    });
+
+    // Update contract status and timestamp
+    const updatedContract = await prisma.contract.update({
+      where: { id: contractId },
+      data: {
+        status: ContractStatus.SENT,
+        sentAt: new Date(),
+      },
+      include: {
+        client: true,
+        template: true,
+        createdByUser: true,
+      },
+    });
+
+    // Log audit trail
+    await prisma.auditLog.create({
+      data: {
+        action: 'RESEND_CONTRACT',
+        entityType: 'Contract',
+        entityId: contractId,
+        userId,
+        clientId: contract.clientId,
+        metadata: {
+          contractNumber: contract.contractNumber,
+          clientEmail: contract.client.email,
+          newMagicLinkUrl: magicLink.magicLinkUrl,
+          expiresAt: magicLink.expiresAt,
+        },
+      },
+    });
+
+    // Send resend contract email to client
+    try {
+      await sendResendContractEmail(
+        contract.client.email,
+        contractId,
+        contract.client.name
+      );
+      console.log(`[Contract] Resend email sent to ${contract.client.email} for contract ${contract.contractNumber}`);
+    } catch (error: any) {
+      console.error(`[Contract] Failed to send resend email for contract ${contract.contractNumber}:`, error.message);
+      // Log the email failure but don't fail the resend operation
+      await prisma.auditLog.create({
+        data: {
+          action: 'EMAIL_FAILED',
+          entityType: 'Contract',
+          entityId: contractId,
+          userId,
+          clientId: contract.clientId,
+          metadata: {
+            contractNumber: contract.contractNumber,
+            action: 'RESEND',
+            error: error.message,
+          },
+        },
+      });
+    }
+
+    console.log(`Contract ${contract.contractNumber} resent to ${contract.client.email}`);
+    console.log(`New magic link: ${magicLink.magicLinkUrl}`);
+    console.log(`Expires at: ${magicLink.expiresAt}`);
+
+    return {
+      ...updatedContract,
+      magicLinkUrl: magicLink.magicLinkUrl,
+      magicLinkExpiresAt: magicLink.expiresAt,
+    };
+  }
+
+  /**
+   * Get all events for a contract (audit trail)
+   */
+  static async getContractEvents(contractId: string) {
+    // Verify contract exists
+    const contract = await prisma.contract.findUnique({
+      where: { id: contractId },
+    });
+
+    if (!contract) {
+      throw new Error('Contract not found');
+    }
+
+    // Fetch all contract events
+    const events = await prisma.contractEvent.findMany({
+      where: { contractId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Also fetch related audit logs
+    const auditLogs = await prisma.auditLog.findMany({
+      where: {
+        entityType: 'Contract',
+        entityId: contractId,
+      },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return {
+      contractEvents: events,
+      auditLogs: auditLogs,
+    };
   }
 }
