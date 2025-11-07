@@ -240,16 +240,16 @@ export default function ContractDetail() {
 
   function getStatusBadge(status: string) {
     const colors: Record<string, string> = {
-      DRAFT: 'bg-gray-100 text-foreground',
-      SENT: 'bg-blue-100 text-blue-800',
-      VIEWED: 'bg-purple-100 text-purple-800',
-      SIGNED: 'bg-green-100 text-green-800',
-      VOIDED: 'bg-red-100 text-red-800',
-      EXPIRED: 'bg-orange-100 text-orange-800',
+      DRAFT: 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100',
+      SENT: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+      VIEWED: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
+      SIGNED: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+      VOIDED: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+      EXPIRED: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
     };
 
     return (
-      <span className={`px-3 py-1 rounded-full text-sm font-medium ${colors[status] || 'bg-gray-100 text-foreground'}`}>
+      <span className={`px-3 py-1 rounded-full text-sm font-medium ${colors[status] || 'bg-gray-100 dark:bg-gray-800 text-foreground'}`}>
         {status}
       </span>
     );
@@ -258,8 +258,8 @@ export default function ContractDetail() {
   if (isLoading) {
     return (
       <div className="p-6 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Loading contract...</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <p className="mt-4 text-muted-foreground">Loading contract...</p>
       </div>
     );
   }
@@ -267,8 +267,8 @@ export default function ContractDetail() {
   if (!contract) {
     return (
       <div className="p-6 text-center">
-        <p className="text-red-600">Contract not found</p>
-        <Link to="/admin/contracts" className="text-blue-600 hover:underline mt-4 inline-block">
+        <p className="text-destructive font-semibold">Contract not found</p>
+        <Link to="/admin/contracts" className="text-primary hover:underline mt-4 inline-block">
           ← Back to contracts
         </Link>
       </div>
@@ -277,50 +277,65 @@ export default function ContractDetail() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
+      {/* Draft Status Banner */}
+      {contract.status === 'DRAFT' && (
+        <div className="mb-6 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            <div>
+              <h3 className="font-semibold text-amber-900 dark:text-amber-100">Draft Contract</h3>
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                This contract is still in draft status. Generate a PDF and send it to the client to begin the signing process.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <Link
           to="/admin/contracts"
-          className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4"
+          className="inline-flex items-center text-primary hover:text-primary/80 dark:text-primary dark:hover:text-primary/60 mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Contracts
         </Link>
-        <div className="flex justify-between items-start">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2 flex-wrap">
               {getStatusIcon(contract.status)}
-              <h1 className="text-3xl font-bold text-gray-900">{contract.title}</h1>
+              <h1 className="text-3xl font-bold text-foreground">{contract.title}</h1>
               {getStatusBadge(contract.status)}
             </div>
-            <p className="text-gray-600">{contract.contractNumber}</p>
+            <p className="text-muted-foreground">{contract.contractNumber}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-2">
             {contract.status === 'DRAFT' && (
-              <Button onClick={handleSend} disabled={isSending}>
+              <Button onClick={handleSend} disabled={isSending} className="flex-1 sm:flex-none">
                 <Send className="w-4 h-4 mr-2" />
                 {isSending ? 'Sending...' : 'Send Contract'}
               </Button>
             )}
             {(contract.status === 'SENT' || contract.status === 'VIEWED') && (
-              <Button onClick={handleResend} disabled={isResending}>
+              <Button onClick={handleResend} disabled={isResending} className="flex-1 sm:flex-none">
                 <RefreshCw className="w-4 h-4 mr-2" />
                 {isResending ? 'Resending...' : 'Resend Contract'}
               </Button>
             )}
             {contract.pdfPath && (
-              <Button variant="secondary" onClick={handleDownloadPDF}>
+              <Button variant="secondary" onClick={handleDownloadPDF} className="flex-1 sm:flex-none">
                 <Download className="w-4 h-4 mr-2" />
                 Download PDF
               </Button>
             )}
             {!contract.pdfPath && contract.status === 'DRAFT' && (
-              <Button variant="secondary" onClick={handleGeneratePDF} disabled={isGeneratingPDF}>
+              <Button variant="secondary" onClick={handleGeneratePDF} disabled={isGeneratingPDF} className="flex-1 sm:flex-none">
                 <FileText className="w-4 h-4 mr-2" />
                 {isGeneratingPDF ? 'Generating...' : 'Generate PDF'}
               </Button>
             )}
-            <Button variant="secondary" onClick={handleDelete}>
+            <Button variant="secondary" onClick={handleDelete} className="flex-1 sm:flex-none">
               <Trash2 className="w-4 h-4 mr-2" />
               Delete
             </Button>
@@ -331,65 +346,65 @@ export default function ContractDetail() {
       {/* Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Client Info */}
-        <div className="bg-card rounded-lg shadow p-4">
+        <div className="bg-card rounded-lg shadow p-4 border border-border">
           <div className="flex items-center mb-2">
-            <User className="w-5 h-5 text-gray-400 mr-2" />
-            <h3 className="font-semibold">Client</h3>
+            <User className="w-5 h-5 text-muted-foreground mr-2" />
+            <h3 className="font-semibold text-foreground">Client</h3>
           </div>
           {contract.client ? (
             <div>
-              <p className="text-gray-900">{contract.client.name}</p>
-              <p className="text-sm text-gray-600">{contract.client.email}</p>
+              <p className="text-foreground font-medium">{contract.client.name}</p>
+              <p className="text-sm text-muted-foreground">{contract.client.email}</p>
               {contract.client.phone && (
-                <p className="text-sm text-gray-600">{contract.client.phone}</p>
+                <p className="text-sm text-muted-foreground">{contract.client.phone}</p>
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">No client assigned</p>
+            <p className="text-muted-foreground text-sm">No client assigned</p>
           )}
         </div>
 
         {/* Template Info */}
-        <div className="bg-card rounded-lg shadow p-4">
+        <div className="bg-card rounded-lg shadow p-4 border border-border">
           <div className="flex items-center mb-2">
-            <FileSignature className="w-5 h-5 text-gray-400 mr-2" />
-            <h3 className="font-semibold">Template</h3>
+            <FileSignature className="w-5 h-5 text-muted-foreground mr-2" />
+            <h3 className="font-semibold text-foreground">Template</h3>
           </div>
           {contract.template ? (
             <div>
-              <p className="text-gray-900">{contract.template.name}</p>
-              <p className="text-sm text-gray-600">Version {contract.template.version}</p>
+              <p className="text-foreground font-medium">{contract.template.name}</p>
+              <p className="text-sm text-muted-foreground">Version {contract.template.version}</p>
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">Template information unavailable</p>
+            <p className="text-muted-foreground text-sm">Template information unavailable</p>
           )}
         </div>
 
         {/* Timeline Info */}
-        <div className="bg-card rounded-lg shadow p-4">
+        <div className="bg-card rounded-lg shadow p-4 border border-border">
           <div className="flex items-center mb-2">
-            <Calendar className="w-5 h-5 text-gray-400 mr-2" />
-            <h3 className="font-semibold">Timeline</h3>
+            <Calendar className="w-5 h-5 text-muted-foreground mr-2" />
+            <h3 className="font-semibold text-foreground">Timeline</h3>
           </div>
           <div className="space-y-1 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-600">Created:</span>
-              <span className="text-gray-900">
+              <span className="text-muted-foreground">Created:</span>
+              <span className="text-foreground font-medium">
                 {new Date(contract.createdAt).toLocaleDateString()}
               </span>
             </div>
             {contract.sentAt && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Sent:</span>
-                <span className="text-gray-900">
+                <span className="text-muted-foreground">Sent:</span>
+                <span className="text-foreground font-medium">
                   {new Date(contract.sentAt).toLocaleDateString()}
                 </span>
               </div>
             )}
             {contract.signedAt && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Signed:</span>
-                <span className="text-green-600 font-medium">
+                <span className="text-muted-foreground">Signed:</span>
+                <span className="text-green-600 dark:text-green-400 font-medium">
                   {new Date(contract.signedAt).toLocaleDateString()}
                 </span>
               </div>
@@ -400,34 +415,34 @@ export default function ContractDetail() {
 
       {/* Magic Link Section */}
       {contract.magicLinkUrl && (
-        <div className="bg-card rounded-lg shadow mb-6">
-          <div className="border-b px-6 py-4">
+        <div className="bg-card rounded-lg shadow mb-6 border border-border">
+          <div className="border-b border-border px-6 py-4">
             <div className="flex items-center gap-2">
-              <LinkIcon className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold">Client Signing Link</h2>
+              <LinkIcon className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Client Signing Link</h2>
             </div>
           </div>
           <div className="p-6">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-blue-800 font-medium mb-2">
+                  <p className="text-sm text-blue-900 dark:text-blue-100 font-medium mb-2">
                     Share this link with your client to sign the contract:
                   </p>
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 text-sm bg-card px-3 py-2 rounded border border-primary text-foreground font-mono break-all">
+                  <div className="flex items-center gap-2 flex-col sm:flex-row">
+                    <code className="flex-1 text-sm bg-card px-3 py-2 rounded border border-border text-foreground font-mono break-all w-full">
                       {contract.magicLinkUrl}
                     </code>
                     <Button
                       variant="secondary"
                       size="sm"
                       onClick={handleCopyMagicLink}
-                      className="flex-shrink-0"
+                      className="flex-shrink-0 w-full sm:w-auto"
                     >
                       {copied ? (
                         <>
-                          <Check className="w-4 h-4 mr-2 text-green-600" />
-                          <span className="text-green-600">Copied!</span>
+                          <Check className="w-4 h-4 mr-2 text-green-600 dark:text-green-400" />
+                          <span className="text-green-600 dark:text-green-400">Copied!</span>
                         </>
                       ) : (
                         <>
@@ -438,7 +453,7 @@ export default function ContractDetail() {
                     </Button>
                   </div>
                   {contract.magicLinkExpiresAt && (
-                    <p className="text-xs text-blue-600 mt-2">
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-2">
                       <Clock className="w-3 h-3 inline mr-1" />
                       Expires: {new Date(contract.magicLinkExpiresAt).toLocaleString()}
                     </p>
@@ -446,8 +461,8 @@ export default function ContractDetail() {
                 </div>
               </div>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
-              <p className="font-medium mb-1">How it works:</p>
+            <div className="mt-4 text-sm text-muted-foreground">
+              <p className="font-medium mb-1 text-foreground">How it works:</p>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li>Client opens the link in their browser</li>
                 <li>They verify their identity with an email OTP code</li>
@@ -460,21 +475,21 @@ export default function ContractDetail() {
       )}
 
       {/* PDF Management Section */}
-      <div className="bg-card rounded-lg shadow mb-6">
-        <div className="border-b px-6 py-4 flex items-center justify-between">
+      <div className="bg-card rounded-lg shadow mb-6 border border-border">
+        <div className="border-b border-border px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-semibold">PDF Document</h2>
+            <h2 className="text-xl font-semibold text-foreground">PDF Document</h2>
             {contract.pdfPath && pdfVerification && (
               <div className="flex items-center gap-1">
                 {pdfVerification.isValid ? (
                   <>
-                    <Shield className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-green-600 font-medium">Verified</span>
+                    <Shield className="w-5 h-5 text-green-600 dark:text-green-400" />
+                    <span className="text-sm text-green-600 dark:text-green-400 font-medium">Verified</span>
                   </>
                 ) : (
                   <>
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                    <span className="text-sm text-red-600 font-medium">Invalid</span>
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    <span className="text-sm text-red-600 dark:text-red-400 font-medium">Invalid</span>
                   </>
                 )}
               </div>
@@ -487,30 +502,30 @@ export default function ContractDetail() {
             <div className="space-y-4">
               {/* PDF Info */}
               {pdfInfo && (
-                <div className="bg-gray-50 rounded-lg p-4">
+                <div className="bg-muted/50 rounded-lg p-4 border border-border">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
                     <div>
-                      <p className="text-gray-500 font-medium">Pages</p>
-                      <p className="text-gray-900 text-lg">{pdfInfo.pageCount}</p>
+                      <p className="text-muted-foreground font-medium">Pages</p>
+                      <p className="text-foreground text-lg font-semibold">{pdfInfo.pageCount}</p>
                     </div>
                     <div>
-                      <p className="text-gray-500 font-medium">File Size</p>
-                      <p className="text-gray-900 text-lg">
+                      <p className="text-muted-foreground font-medium">File Size</p>
+                      <p className="text-foreground text-lg font-semibold">
                         {(pdfInfo.fileSize / 1024).toFixed(1)} KB
                       </p>
                     </div>
                     {pdfInfo.creationDate && (
                       <div>
-                        <p className="text-gray-500 font-medium">Created</p>
-                        <p className="text-gray-900 text-sm">
+                        <p className="text-muted-foreground font-medium">Created</p>
+                        <p className="text-foreground text-sm">
                           {new Date(pdfInfo.creationDate).toLocaleDateString()}
                         </p>
                       </div>
                     )}
                     {pdfInfo.author && (
                       <div>
-                        <p className="text-gray-500 font-medium">Author</p>
-                        <p className="text-gray-900 text-sm">{pdfInfo.author}</p>
+                        <p className="text-muted-foreground font-medium">Author</p>
+                        <p className="text-foreground text-sm">{pdfInfo.author}</p>
                       </div>
                     )}
                   </div>
@@ -518,23 +533,23 @@ export default function ContractDetail() {
               )}
 
               {/* PDF Actions */}
-              <div className="flex flex-wrap gap-2">
-                <Button onClick={handleDownloadPDF} variant="secondary">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2">
+                <Button onClick={handleDownloadPDF} variant="secondary" className="flex-1 sm:flex-none">
                   <Download className="w-4 h-4 mr-2" />
                   Download PDF
                 </Button>
-                <Button onClick={handleRegeneratePDF} variant="secondary" disabled={isGeneratingPDF}>
+                <Button onClick={handleRegeneratePDF} variant="secondary" disabled={isGeneratingPDF} className="flex-1 sm:flex-none">
                   <RefreshCw className={`w-4 h-4 mr-2 ${isGeneratingPDF ? 'animate-spin' : ''}`} />
                   {isGeneratingPDF ? 'Regenerating...' : 'Regenerate PDF'}
                 </Button>
-                <Button onClick={handleVerifyPDF} variant="secondary">
+                <Button onClick={handleVerifyPDF} variant="secondary" className="flex-1 sm:flex-none">
                   <Shield className="w-4 h-4 mr-2" />
                   Verify Integrity
                 </Button>
               </div>
 
               {/* PDF Preview */}
-              <div className="border border-border rounded-lg overflow-hidden bg-gray-100">
+              <div className="border border-border rounded-lg overflow-hidden bg-muted">
                 <iframe
                   src={`http://localhost:3002${contract.pdfPath}`}
                   className="w-full h-[600px]"
@@ -544,9 +559,9 @@ export default function ContractDetail() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No PDF Generated</h3>
-              <p className="text-gray-600 mb-4">
+              <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No PDF Generated</h3>
+              <p className="text-muted-foreground mb-4">
                 Generate a PDF document for this contract to share with the client
               </p>
               <Button onClick={handleGeneratePDF} disabled={isGeneratingPDF}>
@@ -559,12 +574,12 @@ export default function ContractDetail() {
       </div>
 
       {/* Contract Content */}
-      <div className="bg-card rounded-lg shadow">
-        <div className="border-b px-6 py-4">
-          <h2 className="text-xl font-semibold">Contract Content</h2>
+      <div className="bg-card rounded-lg shadow border border-border">
+        <div className="border-b border-border px-6 py-4">
+          <h2 className="text-xl font-semibold text-foreground">Contract Content</h2>
         </div>
         <div
-          className="p-6 prose max-w-none"
+          className="p-6 prose dark:prose-invert prose-sm max-w-none text-foreground"
           dangerouslySetInnerHTML={{ __html: contract.content }}
         />
       </div>
@@ -576,16 +591,16 @@ export default function ContractDetail() {
 
       {/* Variables (for debugging/reference) */}
       {contract.variables && Object.keys(contract.variables).length > 0 && (
-        <div className="mt-6 bg-card rounded-lg shadow">
-          <div className="border-b px-6 py-4">
-            <h2 className="text-xl font-semibold">Contract Variables</h2>
+        <div className="mt-6 bg-card rounded-lg shadow border border-border">
+          <div className="border-b border-border px-6 py-4">
+            <h2 className="text-xl font-semibold text-foreground">Contract Variables</h2>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {Object.entries(contract.variables).map(([key, value]) => (
-                <div key={key} className="border-b pb-2">
-                  <p className="text-sm text-gray-600 font-medium">{key}</p>
-                  <p className="text-gray-900">
+                <div key={key} className="border-b border-border pb-2">
+                  <p className="text-sm text-muted-foreground font-medium">{key}</p>
+                  <p className="text-foreground break-words">
                     {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                   </p>
                 </div>
