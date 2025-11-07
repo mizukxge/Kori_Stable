@@ -120,6 +120,11 @@ export class ContractService {
       throw new Error('Template is not active');
     }
 
+    // Validate that template has content
+    if (!template.bodyHtml || template.bodyHtml.trim() === '') {
+      throw new Error('Template has no content. Please add content to the template before generating contracts.');
+    }
+
     // Generate contract number
     const contractNumber = await this.generateContractNumber();
 
