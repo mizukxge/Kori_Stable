@@ -36,8 +36,7 @@ import ProposalDetailPage from './routes/admin/proposals/[id]';
 import ProposalsDashboardPage from './routes/admin/proposals/dashboard';
 import NewProposalPage from './routes/admin/proposals/new';
 import EditProposalPage from './routes/admin/proposals/edit';
-import { AdminProposalTemplates } from './routes/admin/proposal-templates/index';
-import ProposalEmailTemplatesPage from './routes/admin/proposal-email-templates/index';
+import ProposalTemplatesPage from './routes/admin/proposals/templates/index';
 import InvoicesIndex from './routes/admin/invoices/index';
 import InvoiceDetailPage from './routes/admin/invoices/[id]';
 import NewInvoicePage from './routes/admin/invoices/new';
@@ -238,17 +237,17 @@ function App() {
             }
           />
 
-          {/* Proposal Email Template Routes */}
+          {/* Proposal Routes - SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES */}
+
+          {/* Proposal Templates Route */}
           <Route
-            path="/admin/proposal-email-templates"
+            path="/admin/proposals/templates"
             element={
               <Layout>
-                <ProposalEmailTemplatesPage />
+                <ProposalTemplatesPage />
               </Layout>
             }
           />
-
-          {/* Proposal Routes - SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES */}
           <Route
             path="/admin/proposals/dashboard"
             element={

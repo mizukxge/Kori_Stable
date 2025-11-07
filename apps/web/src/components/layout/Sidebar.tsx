@@ -1,4 +1,4 @@
-import { Home, Users, Image, FileText, Settings, X } from 'lucide-react';
+import { Home, Users, FileText, Settings, X, Images, Shield, FileSignature, FileCheck, Receipt, Mail } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
@@ -10,8 +10,13 @@ interface SidebarProps {
 
 const navigation = [
   { name: 'Dashboard', icon: Home, href: '/' },
-  { name: 'Clients', icon: Users, href: '/clients' },
-  { name: 'Assets', icon: Image, href: '/assets' },
+  { name: 'Galleries', icon: Images, href: '/admin/galleries' },
+  { name: 'Inquiries', icon: Mail, href: '/admin/inquiries' },
+  { name: 'Clients', icon: Users, href: '/admin/clients' },
+  { name: 'Proposals', icon: FileCheck, href: '/admin/proposals' },
+  { name: 'Invoices', icon: Receipt, href: '/admin/invoices' },
+  { name: 'Contracts', icon: FileSignature, href: '/admin/contracts' },
+  { name: 'Rights', icon: Shield, href: '/admin/rights' },
   { name: 'Documents', icon: FileText, href: '/documents' },
   { name: 'Settings', icon: Settings, href: '/settings' },
 ];
@@ -44,7 +49,9 @@ export function Sidebar({ open = true, onClose }: SidebarProps) {
         <nav className="flex-1 space-y-1 overflow-y-auto p-4 scrollbar-thin">
           {navigation.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.href;
+            // Check if current path matches or starts with the nav item href
+            const isActive = location.pathname === item.href ||
+                             (item.href !== '/' && location.pathname.startsWith(item.href));
             return (
               <Link
                 key={item.name}
