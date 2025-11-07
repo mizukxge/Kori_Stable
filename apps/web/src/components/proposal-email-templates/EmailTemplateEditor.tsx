@@ -147,7 +147,7 @@ export function EmailTemplateEditor({ template, onClose }: EmailTemplateEditorPr
               disabled={loading}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              You can use template variables like {{'{'}clientName{'}'}}
+              You can use template variables like {'{clientName}'}
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export function EmailTemplateEditor({ template, onClose }: EmailTemplateEditorPr
               disabled={loading}
             />
             <p className="text-xs text-muted-foreground mt-2">
-              Use variables in the format {{'{'}variableName{'}'}} - click "Insert Variable" for a list of available options
+              Use variables in the format {'{variableName}'} - click "Insert Variable" for a list of available options
             </p>
           </div>
 
@@ -209,8 +209,8 @@ export function EmailTemplateEditor({ template, onClose }: EmailTemplateEditorPr
             <h4 className="text-sm font-medium mb-2">Variable Usage Tips:</h4>
             <ul className="text-xs text-muted-foreground space-y-1">
               <li>" Variables are replaced with actual data when the template is used</li>
-              <li>" Use {{'{'}clientName{'}'}} to personalize messages</li>
-              <li>" {{'{'}proposalLink{'}'}} provides a direct link to the proposal</li>
+              <li>" Use {'{clientName}'} to personalize messages</li>
+              <li>" {'{proposalLink}'} provides a direct link to the proposal</li>
               <li>" All variables are optional - they'll show as [Missing] if not available</li>
             </ul>
           </Card>

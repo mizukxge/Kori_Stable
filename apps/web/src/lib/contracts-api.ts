@@ -320,7 +320,7 @@ export async function generateContract(data: {
   clientId?: string;
   variables: Record<string, any>;
 }): Promise<Contract> {
-  const response = await fetch(`${API_BASE_URL}/admin/contracts/generate`, {
+  const response = await fetch(`${API_BASE_URL}/admin/contracts`, {
     method: 'POST',
     credentials: 'include',
     headers: {

@@ -57,7 +57,8 @@
       "Bash(echo:*)",
       "Bash(prisma migrate:*)",
       "Bash(apps/web/src/components/proposal-email-templates/EmailTemplateEditor.tsx)",
-      "Bash(apps/web/src/components/proposal-email-templates/SendProposalEmail.tsx)"
+      "Bash(apps/web/src/components/proposal-email-templates/SendProposalEmail.tsx)",
+      "Bash(timeout 30 pnpm typecheck:*)"
     ],
     "deny": [],
     "ask": []

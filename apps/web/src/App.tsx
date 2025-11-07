@@ -36,6 +36,7 @@ import ProposalDetailPage from './routes/admin/proposals/[id]';
 import ProposalsDashboardPage from './routes/admin/proposals/dashboard';
 import NewProposalPage from './routes/admin/proposals/new';
 import EditProposalPage from './routes/admin/proposals/edit';
+import { AdminProposalTemplates } from './routes/admin/proposal-templates/index';
 import ProposalTemplatesPage from './routes/admin/proposals/templates/index';
 import InvoicesIndex from './routes/admin/invoices/index';
 import InvoiceDetailPage from './routes/admin/invoices/[id]';
@@ -235,6 +236,12 @@ function App() {
                 <AdminProposalTemplates />
               </Layout>
             }
+          />
+
+          {/* Redirect old email templates URL */}
+          <Route
+            path="/admin/proposal-email-templates"
+            element={<Navigate to="/admin/proposals/templates" replace />}
           />
 
           {/* Proposal Routes - SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES */}
