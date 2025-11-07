@@ -174,8 +174,9 @@ export class ContractService {
       };
     }
 
-    // Substitute variables in template
-    const content = this.substituteVariables(template.content, enrichedVariables);
+    // Substitute variables in template body
+    const bodyHtml = template.bodyHtml || '';
+    const content = this.substituteVariables(bodyHtml, enrichedVariables);
 
     // Create contract
     const contract = await prisma.contract.create({
