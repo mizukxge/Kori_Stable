@@ -20,6 +20,8 @@ model AdminUser {
   rightsPresets     RightsPreset[]
   galleries         Gallery[]
   proposals         Proposal[]
+  proposalTemplates ProposalTemplate[] @relation("CreatedProposalTemplates")
+  proposalEmailTemplates ProposalEmailTemplate[]
   contractTemplates ContractTemplate[]
   contracts         Contract[]
   invoices          Invoice[]
@@ -45,20 +47,17 @@ model AdminUser {
 
   savedFilters SavedFilter[]
 
-
   userRoles              UserRole[]
-  assignedRoles          UserRole[]         @relation("AssignedRoles")
+  assignedRoles          UserRole[]       @relation("AssignedRoles")
   grantedRolePermissions RolePermission[]
 
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+  notificationDigests     NotificationDigest[]
+  webhookEndpoints        WebhookEndpoint[]
 
-  notifications             Notification[]
-  notificationPreferences   NotificationPreference[]
-  notificationDigests       NotificationDigest[]
-  webhookEndpoints          WebhookEndpoint[]
-
-
-  settings             Setting[]
-  settingHistory       SettingHistory[]
+  settings       Setting[]
+  settingHistory SettingHistory[]
 
   @@map("admin_users")
 }
@@ -96,6 +95,7 @@ model Client {
   phone   String?
   company String?
   status  ClientStatus @default(ACTIVE)
+  clientType ClientType?
 
   // Address information
   address String?
@@ -103,6 +103,10 @@ model Client {
   state   String?
   zipCode String?
   country String? @default("US")
+
+  // Client source & communication preferences
+  source                String? // "website", "referral", "social", "direct", etc.
+  preferredContactMethod String? // "email", "phone", "both"
 
   // Metadata
   notes String?
@@ -120,6 +124,7 @@ model Client {
   contracts Contract[]
   invoices  Invoice[]
   Record    Record[]
+  inquiries Inquiry[]
 
   @@index([email])
   @@index([status])
@@ -130,6 +135,94 @@ enum ClientStatus {
   ACTIVE
   INACTIVE
   PENDING
+  ARCHIVED
+}
+
+enum ClientType {
+  individual
+  business
+  organization
+}
+
+// ============================================
+// LEAD CAPTURE & INQUIRY SYSTEM
+// ============================================
+
+// Inquiry - Client inquiry/lead from public form
+model Inquiry {
+  id                String      @id @default(cuid())
+
+  // Contact Information
+  fullName          String      @db.VarChar(255)
+  email             String
+  phone             String
+  company           String?     @db.VarChar(255)
+
+  // Inquiry Details
+  inquiryType       InquiryType
+  shootDate         DateTime?
+  shootDescription  String      @db.Text
+  location          String?     @db.VarChar(255)
+  specialRequirements String?   @db.Text
+
+  // Budget Information
+  budgetMin         Decimal?    @db.Decimal(10, 2)
+  budgetMax         Decimal?    @db.Decimal(10, 2)
+
+  // Files & Attachments
+  attachmentUrls    String[]    @default([])
+  attachmentCount   Int         @default(0)
+
+  // Inquiry Source & Tags
+  source            String?     // "website", "google", "referral", etc.
+  tags              String[]    @default([])
+
+  // Status & Workflow
+  status            InquiryStatus  @default(NEW)
+  internalNotes     String?     @db.Text
+
+  // Relationships
+  clientId          String?     // Links to existing/converted client
+  client            Client?     @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  contactedAt       DateTime?
+  qualifiedAt       DateTime?
+  convertedAt       DateTime?
+
+  // Metadata
+  ipAddress         String?
+  userAgent         String?
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@index([clientId])
+  @@map("inquiries")
+}
+
+enum InquiryType {
+  WEDDING
+  PORTRAIT
+  COMMERCIAL
+  EVENT
+  FAMILY
+  PRODUCT
+  REAL_ESTATE
+  HEADSHOT
+  OTHER
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATING
+  CONVERTED
+  REJECTED
   ARCHIVED
 }
 
@@ -186,8 +279,8 @@ model Asset {
   uploadedBy     String
   uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
 
-  galleries GalleryAsset[]
-  galleryCover Gallery[] @relation("GalleryCoverPhoto")
+  galleries    GalleryAsset[]
+  galleryCover Gallery[]      @relation("GalleryCoverPhoto")
 
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
@@ -313,10 +406,10 @@ model Gallery {
 
 // Join table for Gallery <-> Asset many-to-many relationship
 model GalleryAsset {
-  id        String @id @default(cuid())
-  galleryId String
-  assetId   String
-  position  Int    @default(0) // Order in gallery
+  id         String  @id @default(cuid())
+  galleryId  String
+  assetId    String
+  position   Int     @default(0) // Order in gallery
   isFavorite Boolean @default(false) // Favorite in this gallery
 
   gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
@@ -346,7 +439,7 @@ model Proposal {
   taxRate   Decimal @default(0) @db.Decimal(5, 2)
   taxAmount Decimal @default(0) @db.Decimal(10, 2)
   total     Decimal @db.Decimal(10, 2)
-  currency  String  @default("USD")
+  currency  String  @default("GBP")
 
   // Terms
   terms      String? // Terms and conditions
@@ -372,6 +465,10 @@ model Proposal {
 
   // Contract relationship
   contract Contract?
+
+  // Email template tracking
+  emailTemplateId String?
+  emailTemplate   ProposalEmailTemplate? @relation(fields: [emailTemplateId], references: [id], onDelete: SetNull)
 
   // Metadata
   notes   String? // Internal notes
@@ -417,22 +514,143 @@ enum ProposalStatus {
   EXPIRED
 }
 
-// Contract Templates - Reusable contract templates with variables
-model ContractTemplate {
-  id          String  @id @default(cuid())
-  name        String  @unique
+// Proposal Templates - Reusable proposal templates
+model ProposalTemplate {
+  id          String   @id @default(cuid())
+  name        String
   description String?
-  content     String  @db.Text // Template content with {{variables}}
 
-  // Variables metadata
-  variables Json? // List of available variables with descriptions
+  // Template content
+  title       String? // Default title for proposals created from this template
+  defaultTerms String? @db.Text // Default terms and conditions
 
   // Status
-  isActive Boolean @default(true)
-  version  Int     @default(1)
+  isActive    Boolean @default(true)
+  isPublic    Boolean @default(false) // Shared templates
+
+  // Line items
+  items ProposalTemplateItem[]
+
+  // Creator
+  createdBy     String
+  createdByUser AdminUser @relation("CreatedProposalTemplates", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdBy])
+  @@index([isActive])
+  @@map("proposal_templates")
+}
+
+// Proposal Template Line Items
+model ProposalTemplateItem {
+  id         String   @id @default(cuid())
+  templateId String
+  template   ProposalTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  position    Int     @default(0) // Order in template
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([templateId])
+  @@map("proposal_template_items")
+}
+
+// ============================================
+// CONTRACTS & DOCUMENT MANAGEMENT SYSTEM
+// ============================================
+
+// Document Types
+enum DocumentType {
+  SERVICE_AGREEMENT
+  BOOKING_CONTRACT
+  LICENSE_AGREEMENT
+  MODEL_RELEASE_ADULT
+  NDA
+  SUBCONTRACTOR_AGREEMENT
+  PRIVACY_CONSENT
+}
+
+// Event Types for photography
+enum EventType {
+  WEDDING
+  BRAND_EDITORIAL
+  EVENT
+  PORTRAIT
+  COMMERCIAL
+}
+
+// Clause - Reusable contract clauses
+model Clause {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  bodyHtml  String   @db.Text
+  tags      String[] @default([])
+  mandatory Boolean  @default(false)
+  isActive  Boolean  @default(true)
+
+  // Conditional logic rules
+  rules ClauseRule[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([mandatory])
+  @@map("clauses")
+}
+
+// ClauseRule - Conditional logic for auto-inserting clauses
+model ClauseRule {
+  id         String  @id @default(cuid())
+  clauseId   String
+  clause     Clause  @relation(fields: [clauseId], references: [id], onDelete: Cascade)
+  expression Json // JSONLogic expression
+  enabled    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clauseId])
+  @@map("clause_rules")
+}
+
+// Contract Templates - Enhanced with clause library
+model ContractTemplate {
+  id          String        @id @default(cuid())
+  name        String        @unique
+  description String?
+  type        DocumentType?
+  eventType   EventType?
+
+  // Template content
+  content  String? @db.Text // Legacy: Template content with {{variables}}
+  bodyHtml String? @db.Text // HTML content for PDF generation
+
+  // Variables metadata with validation rules
+  variables       Json? // Legacy: List of available variables
+  variablesSchema Json? // Enhanced: { name, type, required, validation, mask, default }
+
+  // Clause references
+  mandatoryClauseIds String[] @default([]) // IDs of mandatory clauses
+
+  // Status
+  isActive    Boolean @default(true)
+  isPublished Boolean @default(false)
+  version     Int     @default(1)
 
   // Generated contracts
   contracts Contract[]
+
+  // Pricing rules linked to this template
+  pricingRules PricingRule[]
 
   createdBy     String
   createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
@@ -441,23 +659,46 @@ model ContractTemplate {
   updatedAt DateTime @updatedAt
 
   @@index([name])
+  @@index([type])
+  @@index([eventType])
+  @@index([isPublished])
   @@map("contract_templates")
 }
 
-// Contracts - Generated contracts from templates
+// Contract Status with full e-signing lifecycle
+enum ContractStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  COUNTERSIGNED
+  ACTIVE
+  EXPIRED
+  TERMINATED
+  VOIDED
+  CANCELLED
+}
+
+// Contracts - Enhanced with e-signing workflow
 model Contract {
   id             String @id @default(cuid())
-  contractNumber String @unique // e.g., CONT-2025-001
+  contractNumber String @unique // e.g., CT-2025-0001
   title          String
 
+  // Numbering for reissues
+  baseNumber   String? // e.g., CT-2025-0001
+  reissueIndex Int     @default(0) // 0 = original, 1 = -R1, 2 = -R2
+
   // Template reference
-  templateId      String
-  template        ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
-  templateVersion Int              @default(1)
+  templateId      String?
+  template        ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion Int?              @default(1)
 
   // Generated content
-  content   String @db.Text // Final content with variables replaced
-  variables Json // Actual variable values used
+  content  String? @db.Text // Legacy: Final content with variables replaced
+  bodyHtml String? @db.Text // HTML content for PDF
+
+  variables Json? // Actual variable values used
 
   // Associations
   clientId String?
@@ -466,13 +707,53 @@ model Contract {
   proposalId String?   @unique
   proposal   Proposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
 
-  // Status
-  status   ContractStatus @default(DRAFT)
-  sentAt   DateTime?
-  signedAt DateTime?
+  // Invoices linked to this contract
+  invoices Invoice[]
 
-  // PDF
-  pdfPath String?
+  // Contract dates
+  signByAt    DateTime?
+  effectiveAt DateTime?
+  timezone    String    @default("Europe/London")
+
+  // E-signing: OTP verification
+  otpEmail     String?
+  otpCode      String?
+  otpExpiresAt DateTime?
+
+  // E-signing: Portal access
+  portalPasswordHash String?
+  magicLinkToken     String?   @unique
+  magicLinkExpiresAt DateTime?
+  failedAttempts     Int       @default(0)
+
+  // E-signing: Signer session
+  signerSessionId        String?
+  signerSessionExpiresAt DateTime?
+
+  // Document storage and verification
+  pdfPath          String? // PDF file path
+  pdfHash          String? // SHA-256 hash for integrity verification
+  pdfGeneratedAt   DateTime? // PDF generation timestamp
+  pdfPathEncrypted String? // Encrypted PDF path (future)
+  snapshotJsonEncrypted String? // Encrypted immutable snapshot (future)
+  ocrTextPath      String? // Sidecar OCR text file (future)
+  sha256           String? // Legacy PDF hash field
+
+  // Status tracking
+  status          ContractStatus @default(DRAFT)
+  sentAt          DateTime?
+  viewedAt        DateTime?
+  signedAt        DateTime?
+  countersignedAt DateTime?
+  voidedAt        DateTime?
+  voidedReason    String?
+
+  // Invoice automation
+  needsInvoiceRetry    Boolean @default(false)
+  invoiceFailureReason String?
+
+  // Audit trail
+  events ContractEvent[]
 
   createdBy     String
   createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
@@ -481,18 +762,87 @@ model Contract {
   updatedAt DateTime @updatedAt
 
   @@index([contractNumber])
+  @@index([baseNumber])
   @@index([clientId])
   @@index([templateId])
   @@index([status])
+  @@index([signByAt])
+  @@index([magicLinkToken])
+  @@index([sha256])
   @@map("contracts")
 }
 
-enum ContractStatus {
-  DRAFT
+// Contract Events - Full audit trail
+enum ContractEventType {
+  CREATED
   SENT
+  VIEWED
   SIGNED
+  COUNTERSIGNED
   EXPIRED
-  CANCELLED
+  VOIDED
+  LINK_LOCKED
+  REMINDER_SENT
+  PDF_VIEWED
+  PASSWORD_FAILED
+  OTP_SENT
+  OTP_VERIFIED
+  SESSION_STARTED
+  SESSION_EXPIRED
+  REISSUED
+  REACTIVATED
+}
+
+model ContractEvent {
+  id         String            @id @default(cuid())
+  contractId String
+  contract   Contract          @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  type       ContractEventType
+  ip         String? // Hashed IP address
+  userAgent  String? // Hashed user agent
+  meta       Json? // Additional metadata
+
+  createdAt DateTime @default(now())
+
+  @@index([contractId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("contract_events")
+}
+
+// Contract Reminder Rules
+model ContractReminderRule {
+  id                String  @id @default(cuid())
+  name              String
+  offsetsDays       Int[] // e.g., [-3, 0, 3, 7] for T-3, T, T+3, T+7
+  businessHoursOnly Boolean @default(true)
+  cooldownHours     Int     @default(24)
+  isActive          Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contract_reminder_rules")
+}
+
+// Pricing Rules - Auto-invoice creation on signature
+model PricingRule {
+  id         String            @id @default(cuid())
+  key        String            @unique // event_type or template_id
+  eventType  EventType?
+  templateId String?
+  template   ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  depositPercent     Decimal @default(50) @db.Decimal(5, 2)
+  finalDueOffsetDays Int     @default(30)
+  notes              String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([eventType])
+  @@index([templateId])
+  @@map("pricing_rules")
 }
 
 // Invoices - Client invoicing
@@ -506,6 +856,10 @@ model Invoice {
   clientId String
   client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
+  // Contract linkage (for invoices auto-created from contracts)
+  contractId String?
+  contract   Contract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
+
   // Pricing
   subtotal   Decimal @db.Decimal(10, 2)
   taxRate    Decimal @default(0) @db.Decimal(5, 2)
@@ -513,12 +867,15 @@ model Invoice {
   total      Decimal @db.Decimal(10, 2)
   amountPaid Decimal @default(0) @db.Decimal(10, 2)
   amountDue  Decimal @db.Decimal(10, 2)
-  currency   String  @default("USD")
+  currency   String  @default("GBP")
 
   // Payment terms
   dueDate      DateTime?
   paymentTerms String? // e.g., "Net 30", "Due on Receipt"
   notes        String?
+
+  // Payment configuration
+  paymentType PaymentType? // CASH or CARD (selected by admin when sending invoice)
 
   // Status
   status InvoiceStatus @default(DRAFT)
@@ -540,6 +897,7 @@ model Invoice {
 
   @@index([invoiceNumber])
   @@index([clientId])
+  @@index([contractId])
   @@index([status])
   @@index([dueDate])
   @@map("invoices")
@@ -575,7 +933,7 @@ model Payment {
 
   // Payment details
   amount   Decimal       @db.Decimal(10, 2)
-  currency String        @default("USD")
+  currency String        @default("GBP")
   method   PaymentMethod @default(BANK_TRANSFER)
   status   PaymentStatus @default(PENDING)
 
@@ -610,6 +968,11 @@ enum InvoiceStatus {
   CANCELLED
 }
 
+enum PaymentType {
+  CASH
+  CARD
+}
+
 enum PaymentMethod {
   CREDIT_CARD
   BANK_TRANSFER
@@ -617,6 +980,8 @@ enum PaymentMethod {
   CASH
   STRIPE
   PAYPAL
+  APPLE_PAY
+  GOOGLE_PAY
   OTHER
 }
 
@@ -637,7 +1002,7 @@ model BankTransaction {
   transactionDate DateTime
   description     String
   amount          Decimal  @db.Decimal(10, 2)
-  currency        String   @default("USD")
+  currency        String   @default("GBP")
   reference       String? // Bank reference number
 
   // Bank account info
@@ -1148,7 +1513,6 @@ model SavedFilter {
   @@map("saved_filters")
 }
 
-
 // ============================================
 // RBAC & PERMISSIONS
 // ============================================
@@ -1159,24 +1523,24 @@ model SystemRole {
   name        String  @unique // SUPER_ADMIN, ADMIN, EDITOR, VIEWER, etc.
   displayName String // Human-readable name
   description String?
-  
+
   // Role hierarchy level (higher = more permissions)
   level Int @default(0)
-  
+
   // System flags
   isSystem  Boolean @default(false) // Cannot be deleted
   isDefault Boolean @default(false) // Assigned to new users
   isActive  Boolean @default(true)
-  
+
   // Permissions
   permissions RolePermission[]
-  
+
   // User assignments
   userRoles UserRole[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([name])
   @@index([level])
   @@map("system_roles")
@@ -1184,25 +1548,25 @@ model SystemRole {
 
 // UserRole - Many-to-many relationship between users and roles
 model UserRole {
-  id     String @id @default(cuid())
+  id     String    @id @default(cuid())
   userId String
   user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   roleId String
   role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  
+
   // Assignment metadata
   assignedBy     String?
   assignedByUser AdminUser? @relation("AssignedRoles", fields: [assignedBy], references: [id], onDelete: SetNull)
   assignedAt     DateTime   @default(now())
-  
+
   // Scope (optional - for limiting role to specific resources)
   scope     String? // e.g., "client:abc123" to limit to one client
   expiresAt DateTime?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([userId, roleId, scope]) // User can have same role with different scopes
   @@index([userId])
   @@index([roleId])
@@ -1211,33 +1575,33 @@ model UserRole {
 
 // Permission - Granular permission definitions
 model Permission {
-  id       String  @id @default(cuid())
+  id       String @id @default(cuid())
   resource String // Resource type: "clients", "invoices", "assets", etc.
   action   String // Action: "create", "read", "update", "delete", "export", etc.
-  
+
   // Combined permission name: "clients:read", "invoices:delete"
   name String @unique
-  
+
   displayName String
   description String?
-  
+
   // Grouping
   category String? // "Content", "Finance", "Admin", etc.
-  
+
   // Permission flags
-  isSystem   Boolean @default(true) // System-defined permissions
-  isActive   Boolean @default(true)
+  isSystem    Boolean @default(true) // System-defined permissions
+  isActive    Boolean @default(true)
   isDangerous Boolean @default(false) // Requires extra confirmation
-  
+
   // Role assignments
   rolePermissions RolePermission[]
-  
+
   // Policy rules
   policyRules PolicyRule[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([resource, action])
   @@index([name])
   @@index([resource])
@@ -1247,21 +1611,21 @@ model Permission {
 // RolePermission - Many-to-many between roles and permissions
 model RolePermission {
   id String @id @default(cuid())
-  
+
   roleId String
   role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  
+
   permissionId String
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  
+
   // Grant metadata
   grantedBy     String?
   grantedByUser AdminUser? @relation(fields: [grantedBy], references: [id], onDelete: SetNull)
   grantedAt     DateTime   @default(now())
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([roleId, permissionId])
   @@index([roleId])
   @@index([permissionId])
@@ -1272,27 +1636,27 @@ model RolePermission {
 model PolicyRule {
   id   String @id @default(cuid())
   name String @unique
-  
+
   // Rule definition
   permissionId String
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
-  
+
   // Rule conditions (JSON-based)
   // Example: { "field": "ownerId", "operator": "equals", "value": "$userId" }
   // Example: { "field": "status", "operator": "in", "value": ["DRAFT", "PENDING"] }
   conditions Json
-  
+
   // Rule behavior
   effect      PolicyEffect @default(ALLOW) // ALLOW or DENY
   priority    Int          @default(0) // Higher priority = evaluated first
   description String?
-  
+
   // Status
   isActive Boolean @default(true)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([permissionId])
   @@index([priority])
   @@map("policy_rules")
@@ -1306,18 +1670,18 @@ enum PolicyEffect {
 // PermissionCache - Cache for permission checks (optional optimization)
 model PermissionCache {
   id String @id @default(cuid())
-  
+
   userId       String
   permissionId String
   resourceId   String? // Specific resource being accessed
-  
+
   // Cached result
   hasPermission Boolean
-  
+
   // Cache metadata
   computedAt DateTime @default(now())
   expiresAt  DateTime
-  
+
   @@unique([userId, permissionId, resourceId])
   @@index([userId])
   @@index([expiresAt])
@@ -1331,42 +1695,42 @@ model PermissionCache {
 // Notification - In-app notifications for users
 model Notification {
   id String @id @default(cuid())
-  
+
   userId String
   user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   // Notification details
   type     NotificationType // Event type
   title    String
   message  String           @db.Text
   category String? // "info", "success", "warning", "error"
-  
+
   // Related entity
   entityType String? // "invoice", "client", "asset", etc.
   entityId   String?
-  
+
   // Additional data (JSON)
   metadata Json?
-  
+
   // Actions
   actionUrl  String? // URL to navigate to
   actionText String? // Button text
-  
+
   // Status
   isRead      Boolean   @default(false)
   readAt      DateTime?
   isDismissed Boolean   @default(false)
   dismissedAt DateTime?
-  
+
   // Priority
   priority NotificationPriority @default(NORMAL)
-  
+
   // Expiration
   expiresAt DateTime?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([type])
   @@index([isRead])
@@ -1379,19 +1743,19 @@ enum NotificationType {
   CLIENT_CREATED
   CLIENT_UPDATED
   CLIENT_MESSAGE
-  
+
   // Invoice events
   INVOICE_CREATED
   INVOICE_SENT
   INVOICE_PAID
   INVOICE_OVERDUE
   INVOICE_REMINDER
-  
+
   // Payment events
   PAYMENT_RECEIVED
   PAYMENT_FAILED
   PAYMENT_REFUNDED
-  
+
   // Contract/Proposal events
   PROPOSAL_CREATED
   PROPOSAL_SENT
@@ -1400,33 +1764,33 @@ enum NotificationType {
   PROPOSAL_DECLINED
   CONTRACT_SIGNED
   CONTRACT_EXPIRING
-  
+
   // Gallery events
   GALLERY_CREATED
   GALLERY_SHARED
   GALLERY_VIEWED
   GALLERY_EXPIRING
-  
+
   // Proofing events
   PROOF_SELECTION_MADE
   PROOF_COMMENT_ADDED
   PROOF_COMPLETED
-  
+
   // Asset events
   ASSET_UPLOADED
   ASSET_PROCESSED
   ASSET_FAILED
-  
+
   // User events
   USER_INVITED
   USER_ROLE_CHANGED
-  
+
   // System events
   SYSTEM_MAINTENANCE
   SYSTEM_UPDATE
   BACKUP_COMPLETED
   BACKUP_FAILED
-  
+
   // Custom
   CUSTOM
 }
@@ -1441,27 +1805,27 @@ enum NotificationPriority {
 // NotificationPreference - User notification subscription settings
 model NotificationPreference {
   id String @id @default(cuid())
-  
+
   userId String
   user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   // Channel preferences
   emailEnabled   Boolean @default(true)
   inAppEnabled   Boolean @default(true)
   webhookEnabled Boolean @default(false)
-  
+
   // Event-specific preferences
   eventType NotificationType
   enabled   Boolean          @default(true)
-  
+
   // Digest preferences
-  digestEnabled   Boolean              @default(false)
+  digestEnabled   Boolean                     @default(false)
   digestFrequency NotificationDigestFrequency @default(DAILY)
   digestTime      String? // HH:MM format, e.g., "09:00"
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@unique([userId, eventType])
   @@index([userId])
   @@map("notification_preferences")
@@ -1476,23 +1840,23 @@ enum NotificationDigestFrequency {
 // NotificationDigest - Scheduled digest emails
 model NotificationDigest {
   id String @id @default(cuid())
-  
+
   userId String
   user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   frequency NotificationDigestFrequency
-  
+
   // Digest content
   notificationIds String[] // Array of notification IDs included
-  emailSent       Boolean  @default(false)
+  emailSent       Boolean   @default(false)
   emailSentAt     DateTime?
-  
+
   // Period covered
   periodStart DateTime
   periodEnd   DateTime
-  
+
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([emailSent])
   @@index([periodStart])
@@ -1502,43 +1866,43 @@ model NotificationDigest {
 // WebhookEndpoint - Webhook delivery targets
 model WebhookEndpoint {
   id String @id @default(cuid())
-  
+
   userId String
   user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   // Endpoint details
   name        String
   url         String
   secret      String? // Webhook signing secret
   description String?
-  
+
   // Event subscriptions
   events String[] @default([]) // Array of NotificationType
-  
+
   // Status
-  isActive       Boolean @default(true)
-  isVerified     Boolean @default(false)
-  verifiedAt     DateTime?
-  lastPingAt     DateTime?
-  lastSuccessAt  DateTime?
-  lastFailureAt  DateTime?
-  failureCount   Int     @default(0)
-  consecutiveFailures Int @default(0)
-  
+  isActive            Boolean   @default(true)
+  isVerified          Boolean   @default(false)
+  verifiedAt          DateTime?
+  lastPingAt          DateTime?
+  lastSuccessAt       DateTime?
+  lastFailureAt       DateTime?
+  failureCount        Int       @default(0)
+  consecutiveFailures Int       @default(0)
+
   // Retry configuration
   maxRetries     Int @default(3)
   retryBackoff   Int @default(60) // Seconds
   timeoutSeconds Int @default(30)
-  
+
   // Headers (JSON)
   headers Json?
-  
+
   // Deliveries
   deliveries WebhookDelivery[]
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([userId])
   @@index([isActive])
   @@map("webhook_endpoints")
@@ -1547,35 +1911,35 @@ model WebhookEndpoint {
 // WebhookDelivery - Webhook delivery attempts tracking
 model WebhookDelivery {
   id String @id @default(cuid())
-  
+
   endpointId String
   endpoint   WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
-  
+
   // Event details
   eventType NotificationType
   eventId   String // ID of the notification or event
   payload   Json // Full webhook payload
-  
+
   // Delivery status
-  status       WebhookDeliveryStatus @default(PENDING)
-  attempts     Int                   @default(0)
-  maxAttempts  Int                   @default(3)
-  nextRetryAt  DateTime?
-  
+  status      WebhookDeliveryStatus @default(PENDING)
+  attempts    Int                   @default(0)
+  maxAttempts Int                   @default(3)
+  nextRetryAt DateTime?
+
   // Response
   responseStatus Int? // HTTP status code
   responseBody   String? @db.Text
   responseTime   Int? // Milliseconds
-  
+
   // Error tracking
-  error          String? @db.Text
-  lastAttemptAt  DateTime?
-  succeededAt    DateTime?
-  failedAt       DateTime?
-  
+  error         String?   @db.Text
+  lastAttemptAt DateTime?
+  succeededAt   DateTime?
+  failedAt      DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([endpointId])
   @@index([status])
   @@index([nextRetryAt])
@@ -1594,18 +1958,18 @@ enum WebhookDeliveryStatus {
 // EmailLog - Track all emails sent
 model EmailLog {
   id String @id @default(cuid())
-  
+
   // Recipient
   to      String
   cc      String?
   bcc     String?
   from    String
   replyTo String?
-  
+
   // Content
   subject  String
   template String? // Template name if using templates
-  
+
   // Status
   status       EmailStatus @default(PENDING)
   sentAt       DateTime?
@@ -1614,18 +1978,18 @@ model EmailLog {
   clickedAt    DateTime?
   bouncedAt    DateTime?
   complainedAt DateTime?
-  
+
   // Tracking
   messageId      String? // Provider message ID
   providerStatus String?
   error          String? @db.Text
-  
+
   // Metadata
   metadata Json?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([to])
   @@index([status])
   @@index([createdAt])
@@ -1651,73 +2015,73 @@ enum EmailStatus {
 // Organization - Main organization/company profile
 model Organization {
   id String @id @default(cuid())
-  
+
   // Basic information
-  name        String
-  legalName   String?
-  email       String
-  phone       String?
-  website     String?
-  
+  name      String
+  legalName String?
+  email     String
+  phone     String?
+  website   String?
+
   // Address
   addressLine1 String?
   addressLine2 String?
   city         String?
   state        String?
   postcode     String?
-  country      String @default("GB")
-  
+  country      String  @default("GB")
+
   // Tax information
-  vatNumber     String?
-  taxId         String?
+  vatNumber      String?
+  taxId          String?
   defaultTaxRate Decimal @default(20) @db.Decimal(5, 2) // Default VAT rate
-  
+
   // Branding
-  logoUrl         String?
-  primaryColor    String? // Hex color
-  secondaryColor  String?
-  accentColor     String?
-  
+  logoUrl        String?
+  primaryColor   String? // Hex color
+  secondaryColor String?
+  accentColor    String?
+
   // Feature flags
   features Json @default("{}")
-  
+
   // Settings
   timezone String @default("Europe/London")
   locale   String @default("en-GB")
   currency String @default("GBP")
-  
+
   // Metadata
   metadata Json?
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@map("organizations")
 }
 
 // Setting - Key-value settings storage
 model Setting {
   id String @id @default(cuid())
-  
+
   // Setting key (unique)
-  key   String @unique
-  
+  key String @unique
+
   // Setting value (JSON for flexibility)
   value Json
-  
+
   // Metadata
   category    String? // "email", "notification", "branding", etc.
   description String?
   isPublic    Boolean @default(false) // Can be exposed to frontend
   isEncrypted Boolean @default(false) // Is value encrypted
-  
+
   // Change tracking
   lastChangedBy     String?
   lastChangedByUser AdminUser? @relation(fields: [lastChangedBy], references: [id], onDelete: SetNull)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   @@index([category])
   @@index([isPublic])
   @@map("settings")
@@ -1726,26 +2090,58 @@ model Setting {
 // SettingHistory - Audit log for setting changes
 model SettingHistory {
   id String @id @default(cuid())
-  
+
   settingKey String
-  
+
   // Change details
   oldValue Json?
   newValue Json
-  
+
   // Who changed it
   changedBy     String
   changedByUser AdminUser @relation(fields: [changedBy], references: [id], onDelete: Cascade)
-  
+
   // Additional context
   ipAddress String?
   userAgent String?
   reason    String? // Optional reason for change
-  
+
   createdAt DateTime @default(now())
-  
+
   @@index([settingKey])
   @@index([changedBy])
   @@index([createdAt])
   @@map("setting_history")
+}
+
+// ============================================
+// PROPOSAL EMAIL TEMPLATES
+// ============================================
+
+// ProposalEmailTemplate - Email templates for sending proposals
+model ProposalEmailTemplate {
+  id          String  @id @default(cuid())
+  name        String // Template name (e.g., "Standard Proposal Email")
+  subject     String // Email subject line (can include {{variables}})
+  content     String  @db.Text // HTML email content (can include {{variables}})
+
+  // Status
+  isActive    Boolean @default(true)
+  isDefault   Boolean @default(false)
+
+  // Tracking
+  proposals   Proposal[]
+
+  // Creator
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([createdBy])
+  @@index([isActive])
+  @@index([isDefault])
+  @@map("proposal_email_templates")
 }

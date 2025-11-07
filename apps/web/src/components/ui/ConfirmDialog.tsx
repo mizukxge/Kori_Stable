@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './Card';
 import { Button } from './Button';
 import { AlertTriangle } from 'lucide-react';
@@ -27,9 +27,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   if (!isOpen) return null;
 
   const variantColors = {
-    danger: 'text-red-500',
+    danger: 'text-destructive',
     warning: 'text-orange-500',
-    info: 'text-blue-500',
+    info: 'text-primary',
   };
 
   const buttonVariants = {

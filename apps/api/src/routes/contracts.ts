@@ -249,28 +249,33 @@ export async function contractsRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * POST /admin/contracts/:id/generate-pdf
-   * Generate PDF for contract
+   * POST /admin/contracts/:id/resend
+   * Resend contract to client (revokes old magic link)
    */
-  fastify.post('/admin/contracts/:id/generate-pdf', async (request, reply) => {
+  fastify.post('/admin/contracts/:id/resend', async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
 
-      const pdfPath = await ContractService.generatePDF(id);
+      const contract = await ContractService.resendContract(id, request.user!.userId);
 
       request.log.info(
         {
           contractId: id,
+          contractNumber: contract.contractNumber,
           userId: request.user!.userId,
         },
-        'Contract PDF generated'
+        'Contract resent'
       );
 
       return reply.status(200).send({
         success: true,
-        message: 'PDF generated successfully',
+        message: 'Contract resent successfully',
         data: {
-          pdfPath,
+          contractNumber: contract.contractNumber,
+          status: contract.status,
+          sentAt: contract.sentAt,
+          magicLinkUrl: contract.magicLinkUrl,
+          magicLinkExpiresAt: contract.magicLinkExpiresAt,
         },
       });
     } catch (error) {
@@ -282,7 +287,19 @@ export async function contractsRoutes(fastify: FastifyInstance) {
         });
       }
 
-      request.log.error(error, 'Error generating PDF');
+      if (
+        error instanceof Error &&
+        (error.message === 'Cannot resend a signed contract' ||
+          error.message === 'Cannot resend a declined contract')
+      ) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error resending contract');
       throw error;
     }
   });
@@ -329,6 +346,34 @@ export async function contractsRoutes(fastify: FastifyInstance) {
   });
 
   /**
+   * GET /admin/contracts/:id/events
+   * Get audit trail events for a contract
+   */
+  fastify.get('/admin/contracts/:id/events', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const events = await ContractService.getContractEvents(id);
+
+      return reply.status(200).send({
+        success: true,
+        data: events,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Contract not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Contract not found',
+        });
+      }
+
+      request.log.error(error, 'Error fetching contract events');
+      throw error;
+    }
+  });
+
+  /**
    * DELETE /admin/contracts/:id
    * Delete a contract
    */
@@ -364,6 +409,139 @@ export async function contractsRoutes(fastify: FastifyInstance) {
       }
 
       request.log.error(error, 'Error deleting contract');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/contracts/:id/generate-pdf
+   * Generate PDF for a contract
+   */
+  fastify.post('/admin/contracts/:id/generate-pdf', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const userId = request.user!.userId;
+
+      const contract = await ContractService.generatePDF(id, userId);
+
+      request.log.info(
+        {
+          contractId: id,
+          pdfPath: contract.pdfPath,
+          pdfHash: contract.pdfHash,
+        },
+        'PDF generated for contract'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'PDF generated successfully',
+        data: contract,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: error.message,
+        });
+      }
+
+      if (error instanceof Error && error.message.includes('no content')) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error generating PDF');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/contracts/:id/regenerate-pdf
+   * Regenerate PDF for a contract (replaces existing)
+   */
+  fastify.post('/admin/contracts/:id/regenerate-pdf', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const userId = request.user!.userId;
+
+      const contract = await ContractService.regeneratePDF(id, userId);
+
+      request.log.info(
+        {
+          contractId: id,
+          pdfPath: contract.pdfPath,
+        },
+        'PDF regenerated for contract'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'PDF regenerated successfully',
+        data: contract,
+      });
+    } catch (error) {
+      request.log.error(error, 'Error regenerating PDF');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /admin/contracts/:id/verify-pdf
+   * Verify PDF integrity using stored hash
+   */
+  fastify.get('/admin/contracts/:id/verify-pdf', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const result = await ContractService.verifyPDF(id);
+
+      return reply.status(200).send({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('no PDF')) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error verifying PDF');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /admin/contracts/:id/pdf-info
+   * Get PDF metadata and information
+   */
+  fastify.get('/admin/contracts/:id/pdf-info', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const info = await ContractService.getPDFInfo(id);
+
+      return reply.status(200).send({
+        success: true,
+        data: info,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('no PDF')) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error getting PDF info');
       throw error;
     }
   });

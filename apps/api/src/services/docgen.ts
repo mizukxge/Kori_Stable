@@ -65,10 +65,10 @@ export class DocGenService {
     // Format currency
     Handlebars.registerHelper('currency', function(currency: string, value: number) {
       // Handle case where currency might be undefined
-      const currencyCode = currency || 'USD';
+      const currencyCode = currency || 'GBP';
       const numValue = typeof value === 'number' ? value : parseFloat(value);
-      
-      return new Intl.NumberFormat('en-US', {
+
+      return new Intl.NumberFormat('en-GB', {
         style: 'currency',
         currency: currencyCode,
       }).format(numValue);

@@ -19,15 +19,26 @@ async function start() {
     // Build server with all middlewares
     const server = await buildServer();
 
+    // Add hook to modify headers for PDF files before sending response
+    server.addHook('onSend', async (request, reply, payload) => {
+      // Check if this is a PDF file request
+      if (request.url.includes('/uploads/') && request.url.endsWith('.pdf')) {
+        reply.header('Content-Type', 'application/pdf');
+        reply.header('Content-Disposition', 'inline');
+        // Don't override Access-Control headers - let CORS plugin handle it
+        // Remove X-Frame-Options to allow iframe embedding
+        reply.removeHeader('X-Frame-Options');
+        // Set CSP to allow framing from localhost:3000
+        reply.header('Content-Security-Policy', "frame-ancestors 'self' http://localhost:3000");
+      }
+      return payload;
+    });
+
     // Serve uploaded files statically
     await server.register(fastifyStatic, {
       root: path.join(__dirname, '..', 'uploads'),
       prefix: '/uploads/',
-      decorateReply: false,
-      setHeaders: (res: any) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-      }
+      decorateReply: false
     });
 
     // Register all routes

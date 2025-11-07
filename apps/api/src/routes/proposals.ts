@@ -1,5 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { ProposalService } from '../services/proposal.js';
+import { ProposalConversionService } from '../services/proposalConversion.js';
+import { ProposalEmailTemplateService } from '../services/proposalEmailTemplate.js';
+import { sendEmail } from '../services/email.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 export async function proposalsRoutes(fastify: FastifyInstance) {
@@ -323,6 +326,273 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
       }
 
       request.log.error(error, 'Error deleting proposal');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/proposals/:id/send-email
+   * Send proposal via email using an email template
+   */
+  fastify.post('/admin/proposals/:id/send-email', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+      const body = request.body as any;
+
+      // Get proposal
+      const proposal = await ProposalService.getProposalById(id);
+
+      if (!proposal.client) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Proposal must have a client associated',
+        });
+      }
+
+      // Get or use template
+      let templateId = body.templateId;
+      let renderedEmail;
+
+      if (templateId) {
+        // Render using specified template
+        renderedEmail = await ProposalEmailTemplateService.renderTemplate(
+          templateId,
+          id,
+          request.user!.userId
+        );
+      } else {
+        // Get default template
+        const defaultTemplate = await ProposalEmailTemplateService.getDefaultTemplate(
+          request.user!.userId
+        );
+
+        if (!defaultTemplate) {
+          return reply.status(400).send({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: 'No template specified and no default template found',
+          });
+        }
+
+        templateId = defaultTemplate.id;
+        renderedEmail = await ProposalEmailTemplateService.renderTemplate(
+          defaultTemplate.id,
+          id,
+          request.user!.userId
+        );
+      }
+
+      // Use custom recipient email if provided, otherwise use client email
+      const recipientEmail = body.recipientEmail || proposal.client.email;
+
+      // Add custom message if provided
+      let emailContent = renderedEmail.content;
+      if (body.customMessage) {
+        emailContent = `
+          <div style="padding: 20px; background: #f7fafc; border-left: 4px solid #4F46E5; margin-bottom: 20px;">
+            <p style="margin: 0; white-space: pre-wrap;">${body.customMessage}</p>
+          </div>
+          ${emailContent}
+        `;
+      }
+
+      // Send email
+      const emailLogId = await sendEmail({
+        to: recipientEmail,
+        subject: renderedEmail.subject,
+        html: emailContent,
+        template: 'proposal',
+        metadata: {
+          proposalId: proposal.id,
+          proposalNumber: proposal.proposalNumber,
+          templateId,
+          customMessage: body.customMessage || null,
+        },
+      });
+
+      if (!emailLogId) {
+        return reply.status(500).send({
+          statusCode: 500,
+          error: 'Internal Server Error',
+          message: 'Failed to send email',
+        });
+      }
+
+      // Update proposal with email template ID
+      await ProposalService.updateProposal(id, { emailTemplateId: templateId }, request.user!.userId);
+
+      request.log.info(
+        {
+          proposalId: id,
+          proposalNumber: proposal.proposalNumber,
+          recipientEmail,
+          emailLogId,
+          userId: request.user!.userId,
+        },
+        'Proposal email sent'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Proposal email sent successfully',
+        data: {
+          emailLogId,
+          recipientEmail,
+          subject: renderedEmail.subject,
+          sentAt: new Date(),
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Proposal not found') {
+          return reply.status(404).send({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Proposal not found',
+          });
+        }
+
+        if (error.message === 'Email template not found') {
+          return reply.status(404).send({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Email template not found',
+          });
+        }
+      }
+
+      request.log.error(error, 'Error sending proposal email');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/proposals/:id/accept-and-convert
+   * Accept a proposal and automatically create linked contract and invoice
+   * Single-click conversion feature
+   */
+  fastify.post('/admin/proposals/:id/accept-and-convert', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const result = await ProposalConversionService.acceptAndConvert(id);
+
+      request.log.info(
+        {
+          proposalId: id,
+          contractId: result.contract.id,
+          invoiceId: result.invoice.id,
+          userId: request.user!.userId,
+        },
+        'Proposal accepted and converted to contract and invoice'
+      );
+
+      return reply.status(201).send({
+        success: true,
+        message: 'Proposal accepted and converted successfully',
+        data: {
+          proposal: result.proposal,
+          contract: result.contract,
+          invoice: result.invoice,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Proposal not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Proposal not found',
+        });
+      }
+
+      if (
+        error instanceof Error &&
+        error.message.includes('Proposal cannot be accepted from status')
+      ) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error accepting and converting proposal');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /admin/proposals/:id/conversion-status
+   * Get the conversion status of a proposal
+   */
+  fastify.get('/admin/proposals/:id/conversion-status', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const status = await ProposalConversionService.getConversionStatus(id);
+
+      return reply.status(200).send({
+        success: true,
+        data: status,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Proposal not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Proposal not found',
+        });
+      }
+
+      request.log.error(error, 'Error getting conversion status');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/proposals/:id/undo-conversion
+   * Undo a proposal acceptance and mark contract/invoice as voided/cancelled
+   */
+  fastify.post('/admin/proposals/:id/undo-conversion', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      await ProposalConversionService.undoConversion(id);
+
+      request.log.info(
+        {
+          proposalId: id,
+          userId: request.user!.userId,
+        },
+        'Proposal conversion undone'
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Proposal conversion undone successfully',
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Proposal not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Proposal not found',
+        });
+      }
+
+      if (
+        error instanceof Error &&
+        error.message === 'Proposal must be accepted to undo conversion'
+      ) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error undoing conversion');
       throw error;
     }
   });

@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import { PrismaClient, EmailStatus } from '@prisma/client';
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 const prisma = new PrismaClient();
 
@@ -11,8 +12,15 @@ const EMAIL_PASS = process.env.EMAIL_PASS;
 const EMAIL_FROM = process.env.EMAIL_FROM || EMAIL_USER;
 const EMAIL_ENABLED = process.env.EMAIL_ENABLED !== 'false';
 
-// Create transporter
-const transporter = EMAIL_USER && EMAIL_PASS
+// AWS SES configuration
+const USE_SES = process.env.USE_SES === 'true';
+const AWS_REGION = process.env.AWS_REGION || 'eu-west-2';
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const SENDER_EMAIL = process.env.SENDER_EMAIL || EMAIL_FROM;
+
+// Create transporter for Nodemailer
+const transporter = EMAIL_USER && EMAIL_PASS && !USE_SES
   ? nodemailer.createTransport({
       host: EMAIL_HOST,
       port: EMAIL_PORT,
@@ -20,6 +28,17 @@ const transporter = EMAIL_USER && EMAIL_PASS
       auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS,
+      },
+    })
+  : null;
+
+// Create SES client
+const sesClient = USE_SES && AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
+  ? new SESClient({
+      region: AWS_REGION,
+      credentials: {
+        accessKeyId: AWS_ACCESS_KEY_ID,
+        secretAccessKey: AWS_SECRET_ACCESS_KEY,
       },
     })
   : null;
@@ -38,7 +57,61 @@ export interface EmailOptions {
 }
 
 /**
- * Send an email
+ * Send email using SES
+ */
+async function sendEmailWithSES(
+  to: string[],
+  subject: string,
+  html?: string,
+  text?: string,
+  replyTo?: string,
+  from?: string
+): Promise<string | null> {
+  if (!sesClient) {
+    console.error('[Email] SES not configured, cannot send:', subject);
+    return null;
+  }
+
+  try {
+    const command = new SendEmailCommand({
+      Source: from || SENDER_EMAIL || 'noreply@shotbymizu.co.uk',
+      Destination: {
+        ToAddresses: to,
+      },
+      Message: {
+        Subject: {
+          Data: subject,
+          Charset: 'UTF-8',
+        },
+        Body: {
+          Html: html
+            ? {
+                Data: html,
+                Charset: 'UTF-8',
+              }
+            : undefined,
+          Text: text
+            ? {
+                Data: text,
+                Charset: 'UTF-8',
+              }
+            : undefined,
+        },
+      },
+      ReplyToAddresses: replyTo ? [replyTo] : undefined,
+    });
+
+    const result = await sesClient.send(command);
+    console.log(`[Email/SES] Sent: ${subject} to ${to.join(', ')} (MessageId: ${result.MessageId})`);
+    return result.MessageId || null;
+  } catch (error: any) {
+    console.error('[Email/SES] Failed to send:', error);
+    throw error;
+  }
+}
+
+/**
+ * Send an email (supports both Nodemailer and AWS SES)
  */
 export async function sendEmail(options: EmailOptions): Promise<string | null> {
   if (!EMAIL_ENABLED) {
@@ -46,8 +119,83 @@ export async function sendEmail(options: EmailOptions): Promise<string | null> {
     return null;
   }
 
+  // Use SES if configured
+  if (USE_SES && sesClient) {
+    try {
+      const to = Array.isArray(options.to) ? options.to : [options.to];
+      const cc = options.cc ? (Array.isArray(options.cc) ? options.cc : [options.cc]) : [];
+      const bcc = options.bcc ? (Array.isArray(options.bcc) ? options.bcc : [options.bcc]) : [];
+
+      // Create email log entry
+      const emailLog = await prisma.emailLog.create({
+        data: {
+          to: to.join(', '),
+          cc: cc.length > 0 ? cc.join(', ') : undefined,
+          bcc: bcc.length > 0 ? bcc.join(', ') : undefined,
+          from: options.from || SENDER_EMAIL || '',
+          replyTo: options.replyTo,
+          subject: options.subject,
+          template: options.template,
+          status: EmailStatus.PENDING,
+          metadata: options.metadata || {},
+        },
+      });
+
+      // Update status to sending
+      await prisma.emailLog.update({
+        where: { id: emailLog.id },
+        data: { status: EmailStatus.SENDING },
+      });
+
+      // Send email with SES
+      const messageId = await sendEmailWithSES(
+        to.concat(cc, bcc),
+        options.subject,
+        options.html,
+        options.text,
+        options.replyTo,
+        options.from
+      );
+
+      // Update log with success
+      await prisma.emailLog.update({
+        where: { id: emailLog.id },
+        data: {
+          status: EmailStatus.SENT,
+          sentAt: new Date(),
+          messageId: messageId || undefined,
+        },
+      });
+
+      console.log(`[Email] Sent via SES: ${options.subject} to ${to.join(', ')}`);
+      return emailLog.id;
+    } catch (error: any) {
+      console.error('[Email] Failed to send via SES:', error);
+
+      // Log failure
+      try {
+        await prisma.emailLog.create({
+          data: {
+            to: Array.isArray(options.to) ? options.to.join(', ') : options.to,
+            from: options.from || SENDER_EMAIL || '',
+            subject: options.subject,
+            template: options.template,
+            status: EmailStatus.FAILED,
+            error: error.message,
+            metadata: options.metadata || {},
+          },
+        });
+      } catch (logError) {
+        console.error('[Email] Failed to log error:', logError);
+      }
+
+      return null;
+    }
+  }
+
+  // Fall back to Nodemailer
   if (!transporter) {
-    console.error('[Email] Email not configured, cannot send:', options.subject);
+    console.error('[Email] Email not configured (neither SES nor Nodemailer), cannot send:', options.subject);
     return null;
   }
 
@@ -78,7 +226,7 @@ export async function sendEmail(options: EmailOptions): Promise<string | null> {
       data: { status: EmailStatus.SENDING },
     });
 
-    // Send email
+    // Send email via Nodemailer
     const info = await transporter.sendMail({
       from: options.from || EMAIL_FROM,
       to,
@@ -100,10 +248,10 @@ export async function sendEmail(options: EmailOptions): Promise<string | null> {
       },
     });
 
-    console.log(`[Email] Sent: ${options.subject} to ${to}`);
+    console.log(`[Email] Sent via Nodemailer: ${options.subject} to ${to}`);
     return emailLog.id;
   } catch (error: any) {
-    console.error('[Email] Failed to send:', error);
+    console.error('[Email] Failed to send via Nodemailer:', error);
 
     // Log failure
     try {

@@ -213,7 +213,7 @@ export class BankImportService {
           transactionDate,
           description: description.trim(),
           amount,
-          currency: 'USD',
+          currency: 'GBP',
           reference: reference?.trim(),
           rawData: row,
         });

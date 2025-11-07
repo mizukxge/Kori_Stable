@@ -3,12 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
-import { 
-  Home, 
-  MessageSquare, 
-  DollarSign, 
-  Download, 
-  FileText, 
+import {
+  Home,
+  MessageSquare,
+  PoundSterling,
+  Download,
+  FileText,
   X,
   Menu
 } from 'lucide-react';
@@ -16,7 +16,7 @@ import {
 const navigation = [
   { name: 'Dashboard', icon: Home, href: '/portal' },
   { name: 'Messages', icon: MessageSquare, href: '/portal/messages' },
-  { name: 'Invoices', icon: DollarSign, href: '/portal/invoices' },
+  { name: 'Invoices', icon: PoundSterling, href: '/portal/invoices' },
   { name: 'Downloads', icon: Download, href: '/portal/files' },
   { name: 'Documents', icon: FileText, href: '/portal/documents' },
 ];
@@ -85,9 +85,9 @@ export function PortalLayout({ children }: PortalLayoutProps) {
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        
-        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-          <div className="mx-auto max-w-7xl">
+
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="mx-auto max-w-7xl p-6">
             {children}
           </div>
         </main>

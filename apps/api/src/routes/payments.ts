@@ -1,8 +1,107 @@
 import { FastifyInstance } from 'fastify';
 import { PaymentService } from '../services/payment.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function paymentsRoutes(fastify: FastifyInstance) {
+  /**
+   * GET /client/invoice/:invoiceNumber/payment-details
+   * Get invoice details for payment portal (no auth required)
+   */
+  fastify.get('/client/invoice/:invoiceNumber/payment-details', async (request, reply) => {
+    try {
+      const { invoiceNumber } = request.params as { invoiceNumber: string };
+
+      const invoice = await prisma.invoice.findUnique({
+        where: { invoiceNumber },
+        include: {
+          client: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          items: true,
+        },
+      });
+
+      if (!invoice) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Invoice not found',
+        });
+      }
+
+      return reply.status(200).send({
+        success: true,
+        data: {
+          id: invoice.id,
+          invoiceNumber: invoice.invoiceNumber,
+          title: invoice.title,
+          total: invoice.total.toString(),
+          amountDue: invoice.amountDue.toString(),
+          amountPaid: invoice.amountPaid.toString(),
+          currency: invoice.currency,
+          paymentType: invoice.paymentType,
+          dueDate: invoice.dueDate,
+          client: invoice.client,
+          items: invoice.items,
+        },
+      });
+    } catch (error) {
+      request.log.error(error, 'Error fetching invoice payment details');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /admin/invoices/:invoiceId/set-payment-type
+   * Set payment type (CASH or CARD) for an invoice
+   */
+  fastify.post('/admin/invoices/:invoiceId/set-payment-type', { preHandler: requireAdmin }, async (request, reply) => {
+    try {
+      const { invoiceId } = request.params as { invoiceId: string };
+      const { paymentType } = request.body as { paymentType: 'CASH' | 'CARD' };
+
+      if (!paymentType || !['CASH', 'CARD'].includes(paymentType)) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'paymentType must be CASH or CARD',
+        });
+      }
+
+      const invoice = await prisma.invoice.update({
+        where: { id: invoiceId },
+        data: { paymentType },
+      });
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Payment type set successfully',
+        data: {
+          invoiceId: invoice.id,
+          paymentType: invoice.paymentType,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Invoice not found',
+        });
+      }
+
+      request.log.error(error, 'Error setting payment type');
+      throw error;
+    }
+  });
+
   /**
    * POST /webhooks/stripe
    * Stripe webhook receiver (no auth required)

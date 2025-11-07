@@ -1,17 +1,25 @@
 import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
 import { authRoutes } from './auth.js';
-import { clientRoutes } from './clients.js';
+import { clientRoutes, adminClientRoutes } from './clients.js';
+import { inquiryRoutes, adminInquiryRoutes } from './inquiries.js';
 import { ingestRoutes } from './ingest.js';
 import { rightsRoutes } from './rights.js';
 import { galleriesRoutes } from './galleries.js';
 import { publicGalleryRoutes } from './publicGallery.js';
 import { proposalsRoutes } from './proposals.js';
 import { publicProposalRoutes } from './publicProposal.js';
+import { registerProposalTemplateRoutes } from './proposalTemplates.js';
+import { proposalEmailTemplatesRoutes } from './proposalEmailTemplates.js';
+import { registerVariableRoutes } from './variables.js';
 import { templatesRoutes } from './templates.js';
 import { contractsRoutes } from './contracts.js';
+import { publicContractRoutes } from './publicContract.js';
+import { clausesRoutes } from './clauses.js';
+import { contractTemplatesRoutes } from './contract-templates.js';
 import { invoicesRoutes } from './invoices.js';
-import { paymentsRoutes } from './payments.js';
+import { publicInvoiceRoutes } from './publicInvoice.js';
+// import { paymentsRoutes } from './payments.js'; // TEMPORARILY DISABLED - causing route issues
 import { reconciliationRoutes } from './reconciliation.js';
 import { periodsRoutes } from './periods.js';
 import { journalsRoutes } from './journals.js';
@@ -23,6 +31,7 @@ import { emailRoutes } from './email.js';
 import { docgenRoutes } from './docgen.js';
 import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
+import { analyticsRoutes } from './analytics.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // CDN & Image Optimization routes (public image serving + admin management)
@@ -40,8 +49,23 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Public proposal routes (no auth required)
   await fastify.register(publicProposalRoutes);
 
-  // Client management routes (admin only)
+  // Public contract signing routes (no auth required, uses magic links)
+  await fastify.register(publicContractRoutes);
+
+  // Public invoice routes (no auth required)
+  await fastify.register(publicInvoiceRoutes);
+
+  // Public inquiry routes (lead capture form - no auth required)
+  await fastify.register(inquiryRoutes);
+
+  // Public client signup routes (no auth required)
   await fastify.register(clientRoutes);
+
+  // Admin inquiry management routes (admin only)
+  await fastify.register(adminInquiryRoutes);
+
+  // Admin client management routes (admin only)
+  await fastify.register(adminClientRoutes);
 
   // Asset ingest routes (admin only)
   await fastify.register(ingestRoutes);
@@ -55,8 +79,23 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Proposal management routes (admin only)
   await fastify.register(proposalsRoutes);
 
+  // Proposal template routes (admin only)
+  await fastify.register(registerProposalTemplateRoutes);
+
+  // Proposal email template routes (admin only)
+  await fastify.register(proposalEmailTemplatesRoutes);
+
+  // Variable substitution routes (admin only)
+  await fastify.register(registerVariableRoutes);
+
   // Contract template routes (admin only)
   await fastify.register(templatesRoutes);
+
+  // Clause management routes (admin only)
+  await fastify.register(clausesRoutes);
+
+  // Contract template management routes (admin only)
+  await fastify.register(contractTemplatesRoutes);
 
   // Contract routes (admin only)
   await fastify.register(contractsRoutes);
@@ -64,8 +103,8 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Invoice routes (admin only)
   await fastify.register(invoicesRoutes);
 
-  // Payment routes (admin + webhook)
-  await fastify.register(paymentsRoutes);
+  // Payment routes (admin + webhook) - TEMPORARILY DISABLED
+  // await fastify.register(paymentsRoutes);
 
   // Reconciliation routes (admin only)
   await fastify.register(reconciliationRoutes);
@@ -96,6 +135,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Media processing routes (admin only)
   await fastify.register(mediaProcessRoutes);
+
+  // Analytics routes (admin only)
+  await fastify.register(analyticsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {

@@ -134,18 +134,20 @@ export class ClientService {
       },
     });
 
-    // Create audit log
-    await prisma.auditLog.create({
-      data: {
-        action: 'CREATE',
-        entityType: 'Client',
-        entityId: client.id,
-        userId,
-        clientId: client.id,
-        changes: { new: client },
-        metadata: { source: 'admin_api' },
-      },
-    });
+    // Create audit log (skip for public signups)
+    if (userId !== 'public') {
+      await prisma.auditLog.create({
+        data: {
+          action: 'CREATE',
+          entityType: 'Client',
+          entityId: client.id,
+          userId,
+          clientId: client.id,
+          changes: { new: client },
+          metadata: { source: userId === 'public' ? 'public_signup' : 'admin_api' },
+        },
+      });
+    }
 
     return client;
   }

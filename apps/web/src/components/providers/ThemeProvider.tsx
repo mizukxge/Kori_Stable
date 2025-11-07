@@ -22,15 +22,25 @@ export function ThemeProvider({
   storageKey = 'kori-theme',
 }: ThemeProviderProps) {
   const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => {
+      try {
+        return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+      } catch {
+        return defaultTheme;
+      }
+    }
   );
 
   // Determine actual theme (resolve 'system' to 'light' or 'dark')
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>(() => {
-    if (theme === 'system') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+      if (theme === 'system') {
+        return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return theme;
+    } catch {
+      return 'light';
     }
-    return theme;
   });
 
   useEffect(() => {
@@ -70,7 +80,11 @@ export function ThemeProvider({
   }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
-    localStorage.setItem(storageKey, newTheme);
+    try {
+      localStorage.setItem(storageKey, newTheme);
+    } catch {
+      // Silently fail if localStorage is not available
+    }
     setThemeState(newTheme);
   };
 

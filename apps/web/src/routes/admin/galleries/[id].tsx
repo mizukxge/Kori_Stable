@@ -3,11 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { GridTheme } from '../../../components/gallery/GridTheme';
 import { UploadZone } from '../../../components/gallery/UploadZone';
 import { Lightbox } from '../../../components/gallery/Lightbox';
-import { getGallery, toggleGalleryAssetFavorite, updateGalleryPassword, setGalleryCoverPhoto, removeAssetFromGallery } from '../../../lib/api';
+import { getGallery, toggleGalleryAssetFavorite, updateGalleryPassword, setGalleryCoverPhoto, removeAssetFromGallery, reorderGalleryAssets } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Label } from '../../../components/ui/Label';
 import { Button } from '../../../components/ui/Button';
-import { Settings, Grid3x3, Image as ImageIcon, Share2, Copy, Mail, QrCode as QRCodeIcon, Eye, EyeOff, Lock, Trash2, Pencil } from 'lucide-react';
+import { Settings, Grid3x3, Image as ImageIcon, Share2, Copy, Mail, QrCode as QRCodeIcon, Eye, EyeOff, Lock, Trash2, Pencil, Upload, CheckSquare, X, Heart } from 'lucide-react';
 import { updateGallery } from '../../../lib/api';
 import { deleteGallery } from '../../../lib/api';
 import QRCode from 'react-qr-code';
@@ -56,7 +56,11 @@ export default function GalleryAdminPage() {
   const [editDescription, setEditDescription] = useState('');
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<string | null>(null);
-  const ITEMS_PER_PAGE = 12;
+
+  // Selection state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedAssets, setSelectedAssets] = useState<Set<string>>(new Set());
+
   const handleCopyShareLink = () => {
     const shareUrl = `${window.location.origin}/gallery/${gallery.token}`;
     navigator.clipboard.writeText(shareUrl);
@@ -88,14 +92,24 @@ export default function GalleryAdminPage() {
       setIsPasswordProtected(!!(galleryData as any).password);
 
       // Transform API assets to match our format
-      const assets = galleryData.assets.map((ga: any) => ({
-        id: ga.asset.id,
-        filename: ga.asset.filename,
-        // Use filepath from API to construct URL
-        path: `http://localhost:3001/uploads/${ga.asset.category}/${ga.asset.storedName}`,
-        thumbnailPath: `http://localhost:3001/uploads/${ga.asset.category}/${ga.asset.storedName}`,
-        mimeType: ga.asset.mimeType,
-      }));
+      const assets = galleryData.assets.map((ga: any) => {
+        // Debug log to check asset data
+        console.log('🔍 Asset data:', {
+          id: ga.asset.id,
+          filename: ga.asset.filename,
+          storedName: ga.asset.storedName,
+          category: ga.asset.category,
+        });
+
+        return {
+          id: ga.asset.id,
+          filename: ga.asset.filename,
+          // Use filepath from API to construct URL
+          path: `http://localhost:3002/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+          thumbnailPath: `http://localhost:3002/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+          mimeType: ga.asset.mimeType,
+        };
+      });
 
       setAllAssets(assets);
       
@@ -280,7 +294,7 @@ const handleDeleteAsset = async (assetId: string) => {
 
     try {
       await removeAssetFromGallery(id!, assetToDelete);
-      
+
       setAllAssets(prev => prev.filter(a => a.id !== assetToDelete));
       setDisplayedAssets(prev => prev.filter(a => a.id !== assetToDelete));
       setFavorites(prev => {
@@ -288,13 +302,117 @@ const handleDeleteAsset = async (assetId: string) => {
         newFavorites.delete(assetToDelete);
         return newFavorites;
       });
-      
+
       console.log('✅ Photo deleted:', assetToDelete);
     } catch (error) {
       console.error('Failed to delete photo:', error);
       alert('Failed to delete photo. Please try again.');
     } finally {
       setAssetToDelete(null);
+    }
+  };
+
+  const handleReorder = async (reorderedAssets: any[]) => {
+    // Optimistically update UI
+    setDisplayedAssets(reorderedAssets);
+    setAllAssets(reorderedAssets);
+
+    try {
+      // Send new order to backend
+      const assetIds = reorderedAssets.map(asset => asset.id);
+      await reorderGalleryAssets(id!, assetIds);
+
+      console.log('✅ Photos reordered successfully');
+    } catch (error) {
+      console.error('Failed to reorder photos:', error);
+      // Revert on error
+      await loadGallery();
+    }
+  };
+
+  // Selection functions
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    setSelectedAssets(new Set());
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedAssets.size === displayedAssets.length) {
+      setSelectedAssets(new Set());
+    } else {
+      setSelectedAssets(new Set(displayedAssets.map(a => a.id)));
+    }
+  };
+
+  const toggleSelectAsset = (assetId: string) => {
+    const newSelected = new Set(selectedAssets);
+    if (newSelected.has(assetId)) {
+      newSelected.delete(assetId);
+    } else {
+      newSelected.add(assetId);
+    }
+    setSelectedAssets(newSelected);
+  };
+
+  // Batch operations
+  const handleBatchFavorite = async () => {
+    if (selectedAssets.size === 0) return;
+
+    try {
+      // Toggle favorite status for all selected assets
+      for (const assetId of selectedAssets) {
+        const isFavorite = favorites.has(assetId);
+        await toggleGalleryAssetFavorite(id!, assetId, !isFavorite);
+
+        setFavorites(prev => {
+          const newFavorites = new Set(prev);
+          if (isFavorite) {
+            newFavorites.delete(assetId);
+          } else {
+            newFavorites.add(assetId);
+          }
+          return newFavorites;
+        });
+      }
+
+      console.log(`✅ Batch favorited ${selectedAssets.size} photos`);
+      setSelectedAssets(new Set());
+      setSelectionMode(false);
+    } catch (error) {
+      console.error('Failed to batch favorite photos:', error);
+      alert('Failed to favorite photos. Please try again.');
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedAssets.size === 0) return;
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedAssets.size} photo${selectedAssets.size > 1 ? 's' : ''}? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      for (const assetId of selectedAssets) {
+        await removeAssetFromGallery(id!, assetId);
+      }
+
+      // Update local state
+      setAllAssets(prev => prev.filter(a => !selectedAssets.has(a.id)));
+      setDisplayedAssets(prev => prev.filter(a => !selectedAssets.has(a.id)));
+      setFavorites(prev => {
+        const newFavorites = new Set(prev);
+        selectedAssets.forEach(id => newFavorites.delete(id));
+        return newFavorites;
+      });
+
+      console.log(`✅ Batch deleted ${selectedAssets.size} photos`);
+      setSelectedAssets(new Set());
+      setSelectionMode(false);
+    } catch (error) {
+      console.error('Failed to batch delete photos:', error);
+      alert('Failed to delete photos. Please try again.');
     }
   };
 
@@ -371,12 +489,12 @@ const handleEditGallery = () => {
 
   return (
     <>
-     <div className="space-y-8">
+     <div className="space-y-6">
           {/* Page Header */}
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h1 className="text-4xl font-bold tracking-tight">{gallery.name}</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{gallery.name}</h1>
                 <Button
                   variant="outline"
                   size="sm"
@@ -385,30 +503,35 @@ const handleEditGallery = () => {
                   <Pencil className="w-4 h-4" />
                 </Button>
               </div>
-              <p className="mt-2 text-lg text-muted-foreground">{gallery.description}</p>
+              <p className="mt-2 text-base sm:text-lg text-muted-foreground">{gallery.description}</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={handlePasswordToggle}
+                className="flex-1 sm:flex-none"
               >
-                <Lock className="w-4 h-4 mr-2" />
-                {gallery?.password ? 'Change Password' : 'Set Password'}
+                <Lock className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">{gallery?.password ? 'Change Password' : 'Set Password'}</span>
               </Button>
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setShareModalOpen(true)}
+                className="flex-1 sm:flex-none"
               >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
+                <Share2 className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Share</span>
               </Button>
               <Button
                 variant="outline"
-                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                size="sm"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50 flex-1 sm:flex-none"
                 onClick={() => setDeleteGalleryModalOpen(true)}
               >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Gallery
+                <Trash2 className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Delete Gallery</span>
               </Button>
             </div>
           </div>
@@ -564,26 +687,118 @@ const handleEditGallery = () => {
         {/* Gallery Grid */}
         <Card>
           <CardHeader>
-            <CardTitle>Gallery Photos</CardTitle>
-            <CardDescription>
-              Click any photo to open in lightbox view • {favorites.size} favorite{favorites.size !== 1 ? 's' : ''}
-            </CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Gallery Photos</CardTitle>
+                <CardDescription>
+                  {selectionMode
+                    ? `${selectedAssets.size} of ${displayedAssets.length} selected`
+                    : displayedAssets.length > 0
+                    ? `Click any photo to open in lightbox view • ${favorites.size} favorite${favorites.size !== 1 ? 's' : ''}`
+                    : 'Upload photos to get started'
+                  }
+                </CardDescription>
+              </div>
+
+              {displayedAssets.length > 0 && (
+                <div className="flex items-center gap-2">
+                  {selectionMode ? (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSelectAll}
+                      >
+                        {selectedAssets.size === displayedAssets.length ? 'Deselect All' : 'Select All'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSelectionMode}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                      {selectedAssets.size > 0 && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleBatchFavorite}
+                          >
+                            <Heart className="w-4 h-4 mr-2" />
+                            Favorite ({selectedAssets.size})
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleBatchDelete}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete ({selectedAssets.size})
+                          </Button>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={toggleSelectionMode}
+                    >
+                      <CheckSquare className="w-4 h-4 mr-2" />
+                      Select Photos
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            <GridTheme
-                galleryId={id || ''}
-                assets={displayedAssets}
-                settings={settings}
-                favorites={favorites}
-                currentCoverPhotoId={gallery?.coverPhotoId}
-                onAssetClick={handleAssetClick}
-                onFavoriteToggle={handleFavoriteToggle}
-                onSetCover={handleSetCoverPhoto}
-                onDelete={handleDeleteAsset}
-                onLoadMore={handleLoadMore}
-                hasMore={hasMore}
-                loadingMore={loadingMore}
-              />
+            {displayedAssets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-6">
+                  <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                </div>
+                <h3 className="text-2xl font-semibold mb-2">Gallery is Empty</h3>
+                <p className="text-muted-foreground mb-6 max-w-md">
+                  This gallery doesn't have any photos yet. Upload your first photo using the upload zone above to get started.
+                </p>
+                <div className="flex flex-col items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    <span>Drag and drop photos into the upload zone</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" />
+                    <span>Supports JPG, PNG, WEBP, and HEIC formats</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Grid3x3 className="w-4 h-4" />
+                    <span>Photos will appear in the grid below</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <GridTheme
+                  galleryId={id || ''}
+                  assets={displayedAssets}
+                  settings={settings}
+                  favorites={favorites}
+                  currentCoverPhotoId={gallery?.coverPhotoId}
+                  selectionMode={selectionMode}
+                  selectedAssets={selectedAssets}
+                  onAssetClick={handleAssetClick}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  onSetCover={handleSetCoverPhoto}
+                  onDelete={handleDeleteAsset}
+                  onSelectToggle={toggleSelectAsset}
+                  onReorder={handleReorder}
+                  onLoadMore={handleLoadMore}
+                  hasMore={hasMore}
+                  loadingMore={loadingMore}
+                />
+            )}
           </CardContent>
         </Card>
       </div>
@@ -643,7 +858,7 @@ const handleEditGallery = () => {
                     }`}
                   >
                     <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      className={`inline-block h-4 w-4 transform rounded-full bg-card transition-transform ${
                         isPasswordProtected ? 'translate-x-6' : 'translate-x-1'
                       }`}
                     />
@@ -801,7 +1016,7 @@ const handleEditGallery = () => {
                   {/* Right Column: QR Code */}
                   <div className="flex items-center justify-center">
                     <div className="text-center space-y-3">
-                      <div className="bg-white p-3 rounded-lg inline-block shadow-sm">
+                      <div className="bg-card p-3 rounded-lg inline-block shadow-sm">
                         <QRCode 
                           value={`${window.location.origin}/gallery/${gallery.token}`}
                           size={160}

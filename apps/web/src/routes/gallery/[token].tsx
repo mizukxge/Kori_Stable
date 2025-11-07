@@ -113,7 +113,7 @@ const [copySuccess, setCopySuccess] = useState(false);
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/g/${token}/meta`);
+      const response = await fetch(`http://localhost:3002/g/${token}/meta`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -165,8 +165,8 @@ const [copySuccess, setCopySuccess] = useState(false);
 
     try {
       const url = password 
-        ? `http://localhost:3001/g/${token}/items?password=${encodeURIComponent(password)}`
-        : `http://localhost:3001/g/${token}/items`;
+        ? `http://localhost:3002/g/${token}/items?password=${encodeURIComponent(password)}`
+        : `http://localhost:3002/g/${token}/items`;
 
       const response = await fetch(url);
 
@@ -189,8 +189,8 @@ const [copySuccess, setCopySuccess] = useState(false);
         return {
           id: asset.id,
           filename: asset.filename,
-          path: `http://localhost:3001/uploads/${category}/${storedName}`,
-          thumbnailPath: `http://localhost:3001/uploads/${category}/${storedName}`,
+          path: `http://localhost:3002/uploads/${category}/${storedName}`,
+          thumbnailPath: `http://localhost:3002/uploads/${category}/${storedName}`,
           mimeType: asset.mimeType,
         };
       });
@@ -212,7 +212,7 @@ const [copySuccess, setCopySuccess] = useState(false);
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3001/g/${token}/password`, {
+      const response = await fetch(`http://localhost:3002/g/${token}/password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

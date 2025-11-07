@@ -54,8 +54,9 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-md"
       onClick={handleBackdropClick}
+      style={{ top: 0, left: 0, right: 0, bottom: 0 }}
     >
       <div
         ref={modalRef}

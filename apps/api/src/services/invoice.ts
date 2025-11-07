@@ -25,6 +25,8 @@ export interface CreateInvoiceData {
   dueDate?: Date;
   notes?: string;
   currency?: string;
+  status?: InvoiceStatus;
+  paymentType?: 'CASH' | 'CARD';
 }
 
 export interface UpdateInvoiceData {
@@ -129,12 +131,14 @@ export class InvoiceService {
         title: data.title,
         description: data.description,
         clientId: data.clientId,
+        status: data.status || 'DRAFT',
+        paymentType: data.paymentType,
         subtotal: totals.subtotal,
         taxRate: totals.taxRate,
         taxAmount: totals.taxAmount,
         total: totals.total,
         amountDue: totals.amountDue,
-        currency: data.currency || 'USD',
+        currency: data.currency || 'GBP',
         paymentTerms: data.paymentTerms,
         dueDate,
         notes: data.notes,

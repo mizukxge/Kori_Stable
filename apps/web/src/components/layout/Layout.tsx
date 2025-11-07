@@ -23,12 +23,12 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      
+
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-        
-        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
-          <div className="mx-auto max-w-7xl">
+
+        <main className="flex-1 overflow-y-auto scrollbar-thin">
+          <div className="mx-auto max-w-7xl p-6">
             {children}
           </div>
         </main>

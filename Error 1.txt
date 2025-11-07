@@ -1,0 +1,831 @@
+chunk-GR4IE3VO.js?v=8591e5fc:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+index.tsx:124 📦 Loading galleries from API...
+index.tsx:124 📦 Loading galleries from API...
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+    at chunk-GR4IE3VO.js?v=8591e5fc:19328:17
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:124 📦 Loading galleries from API...
+index.tsx:124 📦 Loading galleries from API...
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+    at chunk-GR4IE3VO.js?v=8591e5fc:19328:17
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+rights:1 Access to fetch at 'http://localhost:3001/admin/rights-presets?activeOnly=true' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:547  GET http://localhost:3001/admin/rights-presets?activeOnly=true net::ERR_FAILED 200 (OK)
+getRightsPresets @ api.ts:547
+loadPresets @ index.tsx:54
+(anonymous) @ index.tsx:65
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:58 ❌ Failed to load rights presets: TypeError: Failed to fetch
+    at getRightsPresets (api.ts:547:26)
+    at loadPresets (index.tsx:54:30)
+    at index.tsx:65:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadPresets @ index.tsx:58
+await in loadPresets
+(anonymous) @ index.tsx:65
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+rights:1 Access to fetch at 'http://localhost:3001/admin/rights-presets?activeOnly=true' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:547  GET http://localhost:3001/admin/rights-presets?activeOnly=true net::ERR_FAILED 200 (OK)
+getRightsPresets @ api.ts:547
+loadPresets @ index.tsx:54
+(anonymous) @ index.tsx:65
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:58 ❌ Failed to load rights presets: TypeError: Failed to fetch
+    at getRightsPresets (api.ts:547:26)
+    at loadPresets (index.tsx:54:30)
+    at index.tsx:65:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+    at chunk-GR4IE3VO.js?v=8591e5fc:19328:17
+loadPresets @ index.tsx:58
+await in loadPresets
+(anonymous) @ index.tsx:65
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:124 📦 Loading galleries from API...
+index.tsx:124 📦 Loading galleries from API...
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+galleries:1 Access to fetch at 'http://localhost:3001/admin/galleries' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:168  GET http://localhost:3001/admin/galleries net::ERR_FAILED 200 (OK)
+getAllGalleries @ api.ts:168
+loadGalleries @ index.tsx:128
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:146 ❌ Failed to load galleries: TypeError: Failed to fetch
+    at getAllGalleries (api.ts:168:26)
+    at loadGalleries (index.tsx:128:30)
+    at index.tsx:120:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+    at chunk-GR4IE3VO.js?v=8591e5fc:19328:17
+loadGalleries @ index.tsx:146
+await in loadGalleries
+(anonymous) @ index.tsx:120
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at commitPassiveMountOnFiber (chunk-GR4IE3VO.js?v=8591e5fc:18156:19)
+    at commitPassiveMountEffects_complete (chunk-GR4IE3VO.js?v=8591e5fc:18129:17)
+    at commitPassiveMountEffects_begin (chunk-GR4IE3VO.js?v=8591e5fc:18119:15)
+    at commitPassiveMountEffects (chunk-GR4IE3VO.js?v=8591e5fc:18109:11)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19490:11)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+commitPassiveMountOnFiber @ chunk-GR4IE3VO.js?v=8591e5fc:18156
+commitPassiveMountEffects_complete @ chunk-GR4IE3VO.js?v=8591e5fc:18129
+commitPassiveMountEffects_begin @ chunk-GR4IE3VO.js?v=8591e5fc:18119
+commitPassiveMountEffects @ chunk-GR4IE3VO.js?v=8591e5fc:18109
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19490
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:372  GET http://localhost:3001/admin/clients?page=1&limit=20&sortBy=createdAt&sortOrder=desc net::ERR_FAILED 200 (OK)
+getClients @ api.ts:372
+loadClients @ index.tsx:44
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:57 ❌ Failed to load clients: TypeError: Failed to fetch
+    at getClients (api.ts:372:26)
+    at loadClients (index.tsx:44:30)
+    at load (index.tsx:73:26)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadClients @ index.tsx:57
+await in loadClients
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+clients:1 Access to fetch at 'http://localhost:3001/admin/clients/stats' from origin 'http://localhost:3000' has been blocked by CORS policy: The value of the 'Access-Control-Allow-Credentials' header in the response is '' which must be 'true' when the request's credentials mode is 'include'.
+api.ts:500  GET http://localhost:3001/admin/clients/stats net::ERR_FAILED 200 (OK)
+getClientStats @ api.ts:500
+loadStats @ index.tsx:63
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384
+index.tsx:66 ❌ Failed to load client stats: TypeError: Failed to fetch
+    at getClientStats (api.ts:500:26)
+    at loadStats (index.tsx:63:30)
+    at load (index.tsx:73:41)
+    at index.tsx:76:5
+    at commitHookEffectListMount (chunk-GR4IE3VO.js?v=8591e5fc:16915:34)
+    at invokePassiveEffectMountInDEV (chunk-GR4IE3VO.js?v=8591e5fc:18324:19)
+    at invokeEffectsInDev (chunk-GR4IE3VO.js?v=8591e5fc:19701:19)
+    at commitDoubleInvokeEffectsInDEV (chunk-GR4IE3VO.js?v=8591e5fc:19686:15)
+    at flushPassiveEffectsImpl (chunk-GR4IE3VO.js?v=8591e5fc:19503:13)
+    at flushPassiveEffects (chunk-GR4IE3VO.js?v=8591e5fc:19447:22)
+loadStats @ index.tsx:66
+await in loadStats
+load @ index.tsx:73
+(anonymous) @ index.tsx:76
+commitHookEffectListMount @ chunk-GR4IE3VO.js?v=8591e5fc:16915
+invokePassiveEffectMountInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:18324
+invokeEffectsInDev @ chunk-GR4IE3VO.js?v=8591e5fc:19701
+commitDoubleInvokeEffectsInDEV @ chunk-GR4IE3VO.js?v=8591e5fc:19686
+flushPassiveEffectsImpl @ chunk-GR4IE3VO.js?v=8591e5fc:19503
+flushPassiveEffects @ chunk-GR4IE3VO.js?v=8591e5fc:19447
+(anonymous) @ chunk-GR4IE3VO.js?v=8591e5fc:19328
+workLoop @ chunk-GR4IE3VO.js?v=8591e5fc:197
+flushWork @ chunk-GR4IE3VO.js?v=8591e5fc:176
+performWorkUntilDeadline @ chunk-GR4IE3VO.js?v=8591e5fc:384

@@ -2,6 +2,21 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Tile } from './Tile';
 import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
 
 interface GridThemeProps {
   galleryId: string;
@@ -14,10 +29,14 @@ interface GridThemeProps {
   };
   favorites?: Set<string>;
   currentCoverPhotoId?: string | null;
+  selectionMode?: boolean;
+  selectedAssets?: Set<string>;
   onAssetClick?: (assetId: string) => void;
   onFavoriteToggle?: (assetId: string) => void;
   onSetCover?: (assetId: string) => void;
   onDelete?: (assetId: string) => void;
+  onSelectToggle?: (assetId: string) => void;
+  onReorder?: (assets: any[]) => void;
   onLoadMore?: () => void;
   hasMore?: boolean;
   loadingMore?: boolean;
@@ -30,10 +49,14 @@ export const GridTheme: React.FC<GridThemeProps> = ({
   settings = {},
   favorites = new Set(),
   currentCoverPhotoId,
+  selectionMode = false,
+  selectedAssets = new Set(),
   onAssetClick,
   onFavoriteToggle,
   onSetCover,
   onDelete,
+  onSelectToggle,
+  onReorder,
   onLoadMore,
   hasMore = false,
   loadingMore = false,
@@ -49,6 +72,36 @@ export const GridTheme: React.FC<GridThemeProps> = ({
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Require 8px movement before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = assets.findIndex((asset) => asset.id === active.id);
+      const newIndex = assets.findIndex((asset) => asset.id === over.id);
+
+      const reorderedAssets = arrayMove(assets, oldIndex, newIndex);
+
+      console.log(`📦 Reordered: moved ${active.id} from ${oldIndex} to ${newIndex}`);
+
+      if (onReorder) {
+        onReorder(reorderedAssets);
+      }
+    }
+  };
 
   // ✅ AG1 STEP 3: INFINITE SCROLL WITH INTERSECTION OBSERVER
   useEffect(() => {
@@ -152,43 +205,57 @@ export const GridTheme: React.FC<GridThemeProps> = ({
 
   return (
     <div className="grid-theme-container">
-      {/* ✅ AG1 STEP 3: RESPONSIVE GRID */}
-      <div
-        ref={gridRef}
-        className={cn(
-          'grid',
-          gapClass,
-          'grid-cols-2',
-          'md:grid-cols-3',
-          'lg:grid-cols-4',
-          'xl:grid-cols-5',
-          '2xl:grid-cols-6'
-        )}
-        role="grid"
-        aria-label="Gallery photos"
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
       >
-        {assets.map((asset, index) => (
-            <Tile
-              key={asset.id}
-              asset={asset}
-              aspectRatio={aspectRatio}
-              showCaption={showCaptions}
-              showFavorite={showFavorites}
-              isFavorite={favorites.has(asset.id)}
-              isCover={currentCoverPhotoId === asset.id}
-              onClick={() => {
-                setFocusedIndex(index);
-                onAssetClick?.(asset.id);
-              }}
-              onFavoriteToggle={() => onFavoriteToggle?.(asset.id)}
-              onSetCover={onSetCover ? () => onSetCover(asset.id) : undefined}
-              onDelete={onDelete ? () => onDelete(asset.id) : undefined}
-              animationDelay={index * 30}
-              isFocused={focusedIndex === index}
-              index={index}
-            />
-          ))}
-      </div>
+        <SortableContext items={assets.map(a => a.id)} strategy={rectSortingStrategy}>
+          {/* ✅ AG1 STEP 3: RESPONSIVE GRID */}
+          <div
+            ref={gridRef}
+            className={cn(
+              'grid',
+              gapClass,
+              'grid-cols-2',
+              'md:grid-cols-3',
+              'lg:grid-cols-4',
+              'xl:grid-cols-5',
+              '2xl:grid-cols-6'
+            )}
+            role="grid"
+            aria-label="Gallery photos"
+          >
+            {assets.map((asset, index) => (
+                <Tile
+                  key={asset.id}
+                  asset={asset}
+                  aspectRatio={aspectRatio}
+                  showCaption={showCaptions}
+                  showFavorite={showFavorites}
+                  isFavorite={favorites.has(asset.id)}
+                  isCover={currentCoverPhotoId === asset.id}
+                  selectionMode={selectionMode}
+                  isSelected={selectedAssets.has(asset.id)}
+                  onClick={() => {
+                    if (!selectionMode) {
+                      setFocusedIndex(index);
+                      onAssetClick?.(asset.id);
+                    }
+                  }}
+                  onFavoriteToggle={() => onFavoriteToggle?.(asset.id)}
+                  onSetCover={onSetCover ? () => onSetCover(asset.id) : undefined}
+                  onDelete={onDelete ? () => onDelete(asset.id) : undefined}
+                  onSelectToggle={onSelectToggle ? () => onSelectToggle(asset.id) : undefined}
+                  animationDelay={index * 30}
+                  isFocused={focusedIndex === index}
+                  index={index}
+                  isDraggable={!!onReorder && !selectionMode}
+                />
+              ))}
+          </div>
+        </SortableContext>
+      </DndContext>
 
       {/* ✅ AG1 STEP 3: LOADING MORE INDICATOR */}
       {loadingMore && (

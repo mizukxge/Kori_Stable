@@ -73,7 +73,7 @@ export class GalleryService {
     return {
       ...gallery,
       coverPhotoUrl: gallery.coverPhoto
-        ? `http://localhost:3001/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
+        ? `http://localhost:3002/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
         : null,
     };
   }
@@ -200,9 +200,9 @@ export class GalleryService {
     return galleries.map(gallery => ({
       ...gallery,
       coverPhotoUrl: gallery.coverPhoto
-        ? `http://localhost:3001/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
+        ? `http://localhost:3002/uploads/${gallery.coverPhoto.category}/${gallery.coverPhoto.storedName}`
         : gallery.assets[0]?.asset
-        ? `http://localhost:3001/uploads/${gallery.assets[0].asset.category}/${gallery.assets[0].asset.storedName}`
+        ? `http://localhost:3002/uploads/${gallery.assets[0].asset.category}/${gallery.assets[0].asset.storedName}`
         : null,
       favoriteCount: gallery.assets.filter(ga => ga.isFavorite).length,
     }));

@@ -4,7 +4,7 @@ import { getClients, getClientStats, deleteClient, createClient, type Client } f
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Label } from '../../../components/ui/Label';
-import { Users, Plus, Search, Mail, Phone, Building2, Trash2, Eye, MoreHorizontal, Archive, UserCheck, UserX, Clock, X, MapPin } from 'lucide-react';
+import { Users, Plus, Search, Mail, Phone, Building2, Trash2, Eye, MoreHorizontal, Archive, UserCheck, UserX, Clock, X, MapPin, Check, Share2 } from 'lucide-react';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
 export default function ClientsPage() {
@@ -20,6 +20,7 @@ export default function ClientsPage() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Create client form state
   const [formData, setFormData] = useState({
@@ -231,6 +232,13 @@ export default function ClientsPage() {
       default:
         return <Users className="w-4 h-4" />;
     }
+  };
+
+  const handleCopyLink = () => {
+    const signupUrl = `${window.location.origin}/new-client`;
+    navigator.clipboard.writeText(signupUrl);
+    setLinkCopied(true);
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   if (loading) {
@@ -507,10 +515,32 @@ export default function ClientsPage() {
             Manage your client relationships
           </p>
         </div>
-        <Button onClick={() => setCreateModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Client
-        </Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button onClick={() => setCreateModalOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Client
+          </Button>
+
+          {/* Client Signup Link Button */}
+          <div className="relative">
+            <Button
+              variant="outline"
+              onClick={handleCopyLink}
+              title="Click to copy client signup link"
+              className="gap-2"
+            >
+              <Share2 className="w-4 h-4" />
+              <span className="hidden sm:inline">Client Signup</span>
+              <span className="sm:hidden">Share Link</span>
+              {linkCopied && <Check className="w-4 h-4 ml-1" />}
+            </Button>
+            {linkCopied && (
+              <div className="absolute -bottom-8 right-0 bg-green-600 text-white text-xs py-1 px-2 rounded whitespace-nowrap pointer-events-none">
+                Link copied!
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}

@@ -1,0 +1,1751 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser {
+  id       String @id @default(cuid())
+  email    String @unique
+  name     String
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions          Session[]
+  rightsPresets     RightsPreset[]
+  galleries         Gallery[]
+  proposals         Proposal[]
+  contractTemplates ContractTemplate[]
+  contracts         Contract[]
+  invoices          Invoice[]
+  reconciliations   Reconciliation[]
+  releases          Release[]
+  auditLogs         AuditLog[]
+  assets            Asset[]
+
+  closedPeriods      AccountingPeriod[]  @relation("ClosedPeriods")
+  lockedPeriods      AccountingPeriod[]  @relation("LockedPeriods")
+  unlockedPeriods    AccountingPeriod[]  @relation("UnlockedPeriods")
+  createdJournals    JournalEntry[]      @relation("CreatedJournals")
+  postedJournals     JournalEntry[]      @relation("PostedJournals")
+  approvedJournals   JournalEntry[]      @relation("ApprovedJournals")
+  journalAttachments JournalAttachment[]
+
+  // Records relations
+  archivedRecords     Record[]          @relation("ArchivedRecords")
+  disposedRecords     Record[]          @relation("DisposedRecords")
+  legalHoldRecords    Record[]          @relation("LegalHoldRecords")
+  retentionPolicies   RetentionPolicy[]
+  recordVerifications RecordHash[]
+
+  savedFilters SavedFilter[]
+
+
+  userRoles              UserRole[]
+  assignedRoles          UserRole[]         @relation("AssignedRoles")
+  grantedRolePermissions RolePermission[]
+
+
+  notifications             Notification[]
+  notificationPreferences   NotificationPreference[]
+  notificationDigests       NotificationDigest[]
+  webhookEndpoints          WebhookEndpoint[]
+
+
+  settings             Setting[]
+  settingHistory       SettingHistory[]
+
+  @@map("admin_users")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+// Sessions - User authentication sessions
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// Clients - Customer/Client records
+model Client {
+  id      String       @id @default(cuid())
+  name    String
+  email   String       @unique
+  phone   String?
+  company String?
+  status  ClientStatus @default(ACTIVE)
+
+  // Address information
+  address String?
+  city    String?
+  state   String?
+  zipCode String?
+  country String? @default("US")
+
+  // Metadata
+  notes String?
+  tags  String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  auditLogs AuditLog[]
+
+  assets    Asset[]
+  releases  Release[]
+  galleries Gallery[]
+  proposals Proposal[]
+  contracts Contract[]
+  invoices  Invoice[]
+  Record    Record[]
+
+  @@index([email])
+  @@index([status])
+  @@map("clients")
+}
+
+enum ClientStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  ARCHIVED
+}
+
+// Audit Log - Activity tracking
+model AuditLog {
+  id         String  @id @default(cuid())
+  action     String // e.g., "CREATE", "UPDATE", "DELETE", "LOGIN"
+  entityType String // e.g., "Client", "AdminUser", "Session"
+  entityId   String? // ID of the affected entity
+
+  userId   String? // Who performed the action
+  clientId String? // Related client (if applicable)
+
+  // Details
+  changes   Json? // Store before/after state
+  metadata  Json? // Additional context
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  user   AdminUser? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  client Client?    @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([clientId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Assets - Uploaded files (RAW/EDIT/VIDEO)
+model Asset {
+  id         String        @id @default(cuid())
+  filename   String // Original filename
+  storedName String        @unique // Unique filename on disk
+  filepath   String // Full path to file
+  mimeType   String // MIME type (image/jpeg, video/mp4, etc.)
+  size       BigInt // File size in bytes
+  checksum   String        @unique // SHA256 hash
+  category   AssetCategory
+
+  // Metadata
+  width    Int?
+  height   Int?
+  duration Float? // Video duration in seconds
+  metadata Json? // EXIF and other metadata
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  galleries GalleryAsset[]
+  galleryCover Gallery[] @relation("GalleryCoverPhoto")
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  Selection Selection[]
+  Comment   Comment[]
+
+  @@index([clientId])
+  @@index([uploadedBy])
+  @@index([category])
+  @@index([checksum])
+  @@map("assets")
+}
+
+enum AssetCategory {
+  RAW
+  EDIT
+  VIDEO
+}
+
+// Rights Presets - Copyright and usage rights templates
+model RightsPreset {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  // Copyright fields
+  creator         String
+  copyrightNotice String
+  usageRights     String
+  creditLine      String?
+  instructions    String?
+
+  // Location defaults
+  city    String?
+  state   String?
+  country String?
+
+  // Tags
+  keywords String[] @default([])
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("rights_presets")
+}
+
+// Model/Property Releases
+model Release {
+  id          String      @id @default(cuid())
+  type        ReleaseType
+  releaseName String // Name of person or property
+  releaseDate DateTime?
+  expiryDate  DateTime?
+
+  // File storage
+  documentPath String? // Path to signed release document
+  notes        String?
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([type])
+  @@map("releases")
+}
+
+enum ReleaseType {
+  MODEL
+  PROPERTY
+}
+
+// Galleries - Public shareable collections
+model Gallery {
+  id          String    @id @default(cuid())
+  token       String    @unique // URL token for public access
+  name        String
+  description String?
+  password    String? // Hashed password (optional)
+  expiresAt   DateTime? // Gallery expiration
+  isActive    Boolean   @default(true)
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  // Assets in this gallery (many-to-many)
+  assets GalleryAsset[]
+
+  // Cover photo
+  coverPhotoId String?
+  coverPhoto   Asset?  @relation("GalleryCoverPhoto", fields: [coverPhotoId], references: [id], onDelete: SetNull)
+
+  // Proofing sessions
+  proofSets ProofSet[]
+
+  // Stats
+  viewCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([token])
+  @@index([clientId])
+  @@index([expiresAt])
+  @@map("galleries")
+}
+
+// Join table for Gallery <-> Asset many-to-many relationship
+model GalleryAsset {
+  id        String @id @default(cuid())
+  galleryId String
+  assetId   String
+  position  Int    @default(0) // Order in gallery
+  isFavorite Boolean @default(false) // Favorite in this gallery
+
+  gallery Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  asset   Asset   @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([galleryId, assetId])
+  @@index([galleryId])
+  @@index([assetId])
+  @@map("gallery_assets")
+}
+
+// Proposals - Client proposals with e-signature
+model Proposal {
+  id             String  @id @default(cuid())
+  proposalNumber String  @unique // e.g., PROP-2025-001
+  title          String
+  description    String?
+
+  // Client association
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Pricing
+  subtotal  Decimal @db.Decimal(10, 2)
+  taxRate   Decimal @default(0) @db.Decimal(5, 2)
+  taxAmount Decimal @default(0) @db.Decimal(10, 2)
+  total     Decimal @db.Decimal(10, 2)
+  currency  String  @default("USD")
+
+  // Terms
+  terms      String? // Terms and conditions
+  expiresAt  DateTime? // Proposal expiration
+  validUntil String? // Human-readable validity
+
+  // Status
+  status     ProposalStatus @default(DRAFT)
+  sentAt     DateTime?
+  viewedAt   DateTime?
+  acceptedAt DateTime?
+  declinedAt DateTime?
+
+  // E-signature tracking
+  signatureIP    String?
+  signatureAgent String? // User agent string
+  otpCode        String? // Current OTP for acceptance
+  otpExpiresAt   DateTime? // OTP expiration
+  otpAttempts    Int       @default(0)
+
+  // Line items
+  items ProposalItem[]
+
+  // Contract relationship
+  contract Contract?
+
+  // Metadata
+  notes   String? // Internal notes
+  pdfPath String? // Generated PDF location
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+  @@index([proposalNumber])
+  @@map("proposals")
+}
+
+// Proposal Line Items
+model ProposalItem {
+  id         String   @id @default(cuid())
+  proposalId String
+  proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  position    Int     @default(0) // Order in proposal
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2) // quantity * unitPrice
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([proposalId])
+  @@map("proposal_items")
+}
+
+enum ProposalStatus {
+  DRAFT
+  SENT
+  VIEWED
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+// Contract Templates - Reusable contract templates with variables
+model ContractTemplate {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  content     String  @db.Text // Template content with {{variables}}
+
+  // Variables metadata
+  variables Json? // List of available variables with descriptions
+
+  // Status
+  isActive Boolean @default(true)
+  version  Int     @default(1)
+
+  // Generated contracts
+  contracts Contract[]
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("contract_templates")
+}
+
+// Contracts - Generated contracts from templates
+model Contract {
+  id             String @id @default(cuid())
+  contractNumber String @unique // e.g., CONT-2025-001
+  title          String
+
+  // Template reference
+  templateId      String
+  template        ContractTemplate @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersion Int              @default(1)
+
+  // Generated content
+  content   String @db.Text // Final content with variables replaced
+  variables Json // Actual variable values used
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  proposalId String?   @unique
+  proposal   Proposal? @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+
+  // Status
+  status   ContractStatus @default(DRAFT)
+  sentAt   DateTime?
+  signedAt DateTime?
+
+  // PDF
+  pdfPath String?
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractNumber])
+  @@index([clientId])
+  @@index([templateId])
+  @@index([status])
+  @@map("contracts")
+}
+
+enum ContractStatus {
+  DRAFT
+  SENT
+  SIGNED
+  EXPIRED
+  CANCELLED
+}
+
+// Invoices - Client invoicing
+model Invoice {
+  id            String  @id @default(cuid())
+  invoiceNumber String  @unique // e.g., INV-2025-001
+  title         String
+  description   String?
+
+  // Client association
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  // Pricing
+  subtotal   Decimal @db.Decimal(10, 2)
+  taxRate    Decimal @default(0) @db.Decimal(5, 2)
+  taxAmount  Decimal @default(0) @db.Decimal(10, 2)
+  total      Decimal @db.Decimal(10, 2)
+  amountPaid Decimal @default(0) @db.Decimal(10, 2)
+  amountDue  Decimal @db.Decimal(10, 2)
+  currency   String  @default("USD")
+
+  // Payment terms
+  dueDate      DateTime?
+  paymentTerms String? // e.g., "Net 30", "Due on Receipt"
+  notes        String?
+
+  // Status
+  status InvoiceStatus @default(DRAFT)
+  sentAt DateTime?
+  paidAt DateTime?
+
+  // Line items and payments
+  items    InvoiceItem[]
+  payments Payment[]
+
+  // PDF
+  pdfPath String?
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceNumber])
+  @@index([clientId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+// Invoice Line Items
+model InvoiceItem {
+  id        String  @id @default(cuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  position    Int     @default(0)
+  description String
+  quantity    Int     @default(1)
+  unitPrice   Decimal @db.Decimal(10, 2)
+  amount      Decimal @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+// Payments - Payment transactions
+model Payment {
+  id            String @id @default(cuid())
+  paymentNumber String @unique // e.g., PAY-2025-001
+
+  // Invoice association
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  // Payment details
+  amount   Decimal       @db.Decimal(10, 2)
+  currency String        @default("USD")
+  method   PaymentMethod @default(BANK_TRANSFER)
+  status   PaymentStatus @default(PENDING)
+
+  // External payment processor
+  stripePaymentId String? @unique
+  stripeIntentId  String?
+
+  // Metadata
+  paidAt       DateTime?
+  refundedAt   DateTime?
+  refundAmount Decimal?  @db.Decimal(10, 2)
+  notes        String?
+
+  // Reconciliation
+  reconciliation Reconciliation?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@map("payments")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  PARTIAL
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  BANK_TRANSFER
+  CHECK
+  CASH
+  STRIPE
+  PAYPAL
+  OTHER
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+
+// Bank Transactions - Imported from bank statements
+model BankTransaction {
+  id String @id @default(cuid())
+
+  // Transaction details
+  transactionDate DateTime
+  description     String
+  amount          Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  reference       String? // Bank reference number
+
+  // Bank account info
+  bankAccount   String?
+  accountNumber String?
+
+  // Import metadata
+  importBatch String // Group transactions by import batch
+  rawData     Json? // Original CSV row for reference
+
+  // Reconciliation
+  reconciled     Boolean         @default(false)
+  reconciledAt   DateTime?
+  reconciliation Reconciliation?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([transactionDate])
+  @@index([amount])
+  @@index([importBatch])
+  @@index([reconciled])
+  @@map("bank_transactions")
+}
+
+// Reconciliation - Matches between bank transactions and payments
+model Reconciliation {
+  id String @id @default(cuid())
+
+  // Bank transaction
+  bankTransactionId String          @unique
+  bankTransaction   BankTransaction @relation(fields: [bankTransactionId], references: [id], onDelete: Cascade)
+
+  // System payment (if matched)
+  paymentId String?  @unique
+  payment   Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+
+  // Matching details
+  matchType     MatchType  @default(MANUAL)
+  confidence    Int        @default(0) // 0-100%
+  matchedBy     String? // User who confirmed match
+  matchedByUser AdminUser? @relation(fields: [matchedBy], references: [id], onDelete: SetNull)
+
+  // Status
+  status ReconciliationStatus @default(PENDING)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([matchType])
+  @@map("reconciliations")
+}
+
+enum MatchType {
+  AUTO_EXACT // Exact amount and date match
+  AUTO_FUZZY // Fuzzy match with high confidence
+  MANUAL // Manually matched by user
+  SUGGESTED // System suggestion, needs confirmation
+}
+
+enum ReconciliationStatus {
+  PENDING // Not yet confirmed
+  CONFIRMED // Match confirmed
+  REJECTED // Match rejected
+  UNMATCHED // No match found
+}
+
+// Accounting Periods - Monthly/quarterly/yearly accounting periods
+model AccountingPeriod {
+  id         String     @id @default(cuid())
+  name       String     @unique // e.g., "2025-01", "2025-Q1", "2025"
+  periodType PeriodType @default(MONTHLY)
+
+  // Date range
+  startDate DateTime
+  endDate   DateTime
+
+  // Status
+  status       PeriodStatus @default(OPEN)
+  closedAt     DateTime?
+  closedBy     String?
+  closedByUser AdminUser?   @relation("ClosedPeriods", fields: [closedBy], references: [id], onDelete: SetNull)
+
+  lockedAt     DateTime?
+  lockedBy     String?
+  lockedByUser AdminUser? @relation("LockedPeriods", fields: [lockedBy], references: [id], onDelete: SetNull)
+
+  // Unlock tracking
+  unlockedAt     DateTime?
+  unlockedBy     String?
+  unlockedByUser AdminUser? @relation("UnlockedPeriods", fields: [unlockedBy], references: [id], onDelete: SetNull)
+  unlockReason   String?
+
+  // Journal entries
+  journalEntries JournalEntry[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([startDate])
+  @@index([endDate])
+  @@index([status])
+  @@map("accounting_periods")
+}
+
+// Journal Entries - General ledger journal entries
+model JournalEntry {
+  id            String @id @default(cuid())
+  journalNumber String @unique // e.g., JE-2025-001
+
+  // Period association
+  periodId String
+  period   AccountingPeriod @relation(fields: [periodId], references: [id], onDelete: Restrict)
+
+  // Entry details
+  entryDate   DateTime
+  description String
+  reference   String? // External reference (invoice, payment, etc.)
+
+  // Lines (debits and credits)
+  lines JournalLine[]
+
+  // Attachments
+  attachments JournalAttachment[]
+
+  // Status
+  status       JournalStatus @default(DRAFT)
+  postedAt     DateTime?
+  postedBy     String?
+  postedByUser AdminUser?    @relation("PostedJournals", fields: [postedBy], references: [id], onDelete: SetNull)
+
+  // Approval workflow
+  approvedAt     DateTime?
+  approvedBy     String?
+  approvedByUser AdminUser? @relation("ApprovedJournals", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  createdBy     String
+  createdByUser AdminUser @relation("CreatedJournals", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([periodId])
+  @@index([entryDate])
+  @@index([status])
+  @@index([journalNumber])
+  @@map("journal_entries")
+}
+
+// Journal Lines - Individual debit/credit lines
+model JournalLine {
+  id             String       @id @default(cuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  position    Int     @default(0)
+  account     String // Account code/name
+  description String?
+
+  // Amount
+  debit  Decimal @default(0) @db.Decimal(10, 2)
+  credit Decimal @default(0) @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([journalEntryId])
+  @@map("journal_lines")
+}
+
+// Journal Attachments - Supporting documents
+model JournalAttachment {
+  id             String       @id @default(cuid())
+  journalEntryId String
+  journalEntry   JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  path         String
+
+  description String?
+
+  uploadedBy     String
+  uploadedByUser AdminUser @relation(fields: [uploadedBy], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([journalEntryId])
+  @@map("journal_attachments")
+}
+
+enum PeriodType {
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum PeriodStatus {
+  OPEN
+  CLOSED
+  LOCKED
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  APPROVED
+  VOIDED
+}
+
+// Records - Immutable archived files with WORM compliance
+model Record {
+  id           String @id @default(cuid())
+  recordNumber String @unique // e.g., REC-2025-001
+
+  // File information
+  filename     String
+  originalPath String
+  archivePath  String @unique // Immutable storage location
+  mimeType     String
+  size         BigInt
+
+  // Cryptographic hash (SHA256)
+  hash          String @unique
+  hashAlgorithm String @default("SHA256")
+
+  // Record metadata
+  description String?
+  category    RecordCategory @default(DOCUMENT)
+  tags        String[]       @default([])
+
+  // Retention policy
+  retentionPolicyId String?
+  retentionPolicy   RetentionPolicy? @relation(fields: [retentionPolicyId], references: [id], onDelete: SetNull)
+
+  retainUntil     DateTime? // Calculated retention date
+  legalHold       Boolean    @default(false) // Prevents deletion
+  legalHoldReason String?
+  legalHoldBy     String?
+  legalHoldByUser AdminUser? @relation("LegalHoldRecords", fields: [legalHoldBy], references: [id], onDelete: SetNull)
+  legalHoldAt     DateTime?
+
+  // Verification history
+  verifications      RecordHash[]
+  lastVerifiedAt     DateTime?
+  verificationStatus VerificationStatus @default(PENDING)
+
+  // Associations
+  clientId String?
+  client   Client? @relation(fields: [clientId], references: [id], onDelete: SetNull)
+
+  // Audit trail
+  archivedBy     String
+  archivedByUser AdminUser @relation("ArchivedRecords", fields: [archivedBy], references: [id], onDelete: Restrict)
+  archivedAt     DateTime  @default(now())
+
+  // Disposal (if retention expired and no legal hold)
+  disposedAt     DateTime?
+  disposedBy     String?
+  disposedByUser AdminUser? @relation("DisposedRecords", fields: [disposedBy], references: [id], onDelete: SetNull)
+  disposalReason String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([recordNumber])
+  @@index([hash])
+  @@index([category])
+  @@index([retainUntil])
+  @@index([legalHold])
+  @@index([verificationStatus])
+  @@map("records")
+}
+
+// Retention Policies - Compliance and legal retention rules
+model RetentionPolicy {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+
+  // Retention period
+  retentionYears  Int @default(7) // e.g., 7 years for tax records
+  retentionMonths Int @default(0) // Additional months
+  retentionDays   Int @default(0) // Additional days
+
+  // Policy details
+  regulatoryBasis String? // e.g., "IRS Tax Records", "GDPR", "HIPAA"
+  category        RecordCategory?
+
+  // Status
+  isActive  Boolean @default(true)
+  isDefault Boolean @default(false)
+
+  // Records using this policy
+  records Record[]
+
+  createdBy     String
+  createdByUser AdminUser @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@index([isActive])
+  @@map("retention_policies")
+}
+
+// Record Hashes - Verification history
+model RecordHash {
+  id String @id @default(cuid())
+
+  recordId String
+  record   Record @relation(fields: [recordId], references: [id], onDelete: Cascade)
+
+  // Hash verification
+  computedHash String // Hash computed during verification
+  expectedHash String // Original hash from record
+  matched      Boolean // Whether hashes matched
+
+  // Verification details
+  verifiedAt     DateTime   @default(now())
+  verifiedBy     String? // User or system
+  verifiedByUser AdminUser? @relation(fields: [verifiedBy], references: [id], onDelete: SetNull)
+
+  // File state at verification
+  fileExists Boolean
+  fileSize   BigInt?
+
+  // Error details if verification failed
+  error String?
+
+  @@index([recordId])
+  @@index([verifiedAt])
+  @@index([matched])
+  @@map("record_hashes")
+}
+
+enum RecordCategory {
+  DOCUMENT // General documents
+  CONTRACT // Legal contracts
+  INVOICE // Financial invoices
+  TAX // Tax records
+  PHOTO // Photography files
+  VIDEO // Video files
+  CORRESPONDENCE // Emails, letters
+  LEGAL // Legal documents
+  COMPLIANCE // Compliance records
+  OTHER
+}
+
+enum VerificationStatus {
+  PENDING // Not yet verified
+  VERIFIED // Hash verified successfully
+  FAILED // Hash verification failed (tampered)
+  ERROR // Error during verification
+}
+
+// Magic Link for passwordless authentication
+model MagicLink {
+  id        String    @id @default(cuid())
+  email     String
+  tokenHash String    @unique // SHA256 hash of the token
+  purpose   String // 'admin_login', 'client_login', 'client_portal'
+  expiresAt DateTime
+  usedAt    DateTime?
+  ipHash    String? // SHA256 hash of requesting IP
+  uaHash    String? // SHA256 hash of user agent
+  metadata  Json? // Additional context
+  createdAt DateTime  @default(now())
+
+  @@index([email])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("magic_links")
+}
+
+// ============================================
+// PROOFING & SELECTION WORKFLOW
+// ============================================
+
+// ProofSet - A client's proofing session for a gallery
+model ProofSet {
+  id        String  @id @default(cuid())
+  galleryId String
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+
+  // Session tracking
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  lastActiveAt DateTime  @default(now())
+
+  // Client info (captured at session start)
+  clientEmail String?
+  clientName  String?
+  ipAddress   String?
+  userAgent   String?
+
+  // Selections and comments
+  selections Selection[]
+  comments   Comment[]
+
+  // Stats
+  totalViewed   Int @default(0)
+  totalSelected Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([galleryId])
+  @@index([clientEmail])
+  @@map("proof_sets")
+}
+
+// Selection - Client selections (hearts, flags, rejects)
+model Selection {
+  id         String   @id @default(cuid())
+  proofSetId String
+  proofSet   ProofSet @relation(fields: [proofSetId], references: [id], onDelete: Cascade)
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  type SelectionType @default(HEART)
+
+  // Metadata
+  note String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([proofSetId, assetId]) // One selection per asset per proof set
+  @@index([proofSetId])
+  @@index([assetId])
+  @@index([type])
+  @@map("selections")
+}
+
+enum SelectionType {
+  HEART // Client loves this photo
+  FLAG // Client wants to discuss this photo
+  REJECT // Client doesn't want this photo
+}
+
+// Comment - Client comments on individual photos
+model Comment {
+  id         String   @id @default(cuid())
+  proofSetId String
+  proofSet   ProofSet @relation(fields: [proofSetId], references: [id], onDelete: Cascade)
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  text String @db.Text
+
+  // Reply tracking (for future use)
+  parentId String?
+  parent   Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies  Comment[] @relation("CommentReplies")
+
+  // Edit tracking
+  edited   Boolean   @default(false)
+  editedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([proofSetId])
+  @@index([assetId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+// ============================================
+// SEARCH & FILTERS
+// ============================================
+
+// SavedFilter - User's saved search filters
+model SavedFilter {
+  id     String    @id @default(cuid())
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Filter details
+  name        String
+  description String?
+
+  // Search query
+  query      String? // Search query text
+  entityType String // 'client', 'asset', 'document', 'invoice', etc.
+
+  // Filter criteria (JSON)
+  filters Json // Facets: status, category, dateRange, tags, etc.
+
+  // Usage tracking
+  isDefault  Boolean   @default(false)
+  lastUsedAt DateTime?
+  usageCount Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([entityType])
+  @@map("saved_filters")
+}
+
+
+// ============================================
+// RBAC & PERMISSIONS
+// ============================================
+
+// SystemRole - Predefined system roles
+model SystemRole {
+  id          String  @id @default(cuid())
+  name        String  @unique // SUPER_ADMIN, ADMIN, EDITOR, VIEWER, etc.
+  displayName String // Human-readable name
+  description String?
+  
+  // Role hierarchy level (higher = more permissions)
+  level Int @default(0)
+  
+  // System flags
+  isSystem  Boolean @default(false) // Cannot be deleted
+  isDefault Boolean @default(false) // Assigned to new users
+  isActive  Boolean @default(true)
+  
+  // Permissions
+  permissions RolePermission[]
+  
+  // User assignments
+  userRoles UserRole[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([name])
+  @@index([level])
+  @@map("system_roles")
+}
+
+// UserRole - Many-to-many relationship between users and roles
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  roleId String
+  role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  // Assignment metadata
+  assignedBy     String?
+  assignedByUser AdminUser? @relation("AssignedRoles", fields: [assignedBy], references: [id], onDelete: SetNull)
+  assignedAt     DateTime   @default(now())
+  
+  // Scope (optional - for limiting role to specific resources)
+  scope     String? // e.g., "client:abc123" to limit to one client
+  expiresAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, roleId, scope]) // User can have same role with different scopes
+  @@index([userId])
+  @@index([roleId])
+  @@map("user_roles")
+}
+
+// Permission - Granular permission definitions
+model Permission {
+  id       String  @id @default(cuid())
+  resource String // Resource type: "clients", "invoices", "assets", etc.
+  action   String // Action: "create", "read", "update", "delete", "export", etc.
+  
+  // Combined permission name: "clients:read", "invoices:delete"
+  name String @unique
+  
+  displayName String
+  description String?
+  
+  // Grouping
+  category String? // "Content", "Finance", "Admin", etc.
+  
+  // Permission flags
+  isSystem   Boolean @default(true) // System-defined permissions
+  isActive   Boolean @default(true)
+  isDangerous Boolean @default(false) // Requires extra confirmation
+  
+  // Role assignments
+  rolePermissions RolePermission[]
+  
+  // Policy rules
+  policyRules PolicyRule[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([resource, action])
+  @@index([name])
+  @@index([resource])
+  @@map("permissions")
+}
+
+// RolePermission - Many-to-many between roles and permissions
+model RolePermission {
+  id String @id @default(cuid())
+  
+  roleId String
+  role   SystemRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  // Grant metadata
+  grantedBy     String?
+  grantedByUser AdminUser? @relation(fields: [grantedBy], references: [id], onDelete: SetNull)
+  grantedAt     DateTime   @default(now())
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+// PolicyRule - Fine-grained access control rules
+model PolicyRule {
+  id   String @id @default(cuid())
+  name String @unique
+  
+  // Rule definition
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  // Rule conditions (JSON-based)
+  // Example: { "field": "ownerId", "operator": "equals", "value": "$userId" }
+  // Example: { "field": "status", "operator": "in", "value": ["DRAFT", "PENDING"] }
+  conditions Json
+  
+  // Rule behavior
+  effect      PolicyEffect @default(ALLOW) // ALLOW or DENY
+  priority    Int          @default(0) // Higher priority = evaluated first
+  description String?
+  
+  // Status
+  isActive Boolean @default(true)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([permissionId])
+  @@index([priority])
+  @@map("policy_rules")
+}
+
+enum PolicyEffect {
+  ALLOW
+  DENY
+}
+
+// PermissionCache - Cache for permission checks (optional optimization)
+model PermissionCache {
+  id String @id @default(cuid())
+  
+  userId       String
+  permissionId String
+  resourceId   String? // Specific resource being accessed
+  
+  // Cached result
+  hasPermission Boolean
+  
+  // Cache metadata
+  computedAt DateTime @default(now())
+  expiresAt  DateTime
+  
+  @@unique([userId, permissionId, resourceId])
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("permission_cache")
+}
+
+// ============================================
+// NOTIFICATIONS CENTER
+// ============================================
+
+// Notification - In-app notifications for users
+model Notification {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Notification details
+  type     NotificationType // Event type
+  title    String
+  message  String           @db.Text
+  category String? // "info", "success", "warning", "error"
+  
+  // Related entity
+  entityType String? // "invoice", "client", "asset", etc.
+  entityId   String?
+  
+  // Additional data (JSON)
+  metadata Json?
+  
+  // Actions
+  actionUrl  String? // URL to navigate to
+  actionText String? // Button text
+  
+  // Status
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+  isDismissed Boolean   @default(false)
+  dismissedAt DateTime?
+  
+  // Priority
+  priority NotificationPriority @default(NORMAL)
+  
+  // Expiration
+  expiresAt DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  // Client events
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_MESSAGE
+  
+  // Invoice events
+  INVOICE_CREATED
+  INVOICE_SENT
+  INVOICE_PAID
+  INVOICE_OVERDUE
+  INVOICE_REMINDER
+  
+  // Payment events
+  PAYMENT_RECEIVED
+  PAYMENT_FAILED
+  PAYMENT_REFUNDED
+  
+  // Contract/Proposal events
+  PROPOSAL_CREATED
+  PROPOSAL_SENT
+  PROPOSAL_VIEWED
+  PROPOSAL_ACCEPTED
+  PROPOSAL_DECLINED
+  CONTRACT_SIGNED
+  CONTRACT_EXPIRING
+  
+  // Gallery events
+  GALLERY_CREATED
+  GALLERY_SHARED
+  GALLERY_VIEWED
+  GALLERY_EXPIRING
+  
+  // Proofing events
+  PROOF_SELECTION_MADE
+  PROOF_COMMENT_ADDED
+  PROOF_COMPLETED
+  
+  // Asset events
+  ASSET_UPLOADED
+  ASSET_PROCESSED
+  ASSET_FAILED
+  
+  // User events
+  USER_INVITED
+  USER_ROLE_CHANGED
+  
+  // System events
+  SYSTEM_MAINTENANCE
+  SYSTEM_UPDATE
+  BACKUP_COMPLETED
+  BACKUP_FAILED
+  
+  // Custom
+  CUSTOM
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+// NotificationPreference - User notification subscription settings
+model NotificationPreference {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Channel preferences
+  emailEnabled   Boolean @default(true)
+  inAppEnabled   Boolean @default(true)
+  webhookEnabled Boolean @default(false)
+  
+  // Event-specific preferences
+  eventType NotificationType
+  enabled   Boolean          @default(true)
+  
+  // Digest preferences
+  digestEnabled   Boolean              @default(false)
+  digestFrequency NotificationDigestFrequency @default(DAILY)
+  digestTime      String? // HH:MM format, e.g., "09:00"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([userId, eventType])
+  @@index([userId])
+  @@map("notification_preferences")
+}
+
+enum NotificationDigestFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// NotificationDigest - Scheduled digest emails
+model NotificationDigest {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  frequency NotificationDigestFrequency
+  
+  // Digest content
+  notificationIds String[] // Array of notification IDs included
+  emailSent       Boolean  @default(false)
+  emailSentAt     DateTime?
+  
+  // Period covered
+  periodStart DateTime
+  periodEnd   DateTime
+  
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([emailSent])
+  @@index([periodStart])
+  @@map("notification_digests")
+}
+
+// WebhookEndpoint - Webhook delivery targets
+model WebhookEndpoint {
+  id String @id @default(cuid())
+  
+  userId String
+  user   AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Endpoint details
+  name        String
+  url         String
+  secret      String? // Webhook signing secret
+  description String?
+  
+  // Event subscriptions
+  events String[] @default([]) // Array of NotificationType
+  
+  // Status
+  isActive       Boolean @default(true)
+  isVerified     Boolean @default(false)
+  verifiedAt     DateTime?
+  lastPingAt     DateTime?
+  lastSuccessAt  DateTime?
+  lastFailureAt  DateTime?
+  failureCount   Int     @default(0)
+  consecutiveFailures Int @default(0)
+  
+  // Retry configuration
+  maxRetries     Int @default(3)
+  retryBackoff   Int @default(60) // Seconds
+  timeoutSeconds Int @default(30)
+  
+  // Headers (JSON)
+  headers Json?
+  
+  // Deliveries
+  deliveries WebhookDelivery[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([userId])
+  @@index([isActive])
+  @@map("webhook_endpoints")
+}
+
+// WebhookDelivery - Webhook delivery attempts tracking
+model WebhookDelivery {
+  id String @id @default(cuid())
+  
+  endpointId String
+  endpoint   WebhookEndpoint @relation(fields: [endpointId], references: [id], onDelete: Cascade)
+  
+  // Event details
+  eventType NotificationType
+  eventId   String // ID of the notification or event
+  payload   Json // Full webhook payload
+  
+  // Delivery status
+  status       WebhookDeliveryStatus @default(PENDING)
+  attempts     Int                   @default(0)
+  maxAttempts  Int                   @default(3)
+  nextRetryAt  DateTime?
+  
+  // Response
+  responseStatus Int? // HTTP status code
+  responseBody   String? @db.Text
+  responseTime   Int? // Milliseconds
+  
+  // Error tracking
+  error          String? @db.Text
+  lastAttemptAt  DateTime?
+  succeededAt    DateTime?
+  failedAt       DateTime?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([endpointId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}
+
+enum WebhookDeliveryStatus {
+  PENDING
+  SENDING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+// EmailLog - Track all emails sent
+model EmailLog {
+  id String @id @default(cuid())
+  
+  // Recipient
+  to      String
+  cc      String?
+  bcc     String?
+  from    String
+  replyTo String?
+  
+  // Content
+  subject  String
+  template String? // Template name if using templates
+  
+  // Status
+  status       EmailStatus @default(PENDING)
+  sentAt       DateTime?
+  deliveredAt  DateTime?
+  openedAt     DateTime?
+  clickedAt    DateTime?
+  bouncedAt    DateTime?
+  complainedAt DateTime?
+  
+  // Tracking
+  messageId      String? // Provider message ID
+  providerStatus String?
+  error          String? @db.Text
+  
+  // Metadata
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([to])
+  @@index([status])
+  @@index([createdAt])
+  @@map("email_logs")
+}
+
+enum EmailStatus {
+  PENDING
+  SENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
+}
+
+// ============================================
+// ADMIN SETTINGS & ORGANIZATION
+// ============================================
+
+// Organization - Main organization/company profile
+model Organization {
+  id String @id @default(cuid())
+  
+  // Basic information
+  name        String
+  legalName   String?
+  email       String
+  phone       String?
+  website     String?
+  
+  // Address
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postcode     String?
+  country      String @default("GB")
+  
+  // Tax information
+  vatNumber     String?
+  taxId         String?
+  defaultTaxRate Decimal @default(20) @db.Decimal(5, 2) // Default VAT rate
+  
+  // Branding
+  logoUrl         String?
+  primaryColor    String? // Hex color
+  secondaryColor  String?
+  accentColor     String?
+  
+  // Feature flags
+  features Json @default("{}")
+  
+  // Settings
+  timezone String @default("Europe/London")
+  locale   String @default("en-GB")
+  currency String @default("GBP")
+  
+  // Metadata
+  metadata Json?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("organizations")
+}
+
+// Setting - Key-value settings storage
+model Setting {
+  id String @id @default(cuid())
+  
+  // Setting key (unique)
+  key   String @unique
+  
+  // Setting value (JSON for flexibility)
+  value Json
+  
+  // Metadata
+  category    String? // "email", "notification", "branding", etc.
+  description String?
+  isPublic    Boolean @default(false) // Can be exposed to frontend
+  isEncrypted Boolean @default(false) // Is value encrypted
+  
+  // Change tracking
+  lastChangedBy     String?
+  lastChangedByUser AdminUser? @relation(fields: [lastChangedBy], references: [id], onDelete: SetNull)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([category])
+  @@index([isPublic])
+  @@map("settings")
+}
+
+// SettingHistory - Audit log for setting changes
+model SettingHistory {
+  id String @id @default(cuid())
+  
+  settingKey String
+  
+  // Change details
+  oldValue Json?
+  newValue Json
+  
+  // Who changed it
+  changedBy     String
+  changedByUser AdminUser @relation(fields: [changedBy], references: [id], onDelete: Cascade)
+  
+  // Additional context
+  ipAddress String?
+  userAgent String?
+  reason    String? // Optional reason for change
+  
+  createdAt DateTime @default(now())
+  
+  @@index([settingKey])
+  @@index([changedBy])
+  @@index([createdAt])
+  @@map("setting_history")
+}

@@ -23,7 +23,17 @@ export async function buildServer() {
     requestIdLogLabel: 'reqId',
   });
 
-  // Register security middleware - Helmet
+  // Register CORS FIRST - before Helmet
+  await fastify.register(cors, {
+    origin: env.CORS_ORIGIN.split(',').map(o => o.trim()),
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Type', 'Content-Length'],
+    optionsSuccessStatus: 200,
+  });
+
+  // Register security middleware - Helmet AFTER CORS
   await fastify.register(helmet, {
     contentSecurityPolicy: {
       directives: {
@@ -31,17 +41,14 @@ export async function buildServer() {
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", 'data:', 'https:'],
+        frameSrc: ["'self'"],
+        objectSrc: ["'self'"],
       },
     },
-  });
-
-  // Register CORS
-  await fastify.register(cors, {
-    origin: env.CORS_ORIGIN,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Type', 'Content-Length'],
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+    // Disable X-Frame-Options to allow iframe embedding (we use CSP frame-ancestors instead)
+    frameguard: false,
   });
 
   // Register cookie plugin

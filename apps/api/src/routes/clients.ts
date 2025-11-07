@@ -12,9 +12,98 @@ import {
   UpdateStatusInput,
   ListClientsQuery,
   ClientIdParam,
+  PublicClientSignupSchema,
+  PublicClientSignupInput,
 } from '../schemas/client.js';
 
+/**
+ * Public client signup routes (no auth required)
+ */
 export async function clientRoutes(fastify: FastifyInstance) {
+  /**
+   * POST /clients/create
+   * Public client signup endpoint (no auth required)
+   */
+  fastify.post<{ Body: PublicClientSignupInput }>(
+    '/clients/create',
+    async (request, reply) => {
+      try {
+        // Validate request body
+        let data;
+        try {
+          data = PublicClientSignupSchema.parse(request.body);
+        } catch (validationError: any) {
+          const errorMessages = validationError.issues
+            ? validationError.issues
+                .map((issue: any) => `${issue.path.join('.')}: ${issue.message}`)
+                .join('; ')
+            : validationError.message;
+
+          return reply.status(400).send({
+            statusCode: 400,
+            error: 'Validation Error',
+            message: errorMessages,
+          });
+        }
+
+        // Extract IP and user agent for tracking
+        const ipAddress = request.ip;
+        const userAgent = request.headers['user-agent'] as string;
+
+        // Create client with PENDING status and set source to "website"
+        const client = await ClientService.createClient(
+          {
+            ...data,
+            status: 'PENDING',
+            source: data.source || 'website',
+          },
+          'public' // System user for public signups
+        );
+
+        request.log.info(
+          {
+            clientId: client.id,
+            email: client.email,
+            source: 'public_signup',
+          },
+          'Public client signup received'
+        );
+
+        return reply.status(201).send({
+          success: true,
+          message: 'Thank you for signing up! We will review your details and contact you soon.',
+          clientId: client.id,
+        });
+      } catch (error) {
+        request.log.error(error, 'Error creating client via public signup');
+        if (
+          error instanceof Error &&
+          error.message === 'A client with this email already exists'
+        ) {
+          return reply.status(409).send({
+            statusCode: 409,
+            error: 'Conflict',
+            message: 'A client account with this email already exists. Please use a different email or contact us.',
+          });
+        }
+
+        if (error instanceof Error && error.message.includes('validation')) {
+          return reply.status(400).send({
+            statusCode: 400,
+            error: 'Bad Request',
+            message: error.message,
+          });
+        }
+        throw error;
+      }
+    }
+  );
+}
+
+/**
+ * Admin client management routes (auth required)
+ */
+export async function adminClientRoutes(fastify: FastifyInstance) {
   // All routes require admin authentication
   fastify.addHook('preHandler', requireAdmin);
 

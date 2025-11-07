@@ -15,8 +15,26 @@ export const CreateClientSchema = z.object({
   state: z.string().optional(),
   zipCode: z.string().optional(),
   country: z.string().optional().default('US'),
+  source: z.string().optional(), // "website", "referral", "social", "direct", etc.
+  preferredContactMethod: z.enum(['email', 'phone', 'both']).optional(),
   notes: z.string().optional(),
   tags: z.array(z.string()).optional().default([]),
+});
+
+// Public client signup schema (for self-entry)
+export const PublicClientSignupSchema = z.object({
+  clientType: z.enum(['individual', 'business', 'organization']),
+  name: z.string().min(2, 'Name must be at least 2 characters').max(255),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().min(5, 'Phone is required'),
+  company: z.string().max(255).optional(),
+  address: z.string().max(500).optional(),
+  city: z.string().max(100).optional(),
+  state: z.string().max(100).optional(),
+  zipCode: z.string().max(20).optional(),
+  country: z.string().max(100).optional().default('US'),
+  source: z.string().optional(),
+  preferredContactMethod: z.enum(['email', 'phone', 'both']).optional(),
 });
 
 // Update client schema (all fields optional)
@@ -49,3 +67,4 @@ export type UpdateClientInput = z.infer<typeof UpdateClientSchema>;
 export type UpdateStatusInput = z.infer<typeof UpdateStatusSchema>;
 export type ListClientsQuery = z.infer<typeof ListClientsQuerySchema>;
 export type ClientIdParam = z.infer<typeof ClientIdSchema>;
+export type PublicClientSignupInput = z.infer<typeof PublicClientSignupSchema>;

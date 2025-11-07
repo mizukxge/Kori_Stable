@@ -217,15 +217,16 @@ export function UploadZone({
       try {
         await addAssetsToGallery(galleryId, uploadedAssetIds);
         console.log(`✅ Added ${uploadedAssetIds.length} assets to gallery ${galleryId}`);
+
+        // Call completion callback after assets are added to gallery
+        if (onUploadComplete) {
+          const uploadedFiles = files.filter((f) => f.status === 'success');
+          console.log(`📢 Calling onUploadComplete with ${uploadedFiles.length} files`);
+          await onUploadComplete(uploadedFiles);
+        }
       } catch (error) {
         console.error('❌ Failed to add assets to gallery:', error);
       }
-    }
-
-    // Call completion callback
-    const uploadedFiles = files.filter((f) => f.status === 'success');
-    if (onUploadComplete && uploadedFiles.length > 0) {
-      onUploadComplete(uploadedFiles);
     }
   };
 
