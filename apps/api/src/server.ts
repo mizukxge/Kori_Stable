@@ -24,13 +24,31 @@ export async function buildServer() {
   });
 
   // Register CORS FIRST - before Helmet
+  const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim());
+
   await fastify.register(cors, {
-    origin: env.CORS_ORIGIN.split(',').map(o => o.trim()),
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Type', 'Content-Length'],
     optionsSuccessStatus: 200,
+  });
+
+  // Explicitly set credentials header for CORS (CORS plugin bug workaround)
+  // Using onSend hook which runs after route handler but before response is sent to client
+  fastify.addHook('onSend', async (request, reply) => {
+    const origin = request.headers.origin as string | undefined;
+    if (origin && allowedOrigins.includes(origin)) {
+      // Use raw reply to ensure header is set
+      reply.raw.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
   });
 
   // Register security middleware - Helmet AFTER CORS
