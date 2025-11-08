@@ -41,14 +41,18 @@ export async function buildServer() {
     optionsSuccessStatus: 200,
   });
 
-  // Explicitly set credentials header for CORS (CORS plugin bug workaround)
-  // Using onSend hook which runs after route handler but before response is sent to client
-  fastify.addHook('onSend', async (request, reply) => {
+  // Explicit credentials header hook - runs AFTER route handlers
+  // This ensures the header is set even if CORS plugin has timing issues
+  fastify.addHook('onSend', async (request, reply, payload) => {
     const origin = request.headers.origin as string | undefined;
-    if (origin && allowedOrigins.includes(origin)) {
-      // Use raw reply to ensure header is set
-      reply.raw.setHeader('Access-Control-Allow-Credentials', 'true');
+    const corsHeader = reply.getHeader('Access-Control-Allow-Origin');
+
+    // If CORS allowed this origin but forgot credentials header, add it
+    if (origin && corsHeader === origin && allowedOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Credentials', 'true');
     }
+
+    return payload;
   });
 
   // Register security middleware - Helmet AFTER CORS
@@ -111,12 +115,18 @@ export async function buildServer() {
     // Don't leak error details in production
     const isProduction = env.NODE_ENV === 'production';
     const statusCode = error.statusCode || 500;
-    
+
+    // Ensure CORS credentials header is set for error responses too
+    const origin = request.headers.origin as string | undefined;
+    if (origin && allowedOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Credentials', 'true');
+    }
+
     reply.status(statusCode).send({
       statusCode,
       error: error.name || 'Internal Server Error',
-      message: isProduction && statusCode === 500 
-        ? 'An internal server error occurred' 
+      message: isProduction && statusCode === 500
+        ? 'An internal server error occurred'
         : error.message,
       ...((!isProduction && error.stack) && { stack: error.stack }),
     });
@@ -124,6 +134,12 @@ export async function buildServer() {
 
   // Not found handler
   fastify.setNotFoundHandler((request, reply) => {
+    // Ensure CORS credentials header is set for 404 responses too
+    const origin = request.headers.origin as string | undefined;
+    if (origin && allowedOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Credentials', 'true');
+    }
+
     reply.status(404).send({
       statusCode: 404,
       error: 'Not Found',
