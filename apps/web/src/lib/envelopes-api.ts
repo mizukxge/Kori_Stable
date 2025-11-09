@@ -208,7 +208,10 @@ export async function addDocument(envelopeId: string, data: AddDocumentData) {
     body: JSON.stringify(data),
   });
 
-  if (!response.ok) throw new Error('Failed to add document');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to add document');
+  }
   const json = await response.json();
   return json.data;
 }
