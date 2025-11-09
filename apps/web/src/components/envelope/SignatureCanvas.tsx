@@ -113,8 +113,8 @@ export function SignatureCanvas({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">{placeholder}</label>
-        <div className="border-2 border-dashed border-gray-300 rounded-lg bg-white overflow-hidden">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{placeholder}</label>
+        <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-700 overflow-hidden">
           <canvas
             ref={canvasRef}
             onMouseDown={handleMouseDown}
@@ -131,7 +131,7 @@ export function SignatureCanvas({
         <button
           onClick={handleClear}
           disabled={isEmpty}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Clear
         </button>
@@ -139,7 +139,7 @@ export function SignatureCanvas({
         <button
           onClick={handleUndo}
           disabled={isEmpty}
-          className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Undo
         </button>
@@ -147,18 +147,18 @@ export function SignatureCanvas({
         <div className="flex-1" />
 
         {isEmpty && (
-          <span className="flex items-center text-sm text-gray-500">
+          <span className="flex items-center text-sm text-gray-500 dark:text-gray-400">
             Draw your signature above
           </span>
         )}
         {!isEmpty && (
-          <span className="flex items-center text-sm text-green-600 font-medium">
+          <span className="flex items-center text-sm text-green-600 dark:text-green-400 font-medium">
             ✅ Signature captured
           </span>
         )}
       </div>
 
-      <p className="text-xs text-gray-500">
+      <p className="text-xs text-gray-500 dark:text-gray-400">
         Use your mouse or touchpad to draw your signature in the box above.
       </p>
     </div>

@@ -108,11 +108,11 @@ export function DocumentUpload({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-gray-900">Upload Documents</h2>
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upload Documents</h2>
 
       {/* Error message */}
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-4 text-red-800 dark:text-red-200">
           <p className="font-medium">Error</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
@@ -126,8 +126,8 @@ export function DocumentUpload({
         onDrop={handleDrop}
         className={`rounded-lg border-2 border-dashed p-8 text-center transition-colors cursor-pointer ${
           dragActive
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-gray-50 hover:bg-gray-100'
+            ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+            : 'border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
         }`}
       >
         <input
@@ -144,10 +144,10 @@ export function DocumentUpload({
           className="inline-block"
         >
           <div className="text-4xl mb-3">📤</div>
-          <p className="text-lg font-semibold text-gray-900">
+          <p className="text-lg font-semibold text-gray-900 dark:text-white">
             Click to upload or drag and drop
           </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
             PDF, PNG, or JPEG up to 50MB
           </p>
         </button>
@@ -156,24 +156,24 @@ export function DocumentUpload({
       {/* Uploaded documents list */}
       {documents.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-gray-900 dark:text-white">
             Documents ({documents.length})
           </h3>
 
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className="rounded-lg border border-gray-200 bg-white p-4 flex items-center justify-between"
+              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 flex items-center justify-between"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <span className="text-2xl flex-shrink-0">
                   {getFileIcon(doc.file.name)}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 truncate">
+                  <p className="font-medium text-gray-900 dark:text-white truncate">
                     {doc.name}
                   </p>
-                  <p className="text-xs text-gray-500 truncate">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                     {doc.file.name} • {formatFileSize(doc.file.size)}
                   </p>
                 </div>
@@ -181,7 +181,7 @@ export function DocumentUpload({
 
               <button
                 onClick={() => onRemoveDocument(doc.id)}
-                className="ml-2 text-red-600 hover:text-red-700 font-medium text-sm flex-shrink-0"
+                className="ml-2 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium text-sm flex-shrink-0"
               >
                 Remove
               </button>
@@ -192,17 +192,17 @@ export function DocumentUpload({
 
       {/* Empty state message */}
       {documents.length === 0 && (
-        <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
-          <p className="text-sm text-blue-900">
+        <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
+          <p className="text-sm text-blue-900 dark:text-blue-200">
             <span className="font-semibold">💡 Tip:</span> Upload at least one document that signers will need to sign. You can upload PDFs or images.
           </p>
         </div>
       )}
 
       {/* Info box */}
-      <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 space-y-2">
-        <p className="text-sm font-semibold text-gray-900">📋 Supported formats:</p>
-        <ul className="text-sm text-gray-600 space-y-1">
+      <div className="rounded-lg bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-4 space-y-2">
+        <p className="text-sm font-semibold text-gray-900 dark:text-white">📋 Supported formats:</p>
+        <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
           <li>• PDF documents (*.pdf)</li>
           <li>• Images (*.png, *.jpg, *.jpeg)</li>
           <li>• Maximum file size: 50MB per document</li>

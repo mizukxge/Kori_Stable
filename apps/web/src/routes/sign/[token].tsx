@@ -90,10 +90,10 @@ export default function SigningPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">Loading envelope...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">Loading envelope...</p>
         </div>
       </div>
     );
@@ -101,12 +101,12 @@ export default function SigningPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="rounded-lg border border-red-200 bg-white p-8 max-w-md w-full text-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center px-4">
+        <div className="rounded-lg border border-red-200 dark:border-red-800 bg-white dark:bg-gray-800 p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⚠️</div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Unable to Load Envelope</h1>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Unable to Load Envelope</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             The signing link may be invalid or expired. Please check your email for a new link.
           </p>
         </div>
@@ -116,8 +116,8 @@ export default function SigningPage() {
 
   if (!envelope) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">No envelope data available</p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <p className="text-gray-600 dark:text-gray-400">No envelope data available</p>
       </div>
     );
   }
@@ -126,43 +126,43 @@ export default function SigningPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center px-4">
-        <div className="rounded-lg border border-green-200 bg-white p-8 max-w-md w-full text-center shadow-lg">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 dark:from-blue-950 to-indigo-50 dark:to-indigo-950 flex items-center justify-center px-4">
+        <div className="rounded-lg border border-green-200 dark:border-green-800 bg-white dark:bg-gray-800 p-8 max-w-md w-full text-center shadow-lg">
           <div className="text-5xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Thank You!</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Thank You!</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             {declineReason ? 'We received your response.' : 'Your signature has been submitted successfully.'}
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             {declineReason
               ? 'The envelope has been marked as declined.'
               : 'The next signer will be notified to review the document.'}
           </p>
-          <p className="text-xs text-gray-400">You can close this page</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500">You can close this page</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* Header */}
-        <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200 mb-6">
+        <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">{envelope.envelope?.name}</h1>
-              <p className="mt-2 text-gray-600">{envelope.envelope?.description}</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{envelope.envelope?.name}</h1>
+              <p className="mt-2 text-gray-600 dark:text-gray-400">{envelope.envelope?.description}</p>
             </div>
             <StatusBadge status={envelope.envelope?.status} size="lg" />
           </div>
 
           {signer && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-600">
+            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 <span className="font-medium">Signer:</span> {signer.name}
               </p>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                 <span className="font-medium">Role:</span> {signer.role || 'Signer'}
               </p>
             </div>
@@ -171,21 +171,21 @@ export default function SigningPage() {
 
         {/* Documents */}
         {envelope.envelope?.documents && envelope.envelope.documents.length > 0 && (
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Documents to Sign</h2>
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Documents to Sign</h2>
             <div className="space-y-2">
               {envelope.envelope.documents.map((doc: any) => (
-                <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <span className="text-2xl">📄</span>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{doc.name}</p>
-                    <p className="text-sm text-gray-500">{doc.fileName}</p>
+                    <p className="font-medium text-gray-900 dark:text-white">{doc.name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{doc.fileName}</p>
                   </div>
                   <a
                     href={doc.filePath}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
                   >
                     View →
                   </a>
@@ -197,7 +197,7 @@ export default function SigningPage() {
 
         {/* Signature Pads */}
         {!showDeclineForm && (
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-gray-200 mb-6 space-y-6">
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6 space-y-6">
             <SignatureCanvas
               placeholder="Your Signature"
               onSignatureChange={setSignature}
@@ -205,7 +205,7 @@ export default function SigningPage() {
               height={200}
             />
 
-            <div className="border-t border-gray-200 pt-6">
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
               <SignatureCanvas
                 placeholder="Your Initials"
                 onSignatureChange={setInitials}
@@ -218,22 +218,22 @@ export default function SigningPage() {
 
         {/* Decline Form */}
         {showDeclineForm && (
-          <div className="rounded-lg bg-white p-6 shadow-sm border border-red-200 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Reason for Declining</h2>
+          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-red-200 dark:border-red-800 mb-6">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Reason for Declining</h2>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
               placeholder="Please explain why you're unable to sign this envelope..."
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-3 text-gray-900 dark:text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               rows={4}
             />
-            <p className="mt-2 text-sm text-gray-500">This reason will be recorded in the audit trail.</p>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">This reason will be recorded in the audit trail.</p>
           </div>
         )}
 
         {/* Error */}
         {error && (
-          <div className="rounded-lg bg-red-50 border border-red-200 p-4 mb-6 text-red-800">
+          <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-4 mb-6 text-red-800 dark:text-red-200">
             <p className="font-medium">{error}</p>
           </div>
         )}
@@ -245,14 +245,14 @@ export default function SigningPage() {
               <button
                 onClick={handleSign}
                 disabled={submitting || !signature}
-                className="flex-1 rounded-lg bg-blue-600 px-6 py-3 font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 rounded-lg bg-blue-600 dark:bg-blue-700 px-6 py-3 font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? '⏳ Submitting...' : '✅ Sign & Submit'}
               </button>
               <button
                 onClick={() => setShowDeclineForm(true)}
                 disabled={submitting}
-                className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-6 py-3 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Decline
               </button>
@@ -262,7 +262,7 @@ export default function SigningPage() {
               <button
                 onClick={handleDecline}
                 disabled={submitting || !declineReason.trim()}
-                className="flex-1 rounded-lg bg-red-600 px-6 py-3 font-medium text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 rounded-lg bg-red-600 dark:bg-red-700 px-6 py-3 font-medium text-white hover:bg-red-700 dark:hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? '⏳ Submitting...' : '❌ Confirm Decline'}
               </button>
@@ -272,7 +272,7 @@ export default function SigningPage() {
                   setDeclineReason('');
                 }}
                 disabled={submitting}
-                className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-6 py-3 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Back
               </button>
@@ -280,7 +280,7 @@ export default function SigningPage() {
           )}
         </div>
 
-        <p className="mt-4 text-center text-sm text-gray-500">
+        <p className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
           Your signature is secure and will be cryptographically verified.
         </p>
       </div>

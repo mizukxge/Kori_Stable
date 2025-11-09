@@ -22,32 +22,32 @@ const statusConfig = {
   PENDING: {
     icon: '⏳',
     label: 'Pending',
-    color: 'text-gray-600',
-    bg: 'bg-gray-50',
+    color: 'text-gray-600 dark:text-gray-400',
+    bg: 'bg-gray-50 dark:bg-gray-700',
   },
   VIEWED: {
     icon: '👁️',
     label: 'Viewed',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50',
+    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900',
   },
   SIGNED: {
     icon: '✅',
     label: 'Signed',
-    color: 'text-green-600',
-    bg: 'bg-green-50',
+    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-green-50 dark:bg-green-900',
   },
   DECLINED: {
     icon: '❌',
     label: 'Declined',
-    color: 'text-red-600',
-    bg: 'bg-red-50',
+    color: 'text-red-600 dark:text-red-400',
+    bg: 'bg-red-50 dark:bg-red-900',
   },
   EXPIRED: {
     icon: '⏰',
     label: 'Expired',
-    color: 'text-gray-600',
-    bg: 'bg-gray-50',
+    color: 'text-gray-600 dark:text-gray-400',
+    bg: 'bg-gray-50 dark:bg-gray-700',
   },
 };
 
@@ -75,25 +75,25 @@ export function SignerCard({
   }
 
   return (
-    <div className={`rounded-lg border border-gray-200 p-4 ${config.bg}`}>
+    <div className={`rounded-lg border border-gray-200 dark:border-gray-700 p-4 ${config.bg}`}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-gray-900">{name}</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{name}</h3>
             {sequenceNumber && (
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-sm font-bold text-blue-600 dark:text-blue-300">
                 {sequenceNumber}
               </span>
             )}
-            {role && <span className="text-sm text-gray-600">({role})</span>}
+            {role && <span className="text-sm text-gray-600 dark:text-gray-400">({role})</span>}
           </div>
-          <p className="mt-1 text-sm text-gray-600">{email}</p>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{email}</p>
         </div>
 
         {onRemove && status === 'PENDING' && (
           <button
             onClick={onRemove}
-            className="rounded text-gray-400 hover:text-red-600"
+            className="rounded text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400"
             title="Remove signer"
           >
             ✕
@@ -107,7 +107,7 @@ export function SignerCard({
       </div>
 
       {declinedReason && (
-        <div className="mt-2 rounded-md bg-red-100 p-2 text-sm text-red-800">
+        <div className="mt-2 rounded-md bg-red-100 dark:bg-red-900 p-2 text-sm text-red-800 dark:text-red-200">
           <strong>Reason:</strong> {declinedReason}
         </div>
       )}

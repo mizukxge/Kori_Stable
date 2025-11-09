@@ -57,15 +57,15 @@ const actionLabels: Record<string, string> = {
 
 function getActionColor(action: string): string {
   if (action.includes('CANCELLED') || action.includes('DECLINED') || action.includes('TAMPER')) {
-    return 'text-red-600';
+    return 'text-red-600 dark:text-red-400';
   }
   if (action.includes('COMPLETED') || action.includes('SIGNED') || action.includes('VERIFIED')) {
-    return 'text-green-600';
+    return 'text-green-600 dark:text-green-400';
   }
   if (action.includes('VIEWED')) {
-    return 'text-blue-600';
+    return 'text-blue-600 dark:text-blue-400';
   }
-  return 'text-gray-600';
+  return 'text-gray-600 dark:text-gray-400';
 }
 
 export function AuditTrail({ logs, maxItems = 10 }: AuditTrailProps) {
@@ -73,8 +73,8 @@ export function AuditTrail({ logs, maxItems = 10 }: AuditTrailProps) {
 
   if (displayLogs.length === 0) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center">
-        <p className="text-sm text-gray-600">No activity yet</p>
+      <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-6 text-center">
+        <p className="text-sm text-gray-600 dark:text-gray-400">No activity yet</p>
       </div>
     );
   }
@@ -93,20 +93,20 @@ export function AuditTrail({ logs, maxItems = 10 }: AuditTrailProps) {
             <div className="flex flex-col items-center">
               <div className={`text-2xl ${color}`}>{icon}</div>
               {index < displayLogs.length - 1 && (
-                <div className="mt-2 h-8 w-0.5 bg-gray-200" />
+                <div className="mt-2 h-8 w-0.5 bg-gray-200 dark:bg-gray-700" />
               )}
             </div>
 
             {/* Content */}
             <div className="flex-1 pb-4">
               <div className="flex items-baseline justify-between">
-                <h4 className="font-medium text-gray-900">{label}</h4>
-                <span className="text-xs text-gray-500">{time}</span>
+                <h4 className="font-medium text-gray-900 dark:text-white">{label}</h4>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{time}</span>
               </div>
 
               {/* Metadata */}
               {log.metadata && Object.keys(log.metadata).length > 0 && (
-                <div className="mt-2 space-y-1 text-sm text-gray-600">
+                <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-400">
                   {Object.entries(log.metadata).map(([key, value]) => {
                     // Skip complex objects
                     if (typeof value === 'object') return null;
@@ -126,7 +126,7 @@ export function AuditTrail({ logs, maxItems = 10 }: AuditTrailProps) {
       })}
 
       {logs.length > maxItems && (
-        <div className="pt-4 text-center text-xs text-gray-500">
+        <div className="pt-4 text-center text-xs text-gray-500 dark:text-gray-400">
           ... and {logs.length - maxItems} more events
         </div>
       )}

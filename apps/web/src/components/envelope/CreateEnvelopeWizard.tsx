@@ -215,12 +215,12 @@ export function CreateEnvelopeWizard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Create New Envelope</h1>
-          <p className="mt-2 text-gray-600">Step {step} of 3</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create New Envelope</h1>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Step {step} of 3</p>
         </div>
         <button
           onClick={() => navigate('/admin/envelopes')}
-          className="text-blue-600 hover:text-blue-700 font-medium"
+          className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
         >
           ← Cancel
         </button>
@@ -232,7 +232,7 @@ export function CreateEnvelopeWizard() {
           <div
             key={s}
             className={`flex-1 h-1 rounded-full transition-colors ${
-              s <= step ? 'bg-blue-600' : 'bg-gray-200'
+              s <= step ? 'bg-blue-600' : 'bg-gray-200 dark:bg-gray-700'
             }`}
           />
         ))}
@@ -240,7 +240,7 @@ export function CreateEnvelopeWizard() {
 
       {/* Error message */}
       {error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-red-800">
+        <div className="rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 p-4 text-red-800 dark:text-red-200">
           <p className="font-medium">Error</p>
           <p className="text-sm mt-1">{error}</p>
         </div>
@@ -248,7 +248,7 @@ export function CreateEnvelopeWizard() {
 
       {/* Step 1: Basic Info */}
       {step === 1 && (
-        <div className="rounded-lg bg-white border border-gray-200 p-6">
+        <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
           <EnvelopeBasicInfo
             data={{
               name: data.name,
@@ -262,7 +262,7 @@ export function CreateEnvelopeWizard() {
 
       {/* Step 2: Documents */}
       {step === 2 && (
-        <div className="rounded-lg bg-white border border-gray-200 p-6">
+        <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
           <DocumentUpload
             documents={data.documents}
             onAddDocument={addDoc}
@@ -273,7 +273,7 @@ export function CreateEnvelopeWizard() {
 
       {/* Step 3: Signers */}
       {step === 3 && (
-        <div className="rounded-lg bg-white border border-gray-200 p-6">
+        <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-6">
           <SignerListStep
             signers={data.signers}
             workflow={data.signingWorkflow}
@@ -289,7 +289,7 @@ export function CreateEnvelopeWizard() {
         <button
           onClick={() => setStep((s) => Math.max(1, s - 1) as 1 | 2 | 3 | 4)}
           disabled={step === 1}
-          className="rounded-lg border border-gray-300 px-6 py-2 font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-6 py-2 font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           ← Previous
         </button>
@@ -309,7 +309,7 @@ export function CreateEnvelopeWizard() {
               setStep((s) => Math.min(3, s + 1) as 1 | 2 | 3 | 4);
             }}
             disabled={loading}
-            className="rounded-lg bg-blue-600 px-6 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-blue-600 dark:bg-blue-700 px-6 py-2 font-medium text-white hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next →
           </button>
@@ -317,7 +317,7 @@ export function CreateEnvelopeWizard() {
           <button
             onClick={handleSubmit}
             disabled={!canProceedToStep4() || loading}
-            className="rounded-lg bg-green-600 px-6 py-2 font-medium text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-green-600 dark:bg-green-700 px-6 py-2 font-medium text-white hover:bg-green-700 dark:hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? '⏳ Creating...' : '✅ Create Envelope'}
           </button>
@@ -325,8 +325,8 @@ export function CreateEnvelopeWizard() {
       </div>
 
       {/* Step summary */}
-      <div className="rounded-lg bg-blue-50 border border-blue-200 p-4">
-        <p className="text-sm text-blue-900">
+      <div className="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-4">
+        <p className="text-sm text-blue-900 dark:text-blue-200">
           <span className="font-semibold">Summary:</span> {data.name || '(No name)'} •{' '}
           {data.documents.length} document
           {data.documents.length !== 1 ? 's' : ''} • {data.signers.length} signer
