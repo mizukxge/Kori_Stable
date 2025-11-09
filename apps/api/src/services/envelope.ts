@@ -1,5 +1,6 @@
 import { PrismaClient, EnvelopeStatus, SigningWorkflow, SignerStatus, SignatureStatus } from '@prisma/client';
 import crypto from 'crypto';
+import { EnvelopeMailService } from './envelope-mail.js';
 
 const prisma = new PrismaClient();
 
@@ -161,6 +162,14 @@ export class EnvelopeService {
         },
       },
     });
+
+    // Send email notifications to signers
+    try {
+      await EnvelopeMailService.sendEnvelopeNotifications(id);
+    } catch (error) {
+      console.error(`[Envelope] Failed to send envelope notifications:`, error);
+      // Don't throw - envelope was already sent successfully, just log the email error
+    }
 
     return updated;
   }
@@ -525,6 +534,22 @@ export class EnvelopeService {
       });
     }
 
+    // Send confirmation email to signer
+    try {
+      await EnvelopeMailService.sendSignatureConfirmationEmail(signerId);
+    } catch (error) {
+      console.error(`[Envelope] Failed to send signature confirmation email:`, error);
+      // Don't throw - signature was already captured
+    }
+
+    // Send admin notification
+    try {
+      await EnvelopeMailService.sendSignedAdminNotification(signerId);
+    } catch (error) {
+      console.error(`[Envelope] Failed to send admin notification:`, error);
+      // Don't throw - signature was already captured
+    }
+
     return signature;
   }
 
@@ -565,6 +590,14 @@ export class EnvelopeService {
         },
       },
     });
+
+    // Send decline notification email
+    try {
+      await EnvelopeMailService.sendDeclinedNotification(signerId);
+    } catch (error) {
+      console.error(`[Envelope] Failed to send decline notification:`, error);
+      // Don't throw - decline was already recorded
+    }
 
     return signer;
   }
