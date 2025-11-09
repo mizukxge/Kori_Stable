@@ -41,14 +41,23 @@ export async function buildServer() {
     optionsSuccessStatus: 200,
   });
 
-  // Explicit credentials header hook - runs AFTER route handlers
-  // This ensures the header is set even if CORS plugin has timing issues
+  // Explicit credentials header hook - runs BEFORE route handlers
+  // This ensures the header is set for ALL requests including OPTIONS (preflight)
+  fastify.addHook('preHandler', async (request, reply) => {
+    const origin = request.headers.origin as string | undefined;
+
+    // If origin is allowed, ensure credentials header is set
+    if (origin && allowedOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Credentials', 'true');
+    }
+  });
+
+  // Also set on response (onSend) as backup
   fastify.addHook('onSend', async (request, reply, payload) => {
     const origin = request.headers.origin as string | undefined;
-    const corsHeader = reply.getHeader('Access-Control-Allow-Origin');
 
-    // If CORS allowed this origin but forgot credentials header, add it
-    if (origin && corsHeader === origin && allowedOrigins.includes(origin)) {
+    // Ensure credentials header is always set for allowed origins
+    if (origin && allowedOrigins.includes(origin)) {
       reply.header('Access-Control-Allow-Credentials', 'true');
     }
 
