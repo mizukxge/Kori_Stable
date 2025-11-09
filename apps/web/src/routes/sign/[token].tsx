@@ -13,6 +13,7 @@ import {
 } from '../../lib/envelopes-api';
 import { SignatureCanvas } from '../../components/envelope/SignatureCanvas';
 import { StatusBadge } from '../../components/envelope/StatusBadge';
+import { PDFViewer } from '../../components/envelope/PDFViewer';
 
 export default function SigningPage() {
   const { token } = useParams<{ token: string }>();
@@ -25,6 +26,7 @@ export default function SigningPage() {
   const [submitted, setSubmitted] = useState(false);
   const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
+  const [selectedDocumentIndex, setSelectedDocumentIndex] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -171,26 +173,49 @@ export default function SigningPage() {
 
         {/* Documents */}
         {envelope.envelope?.documents && envelope.envelope.documents.length > 0 && (
-          <div className="rounded-lg bg-white dark:bg-gray-800 p-6 shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Documents to Sign</h2>
-            <div className="space-y-2">
-              {envelope.envelope.documents.map((doc: any) => (
-                <div key={doc.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <span className="text-2xl">📄</span>
-                  <div className="flex-1">
-                    <p className="font-medium text-gray-900 dark:text-white">{doc.name}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{doc.fileName}</p>
-                  </div>
-                  <a
-                    href={doc.filePath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium text-sm"
-                  >
-                    View →
-                  </a>
+          <div className="rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 mb-6 overflow-hidden">
+            {/* Document Tabs */}
+            {envelope.envelope.documents.length > 1 && (
+              <div className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <div className="flex overflow-x-auto">
+                  {envelope.envelope.documents.map((doc: any, index: number) => (
+                    <button
+                      key={doc.id}
+                      onClick={() => setSelectedDocumentIndex(index)}
+                      className={`flex-1 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${
+                        selectedDocumentIndex === index
+                          ? 'border-blue-600 text-blue-600 dark:text-blue-400'
+                          : 'border-transparent text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300'
+                      }`}
+                    >
+                      📄 {doc.name}
+                    </button>
+                  ))}
                 </div>
-              ))}
+              </div>
+            )}
+
+            {/* PDF Viewer */}
+            <div className="p-4">
+              {envelope.envelope.documents[selectedDocumentIndex] && (
+                <>
+                  <div className="mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      {envelope.envelope.documents[selectedDocumentIndex].name}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {envelope.envelope.documents[selectedDocumentIndex].fileName}
+                    </p>
+                  </div>
+                  <PDFViewer
+                    filePath={envelope.envelope.documents[selectedDocumentIndex].filePath}
+                    fileName={envelope.envelope.documents[selectedDocumentIndex].fileName}
+                    height="500px"
+                    showFileInfo={false}
+                    showDownloadButton={true}
+                  />
+                </>
+              )}
             </div>
           </div>
         )}
