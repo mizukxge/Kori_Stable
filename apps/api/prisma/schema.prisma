@@ -59,6 +59,10 @@ model AdminUser {
   settings       Setting[]
   settingHistory SettingHistory[]
 
+  // Phase 3: Multi-signature envelope system
+  createdEnvelopes  Envelope[]          @relation("CreatedEnvelopes")
+  envelopeWebhooks  EnvelopeWebhook[]   @relation("CreatedEnvelopeWebhooks")
+
   @@map("admin_users")
 }
 
@@ -2144,4 +2148,310 @@ model ProposalEmailTemplate {
   @@index([isActive])
   @@index([isDefault])
   @@map("proposal_email_templates")
+}
+
+// ============================================
+// PHASE 3: MULTI-SIGNATURE ENVELOPE SYSTEM
+// ============================================
+
+// Envelope Status Enum
+enum EnvelopeStatus {
+  DRAFT
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  EXPIRED
+}
+
+// Signing Workflow Type
+enum SigningWorkflow {
+  SEQUENTIAL  // A→B→C order enforced
+  PARALLEL    // All can sign concurrently
+}
+
+// Signer Status Enum
+enum SignerStatus {
+  PENDING
+  VIEWED
+  SIGNED
+  DECLINED
+  EXPIRED
+}
+
+// Signature Status Enum
+enum SignatureStatus {
+  PENDING
+  VIEWED
+  SIGNED
+  DECLINED
+}
+
+// Audit Action Enum
+enum AuditAction {
+  ENVELOPE_CREATED
+  ENVELOPE_SENT
+  ENVELOPE_VIEWED
+  ENVELOPE_SIGNED
+  ENVELOPE_DECLINED
+  ENVELOPE_COMPLETED
+  ENVELOPE_CANCELLED
+  ENVELOPE_EXPIRED
+  DOCUMENT_ADDED
+  DOCUMENT_REMOVED
+  SIGNER_ADDED
+  SIGNER_REMOVED
+  SIGNER_VIEWED
+  SIGNER_SIGNED
+  SIGNER_DECLINED
+  SIGNATURE_VERIFIED
+  TAMPER_DETECTED
+}
+
+// Webhook Event Enum
+enum WebhookEvent {
+  ENVELOPE_CREATED
+  ENVELOPE_SENT
+  ENVELOPE_VIEWED
+  ENVELOPE_SIGNED
+  ENVELOPE_DECLINED
+  ENVELOPE_COMPLETED
+  ENVELOPE_CANCELLED
+  ENVELOPE_EXPIRED
+  SIGNER_VIEWED
+  SIGNER_SIGNED
+  SIGNER_DECLINED
+}
+
+// ============================================
+// ENVELOPE & DOCUMENTS
+// ============================================
+
+model Envelope {
+  id                String   @id @default(cuid())
+
+  // Naming & metadata
+  name              String
+  description       String?
+
+  // Creator & access control
+  createdById       String
+  createdBy         AdminUser @relation("CreatedEnvelopes", fields: [createdById], references: [id], onDelete: Cascade)
+
+  // State management
+  status            EnvelopeStatus @default(DRAFT)
+  signingWorkflow   SigningWorkflow @default(SEQUENTIAL)
+
+  // Expiration
+  expiresAt         DateTime?
+
+  // Timestamps
+  sentAt            DateTime?
+  completedAt       DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  documents         Document[]
+  signers           Signer[]
+  signatures        Signature[]
+  auditLogs         EnvelopeAuditLog[]
+
+  @@index([createdById])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@map("envelopes")
+}
+
+model Document {
+  id                String   @id @default(cuid())
+
+  // Envelope reference
+  envelopeId        String
+  envelope          Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  // Document info
+  name              String
+  fileName          String
+  filePath          String   // Path to stored PDF
+
+  // Integrity verification
+  fileHash          String   // SHA256 hash of file
+  fileSize          Int      // Size in bytes
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([envelopeId])
+  @@index([fileHash])
+  @@map("documents")
+}
+
+// ============================================
+// SIGNERS & SIGNATURES
+// ============================================
+
+model Signer {
+  id                String   @id @default(cuid())
+
+  // Envelope reference
+  envelopeId        String
+  envelope          Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  // Signer identity
+  name              String
+  email             String
+  role              String?  // buyer, seller, witness, lawyer, etc.
+
+  // Sequential workflow: signing order
+  sequenceNumber    Int?     // 1, 2, 3... for sequential
+
+  // Signing status
+  status            SignerStatus @default(PENDING)
+
+  // Magic link authentication
+  magicLinkToken    String   @unique
+  magicLinkExpiresAt DateTime
+
+  // Session management
+  signerSessionId   String?
+  signerSessionExpiresAt DateTime?
+
+  // OTP verification (per-signer)
+  otpEmail          String?
+  otpCode           String?
+  otpExpiresAt      DateTime?
+  failedAttempts    Int      @default(0)
+
+  // Signing timestamps
+  viewedAt          DateTime?
+  signedAt          DateTime?
+  declinedAt        DateTime?
+  declinedReason    String?
+
+  // IP & browser info for audit
+  signerIP          String?
+  signerUserAgent   String?
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relations
+  signatures        Signature[]
+
+  @@unique([envelopeId, email])
+  @@index([envelopeId])
+  @@index([status])
+  @@index([email])
+  @@index([magicLinkToken])
+  @@index([envelopeId, sequenceNumber])
+  @@map("signers")
+}
+
+model Signature {
+  id                String   @id @default(cuid())
+
+  // References
+  envelopeId        String
+  envelope          Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  signerId          String
+  signer            Signer @relation(fields: [signerId], references: [id], onDelete: Cascade)
+
+  // Status
+  status            SignatureStatus @default(PENDING)
+
+  // Signature data
+  signatureDataUrl  String?  // Base64 encoded canvas data
+  initialsDataUrl   String?  // Optional initials
+
+  // Verification (SHA256 hash of signature data)
+  signatureHash     String?
+
+  // Optional: position on document (for multi-page PDFs)
+  pageNumber        Int?
+  xCoordinate       Float?
+  yCoordinate       Float?
+  width             Float?
+  height            Float?
+
+  // IP & browser info for compliance
+  signerIP          String?
+  signerUserAgent   String?
+
+  // Timestamps
+  signedAt          DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([envelopeId])
+  @@index([signerId])
+  @@index([status])
+  @@index([signedAt])
+  @@map("signatures")
+}
+
+// ============================================
+// AUDIT & COMPLIANCE
+// ============================================
+
+model EnvelopeAuditLog {
+  id                String   @id @default(cuid())
+
+  // Envelope & signer references
+  envelopeId        String
+  envelope          Envelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  signerId          String?  // Null for envelope-level events
+
+  // Action & metadata
+  action            AuditAction
+  metadata          Json?    // Additional context (error msg, old value, new value, etc.)
+
+  // Who performed the action
+  actorId           String?  // Admin user ID if performed by admin
+
+  // IP & browser for tracking
+  ipAddress         String?
+  userAgent         String?
+
+  // Timestamp (immutable, append-only)
+  timestamp         DateTime @default(now())
+
+  @@index([envelopeId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("envelope_audit_logs")
+}
+
+// ============================================
+// WEBHOOKS (for notifications)
+// ============================================
+
+model EnvelopeWebhook {
+  id                String   @id @default(cuid())
+
+  // Admin who registered
+  createdById       String
+  createdBy         AdminUser @relation("CreatedEnvelopeWebhooks", fields: [createdById], references: [id], onDelete: Cascade)
+
+  // Webhook configuration
+  url               String
+  events            WebhookEvent[]
+  active            Boolean  @default(true)
+
+  // Retry configuration
+  maxRetries        Int      @default(3)
+  retryDelaySeconds Int      @default(60)
+
+  // Timestamps
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([createdById])
+  @@index([active])
+  @@map("envelope_webhooks")
 }

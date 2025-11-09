@@ -195,8 +195,10 @@ async function main() {
   };
 
   // Contract 1: SIGNED (Wedding - John Doe)
-  const contract1 = await prisma.contract.create({
-    data: {
+  const contract1 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(1) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(1),
       title: 'Wedding Photography - John & Sarah',
       clientId: client1.id,
@@ -219,8 +221,10 @@ async function main() {
   console.log('✅ Created Contract 1: SIGNED');
 
   // Contract 2: VIEWED (Wedding - Jane Smith)
-  const contract2 = await prisma.contract.create({
-    data: {
+  const contract2 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(2) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(2),
       title: 'Wedding Photography - Jane & Michael',
       clientId: client2.id,
@@ -244,8 +248,10 @@ async function main() {
   console.log('✅ Created Contract 2: VIEWED');
 
   // Contract 3: SENT (Portrait - Bob Wilson)
-  const contract3 = await prisma.contract.create({
-    data: {
+  const contract3 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(3) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(3),
       title: 'Corporate Portrait Session - Wilson Inc',
       clientId: client3.id,
@@ -266,8 +272,10 @@ async function main() {
   console.log('✅ Created Contract 3: SENT');
 
   // Contract 4: DRAFT
-  const contract4 = await prisma.contract.create({
-    data: {
+  const contract4 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(4) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(4),
       title: 'Wedding Photography - Thompson Wedding',
       clientId: client1.id,
@@ -287,8 +295,10 @@ async function main() {
   console.log('✅ Created Contract 4: DRAFT');
 
   // Contract 5: SIGNED (Wedding - Different client)
-  const contract5 = await prisma.contract.create({
-    data: {
+  const contract5 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(5) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(5),
       title: 'Wedding Photography - Anderson Wedding',
       clientId: client2.id,
@@ -311,8 +321,10 @@ async function main() {
   console.log('✅ Created Contract 5: SIGNED');
 
   // Contract 6: VOIDED (using VOIDED status instead of DECLINED)
-  const contract6 = await prisma.contract.create({
-    data: {
+  const contract6 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(6) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(6),
       title: 'Portrait Session - Martinez Family',
       clientId: client3.id,
@@ -334,8 +346,10 @@ async function main() {
   console.log('✅ Created Contract 6: VOIDED');
 
   // Contract 7: EXPIRED
-  const contract7 = await prisma.contract.create({
-    data: {
+  const contract7 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(7) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(7),
       title: 'Wedding Photography - Davis Wedding',
       clientId: client1.id,
@@ -359,8 +373,10 @@ async function main() {
   console.log('✅ Created Contract 7: EXPIRED');
 
   // Contract 8: SENT (Recent)
-  const contract8 = await prisma.contract.create({
-    data: {
+  const contract8 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(8) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(8),
       title: 'Wedding Photography - Garcia Wedding',
       clientId: client2.id,
@@ -383,8 +399,10 @@ async function main() {
   console.log('✅ Created Contract 8: SENT');
 
   // Contract 9: DRAFT
-  const contract9 = await prisma.contract.create({
-    data: {
+  const contract9 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(9) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(9),
       title: 'Portrait Session - Lee Family',
       clientId: client3.id,
@@ -402,8 +420,10 @@ async function main() {
   console.log('✅ Created Contract 9: DRAFT');
 
   // Contract 10: SIGNED (Recent)
-  const contract10 = await prisma.contract.create({
-    data: {
+  const contract10 = await prisma.contract.upsert({
+    where: { contractNumber: generateContractNumber(10) },
+    update: {},
+    create: {
       contractNumber: generateContractNumber(10),
       title: 'Wedding Photography - Chen Wedding',
       clientId: client1.id,
@@ -434,6 +454,145 @@ async function main() {
   console.log('  - VOIDED: 1 contract');
   console.log('  - EXPIRED: 1 contract');
 
+  // ============================================
+  // PHASE 3: ENVELOPE SEEDING (Multi-Signature)
+  // ============================================
+  console.log('\n📬 Creating Multi-Signature Envelopes...');
+
+  // Create a sample PDF file path (would be real in production)
+  const generateMagicToken = () =>
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15);
+
+  // Envelope 1: Sequential signing with 3 signers
+  const envelope1 = await prisma.envelope.create({
+    data: {
+      name: 'Wedding Photography Agreement - Smith Wedding',
+      description: 'Multi-party contract requiring signatures from bride, groom, and photographer',
+      createdById: superAdmin.id,
+      status: 'PENDING',
+      signingWorkflow: 'SEQUENTIAL',
+      expiresAt: getDateOffset(60),
+      sentAt: new Date(),
+    },
+  });
+  console.log('✅ Created Envelope 1 (PENDING, Sequential):', envelope1.id);
+
+  // Create document for envelope
+  const document1 = await prisma.document.create({
+    data: {
+      envelopeId: envelope1.id,
+      name: 'Wedding Photography Contract',
+      fileName: 'wedding-contract.pdf',
+      filePath: '/uploads/documents/wedding-contract-abc123.pdf',
+      fileHash: 'sha256_abc123def456',
+      fileSize: 245600,
+    },
+  });
+  console.log('✅ Created Document 1:', document1.id);
+
+  // Create signers for sequential workflow
+  const signer1 = await prisma.signer.create({
+    data: {
+      envelopeId: envelope1.id,
+      name: 'Sarah Smith',
+      email: 'sarah.smith@example.com',
+      role: 'BRIDE',
+      sequenceNumber: 1, // Must sign first
+      status: 'PENDING',
+      magicLinkToken: generateMagicToken(),
+      magicLinkExpiresAt: getDateOffset(60),
+    },
+  });
+  console.log('✅ Created Signer 1 (sequence 1):', signer1.email);
+
+  const signer2 = await prisma.signer.create({
+    data: {
+      envelopeId: envelope1.id,
+      name: 'John Smith',
+      email: 'john.smith@example.com',
+      role: 'GROOM',
+      sequenceNumber: 2, // Signs after bride
+      status: 'PENDING',
+      magicLinkToken: generateMagicToken(),
+      magicLinkExpiresAt: getDateOffset(60),
+    },
+  });
+  console.log('✅ Created Signer 2 (sequence 2):', signer2.email);
+
+  const signer3 = await prisma.signer.create({
+    data: {
+      envelopeId: envelope1.id,
+      name: 'Alice Johnson',
+      email: 'alice@kori.dev',
+      role: 'PHOTOGRAPHER',
+      sequenceNumber: 3, // Signs last
+      status: 'PENDING',
+      magicLinkToken: generateMagicToken(),
+      magicLinkExpiresAt: getDateOffset(60),
+    },
+  });
+  console.log('✅ Created Signer 3 (sequence 3):', signer3.email);
+
+  // Create signature records (initially empty)
+  const sig1 = await prisma.signature.create({
+    data: {
+      envelopeId: envelope1.id,
+      signerId: signer1.id,
+      status: 'PENDING',
+    },
+  });
+
+  const sig2 = await prisma.signature.create({
+    data: {
+      envelopeId: envelope1.id,
+      signerId: signer2.id,
+      status: 'PENDING',
+    },
+  });
+
+  const sig3 = await prisma.signature.create({
+    data: {
+      envelopeId: envelope1.id,
+      signerId: signer3.id,
+      status: 'PENDING',
+    },
+  });
+  console.log('✅ Created 3 Signature records (PENDING)');
+
+  // Create audit logs for envelope
+  await prisma.envelopeAuditLog.create({
+    data: {
+      envelopeId: envelope1.id,
+      action: 'ENVELOPE_CREATED',
+      actorId: superAdmin.id,
+      metadata: {
+        name: envelope1.name,
+        workflow: 'SEQUENTIAL',
+        signerCount: 3,
+      },
+    },
+  });
+
+  await prisma.envelopeAuditLog.create({
+    data: {
+      envelopeId: envelope1.id,
+      action: 'ENVELOPE_SENT',
+      actorId: superAdmin.id,
+      metadata: {
+        sentAt: new Date().toISOString(),
+        recipients: [signer1.email, signer2.email, signer3.email],
+      },
+    },
+  });
+  console.log('✅ Created Envelope Audit Logs');
+
+  console.log('\n📊 Envelope Summary:');
+  console.log('  - Total Envelopes: 1');
+  console.log('  - Total Signers: 3 (sequential order)');
+  console.log('  - Workflow: Sequential (A→B→C)');
+  console.log('  - Status: PENDING');
+
   // Create Audit Log entries
   await prisma.auditLog.create({
     data: {
@@ -441,8 +600,10 @@ async function main() {
       entityType: 'Database',
       userId: superAdmin.id,
       metadata: {
-        message: 'Initial database seed completed with contracts',
+        message: 'Initial database seed completed with contracts and envelopes',
         timestamp: new Date().toISOString(),
+        envelopes: 1,
+        signers: 3,
       },
     },
   });

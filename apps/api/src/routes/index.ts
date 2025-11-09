@@ -19,7 +19,7 @@ import { clausesRoutes } from './clauses.js';
 import { contractTemplatesRoutes } from './contract-templates.js';
 import { invoicesRoutes } from './invoices.js';
 import { publicInvoiceRoutes } from './publicInvoice.js';
-// import { paymentsRoutes } from './payments.js'; // TEMPORARILY DISABLED - causing route issues
+import { paymentsRoutes } from './payments.js';
 import { reconciliationRoutes } from './reconciliation.js';
 import { periodsRoutes } from './periods.js';
 import { journalsRoutes } from './journals.js';
@@ -32,6 +32,7 @@ import { docgenRoutes } from './docgen.js';
 import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
+import { envelopesRoutes } from './envelopes.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // CDN & Image Optimization routes (public image serving + admin management)
@@ -51,6 +52,10 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Public contract signing routes (no auth required, uses magic links)
   await fastify.register(publicContractRoutes);
+
+  // Public envelope signing routes (no auth required, uses magic links)
+  // Also includes admin envelope management routes
+  await fastify.register(envelopesRoutes);
 
   // Public invoice routes (no auth required)
   await fastify.register(publicInvoiceRoutes);
@@ -103,8 +108,8 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Invoice routes (admin only)
   await fastify.register(invoicesRoutes);
 
-  // Payment routes (admin + webhook) - TEMPORARILY DISABLED
-  // await fastify.register(paymentsRoutes);
+  // Payment routes (admin + webhook)
+  await fastify.register(paymentsRoutes);
 
   // Reconciliation routes (admin only)
   await fastify.register(reconciliationRoutes);
