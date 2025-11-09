@@ -13,6 +13,8 @@ import {
   extendSession,
 } from '../../../lib/public-contract-api';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 type Step = 'validating' | 'request-otp' | 'verify-otp' | 'view-contract' | 'signing' | 'success' | 'error';
 
 interface ContractData {
@@ -324,7 +326,15 @@ export default function SignContract() {
             </div>
           )}
 
+          {loading && (
+            <div className="mb-6 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm text-center">
+              <div className="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+              Verifying code...
+            </div>
+          )}
+
           <div className="mb-6">
+            <label className="block text-sm font-medium text-foreground mb-3">Verification Code</label>
             <OTPInput
               length={6}
               onComplete={handleVerifyOTP}
@@ -339,11 +349,37 @@ export default function SignContract() {
           </div>
 
           <button
-            onClick={() => setStep('request-otp')}
-            className="w-full text-sm text-primary hover:text-primary"
+            onClick={() => otpValue.length === 6 && handleVerifyOTP(otpValue)}
+            disabled={loading || otpValue.length !== 6}
+            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mb-4"
           >
-            Resend code
+            {loading ? 'Verifying...' : 'Verify Code'}
           </button>
+
+          <div className="space-y-2">
+            <button
+              onClick={() => setStep('request-otp')}
+              className="w-full text-sm text-primary hover:text-primary underline"
+            >
+              Resend code
+            </button>
+
+            {process.env.NODE_ENV === 'development' && contractId && (
+              <div className="pt-2 border-t">
+                <p className="text-xs text-muted-foreground mb-2">
+                  <strong>Development:</strong> Check API logs for OTP or:
+                </p>
+                <a
+                  href={`http://localhost:3001/contract/dev/otp/${contractId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-primary hover:text-primary underline inline-block"
+                >
+                  Get OTP from database
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -472,7 +508,7 @@ export default function SignContract() {
 
           {signedData?.signedPdfPath && (
             <a
-              href={`http://localhost:3002${signedData.signedPdfPath}`}
+              href={`${API_BASE_URL}${signedData.signedPdfPath}`}
               download={`${signedData.contractNumber}_signed.pdf`}
               className="inline-flex items-center justify-center w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors mb-4"
             >

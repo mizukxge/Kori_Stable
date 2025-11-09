@@ -123,11 +123,12 @@ export function OTPInput({
           disabled={disabled}
           className={`
             w-12 h-14 text-center text-2xl font-semibold
+            bg-background text-foreground
             border-2 rounded-lg
             focus:outline-none focus:ring-2 focus:ring-ring
-            disabled:bg-muted disabled:cursor-not-allowed
+            disabled:bg-muted disabled:cursor-not-allowed disabled:text-muted-foreground
             ${error ? 'border-red-500' : 'border-input'}
-            ${!disabled && !error ? 'hover:border-gray-400' : ''}
+            ${!disabled && !error ? 'hover:border-gray-400 dark:hover:border-gray-600' : ''}
           `}
           aria-label={`Digit ${index + 1}`}
         />

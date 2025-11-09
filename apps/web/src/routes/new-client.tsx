@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 import { isValidPhoneNumber, parsePhoneNumber } from 'libphonenumber-js';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 const CLIENT_TYPE_OPTIONS = [
   { value: 'individual', label: 'Individual', description: 'Personal use or freelancer' },
   { value: 'business', label: 'Small Business', description: 'Business with company details' },
@@ -271,7 +273,7 @@ export default function NewClientPage() {
         COUNTRY_CODES.find((c) => c.code === formData.phoneCountry)?.prefix || '+1';
       const phoneNumber = `${countryPrefix}${formData.phone.replace(/\D/g, '')}`;
 
-      const response = await fetch('http://localhost:3002/clients/create', {
+      const response = await fetch(`${API_BASE_URL}/clients/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -32,6 +32,8 @@ import {
 } from '../../../lib/contracts-api';
 import { getClients, type Client } from '../../../lib/api';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 type ContractStatus = 'DRAFT' | 'SENT' | 'VIEWED' | 'SIGNED' | 'VOIDED' | 'EXPIRED';
 
 interface GenerationStep {
@@ -675,7 +677,7 @@ export default function ContractsIndex() {
                         </Button>
                       </Link>
                       {contract.pdfPath && (
-                        <a href={`http://localhost:3002${contract.pdfPath}`} download>
+                        <a href={`${API_BASE_URL}${contract.pdfPath}`} download>
                           <Button variant="secondary" size="sm" className="text-xs">
                             <Download className="w-3 h-3" />
                           </Button>

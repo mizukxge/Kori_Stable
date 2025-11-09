@@ -37,6 +37,8 @@ import {
   type Contract,
 } from '../../../lib/contracts-api';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export default function ContractDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -551,7 +553,7 @@ export default function ContractDetail() {
               {/* PDF Preview */}
               <div className="border border-border rounded-lg overflow-hidden bg-muted">
                 <iframe
-                  src={`http://localhost:3002${contract.pdfPath}`}
+                  src={`${API_BASE_URL}${contract.pdfPath}`}
                   className="w-full h-[600px]"
                   title="Contract PDF Preview"
                 />

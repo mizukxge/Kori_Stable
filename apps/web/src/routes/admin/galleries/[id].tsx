@@ -13,7 +13,7 @@ import { deleteGallery } from '../../../lib/api';
 import QRCode from 'react-qr-code';
 import { ConfirmDialog } from '../../../components/ui/ConfirmDialog';
 
-
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 interface GallerySettings {
   aspectRatio: 'square' | 'portrait' | 'landscape' | 'original';
@@ -105,8 +105,8 @@ export default function GalleryAdminPage() {
           id: ga.asset.id,
           filename: ga.asset.filename,
           // Use filepath from API to construct URL
-          path: `http://localhost:3002/uploads/${ga.asset.category}/${ga.asset.storedName}`,
-          thumbnailPath: `http://localhost:3002/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+          path: `${API_BASE_URL}/uploads/${ga.asset.category}/${ga.asset.storedName}`,
+          thumbnailPath: `${API_BASE_URL}/uploads/${ga.asset.category}/${ga.asset.storedName}`,
           mimeType: ga.asset.mimeType,
         };
       });

@@ -8,6 +8,8 @@ import JSZip from 'jszip';
 import { GridTheme } from '../../components/gallery/GridTheme';
 import { Lightbox } from '../../components/gallery/Lightbox';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 interface GalleryMeta {
   name: string;
   description?: string;
@@ -113,7 +115,7 @@ const [copySuccess, setCopySuccess] = useState(false);
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3002/g/${token}/meta`);
+      const response = await fetch(`${API_BASE_URL}/g/${token}/meta`);
       
       if (!response.ok) {
         if (response.status === 404) {
@@ -164,9 +166,9 @@ const [copySuccess, setCopySuccess] = useState(false);
     setLoadingItems(true);
 
     try {
-      const url = password 
-        ? `http://localhost:3002/g/${token}/items?password=${encodeURIComponent(password)}`
-        : `http://localhost:3002/g/${token}/items`;
+      const url = password
+        ? `${API_BASE_URL}/g/${token}/items?password=${encodeURIComponent(password)}`
+        : `${API_BASE_URL}/g/${token}/items`;
 
       const response = await fetch(url);
 
@@ -189,8 +191,8 @@ const [copySuccess, setCopySuccess] = useState(false);
         return {
           id: asset.id,
           filename: asset.filename,
-          path: `http://localhost:3002/uploads/${category}/${storedName}`,
-          thumbnailPath: `http://localhost:3002/uploads/${category}/${storedName}`,
+          path: `${API_BASE_URL}/uploads/${category}/${storedName}`,
+          thumbnailPath: `${API_BASE_URL}/uploads/${category}/${storedName}`,
           mimeType: asset.mimeType,
         };
       });
@@ -212,7 +214,7 @@ const [copySuccess, setCopySuccess] = useState(false);
     setError(null);
 
     try {
-      const response = await fetch(`http://localhost:3002/g/${token}/password`, {
+      const response = await fetch(`${API_BASE_URL}/g/${token}/password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
