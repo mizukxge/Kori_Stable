@@ -354,3 +354,86 @@ export async function declineSignature(token: string, reason?: string) {
   if (!response.ok) throw new Error('Failed to decline signature');
   return await response.json();
 }
+
+// ============================================
+// DOWNLOAD OPERATIONS
+// ============================================
+
+/**
+ * Download envelope documents (admin only)
+ */
+export async function downloadEnvelopeDocuments(envelopeId: string) {
+  const response = await fetch(`${API_BASE}/admin/envelopes/${envelopeId}/download`, {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (response.status === 404) throw new Error('Envelope not found');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to download envelope');
+  }
+  const json = await response.json();
+  return json.data;
+}
+
+/**
+ * Download signed documents (signer using magic link)
+ */
+export async function downloadSignedDocuments(token: string) {
+  const response = await fetch(`${API_BASE}/sign/${token}/download`);
+
+  if (response.status === 401) throw new Error('Invalid or expired magic link');
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to download documents');
+  }
+  const json = await response.json();
+  return json.data;
+}
+
+/**
+ * Utility function to download a file from a URL
+ */
+export async function downloadFile(url: string, fileName: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to download file');
+
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    const objectUrl = URL.createObjectURL(blob);
+
+    link.href = objectUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    throw error;
+  }
+}
+
+/**
+ * Download multiple files as ZIP (simulated - downloads each file)
+ */
+export async function downloadEnvelopeAsZip(
+  documents: Array<{ name: string; fileName: string; filePath: string }>
+) {
+  // For now, we'll download each file individually
+  // In production, you'd want to implement a backend endpoint that creates a ZIP file
+  for (const doc of documents) {
+    try {
+      await downloadFile(doc.filePath, doc.fileName);
+      // Add a small delay between downloads
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    } catch (error) {
+      console.error(`Failed to download ${doc.fileName}:`, error);
+    }
+  }
+}

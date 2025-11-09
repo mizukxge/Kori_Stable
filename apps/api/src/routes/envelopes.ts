@@ -475,4 +475,104 @@ export async function envelopesRoutes(fastify: FastifyInstance) {
       throw error;
     }
   });
+
+  /**
+   * GET /admin/envelopes/:id/download
+   * Download all documents from completed envelope as ZIP
+   */
+  fastify.get('/admin/envelopes/:id/download', { onRequest: [requireAdmin] }, async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      const envelope = await EnvelopeService.getEnvelopeById(id);
+
+      if (!envelope.documents || envelope.documents.length === 0) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'No documents available for download',
+        });
+      }
+
+      // Return document list for download
+      // The client will handle downloading each document
+      return reply.status(200).send({
+        success: true,
+        data: {
+          envelopeId: envelope.id,
+          envelopeName: envelope.name,
+          status: envelope.status,
+          documents: envelope.documents.map((doc: any) => ({
+            id: doc.id,
+            name: doc.name,
+            fileName: doc.fileName,
+            filePath: doc.filePath,
+            fileSize: doc.fileSize,
+          })),
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Envelope not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Envelope not found',
+        });
+      }
+
+      request.log.error(error, 'Error downloading envelope documents');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /sign/:token/download
+   * Download signed document (public endpoint for signers)
+   */
+  fastify.get('/sign/:token/download', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+
+      const signer = await EnvelopeService.getSignerByMagicToken(token);
+      const envelope = await EnvelopeService.getEnvelopeById(signer.envelopeId);
+
+      if (envelope.status !== 'COMPLETED') {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Cannot download documents until envelope is completed',
+        });
+      }
+
+      // Return document list for download
+      return reply.status(200).send({
+        success: true,
+        data: {
+          envelopeId: envelope.id,
+          envelopeName: envelope.name,
+          status: envelope.status,
+          signerName: signer.name,
+          signerEmail: signer.email,
+          documents: envelope.documents.map((doc: any) => ({
+            id: doc.id,
+            name: doc.name,
+            fileName: doc.fileName,
+            filePath: doc.filePath,
+            fileSize: doc.fileSize,
+          })),
+        },
+      });
+    } catch (error) {
+      if (error instanceof Error && (error.message === 'Invalid magic link' || error.message === 'Magic link has expired')) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error downloading signed documents');
+      throw error;
+    }
+  });
 }

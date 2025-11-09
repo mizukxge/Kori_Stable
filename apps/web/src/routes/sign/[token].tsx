@@ -10,6 +10,8 @@ import {
   markEnvelopeViewed,
   captureSignature,
   declineSignature,
+  downloadSignedDocuments,
+  downloadFile,
 } from '../../lib/envelopes-api';
 import { SignatureCanvas } from '../../components/envelope/SignatureCanvas';
 import { StatusBadge } from '../../components/envelope/StatusBadge';
@@ -27,6 +29,8 @@ export default function SigningPage() {
   const [showDeclineForm, setShowDeclineForm] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
   const [selectedDocumentIndex, setSelectedDocumentIndex] = useState(0);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadedDocs, setDownloadedDocs] = useState<any>(null);
 
   useEffect(() => {
     if (!token) return;
@@ -90,6 +94,31 @@ export default function SigningPage() {
     }
   }
 
+  async function handleDownloadDocuments() {
+    if (!token) return;
+
+    try {
+      setDownloading(true);
+      const docs = await downloadSignedDocuments(token);
+      setDownloadedDocs(docs);
+
+      // Download each document
+      for (const doc of docs.documents) {
+        try {
+          await downloadFile(doc.filePath, doc.fileName);
+          // Add delay between downloads
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        } catch (err) {
+          console.error(`Failed to download ${doc.fileName}:`, err);
+        }
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to download documents');
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -140,6 +169,17 @@ export default function SigningPage() {
               ? 'The envelope has been marked as declined.'
               : 'The next signer will be notified to review the document.'}
           </p>
+
+          {!declineReason && (
+            <button
+              onClick={handleDownloadDocuments}
+              disabled={downloading}
+              className="w-full mb-4 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+            >
+              {downloading ? '⬇️ Downloading...' : '⬇️ Download Documents'}
+            </button>
+          )}
+
           <p className="text-xs text-gray-400 dark:text-gray-500">You can close this page</p>
         </div>
       </div>
