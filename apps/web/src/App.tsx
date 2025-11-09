@@ -1,6 +1,7 @@
 import PublicGalleryPage from './routes/gallery/[token]';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './components/providers/ThemeProvider';
+import { StripeProvider } from './components/providers/StripeProvider';
 import { Layout } from './components/layout/Layout';
 import { PortalLayout } from './components/layout/PortalLayout';
 import { DesignSystemDemo } from './pages/DesignSystemDemo';
@@ -44,12 +45,19 @@ import NewInvoicePage from './routes/admin/invoices/new';
 import ClientProposalPage from './routes/client/proposal/[proposalNumber]';
 import ClientInvoicePage from './routes/client/invoice/[invoiceNumber]';
 import ClientPaymentPage from './routes/payment/client-payment';
+import InvoicePaymentPage from './routes/payment/invoice-payment';
+import PaymentSuccessPage from './routes/payment/success';
 import NewClientPage from './routes/new-client';
+import EnvelopesIndex from './routes/admin/envelopes/index';
+import EnvelopeDetailPage from './routes/admin/envelopes/[id]';
+import CreateEnvelopePage from './routes/admin/envelopes/new';
+import SigningPage from './routes/sign/[token]';
 
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="kori-theme">
-      <BrowserRouter>
+      <StripeProvider>
+        <BrowserRouter>
         <Routes>
           {/* Public Gallery Route - No auth required */}
           <Route
@@ -61,6 +69,9 @@ function App() {
           <Route path="/contract/:token" element={<ContractViewer />} />
           <Route path="/contract/sign/:token" element={<SignContract />} />
 
+          {/* Public Envelope Signing Route - No auth required */}
+          <Route path="/sign/:token" element={<SigningPage />} />
+
           {/* Client Proposal Routes - No auth required */}
           <Route path="/client/proposal/:proposalNumber" element={<ClientProposalPage />} />
 
@@ -69,6 +80,12 @@ function App() {
 
           {/* Client Payment Portal - No auth required */}
           <Route path="/payment/client" element={<ClientPaymentPage />} />
+
+          {/* Invoice Payment Portal (Stripe) - No auth required */}
+          <Route path="/payment/invoice/:invoiceNumber" element={<InvoicePaymentPage />} />
+
+          {/* Payment Success Page - No auth required */}
+          <Route path="/payment/success" element={<PaymentSuccessPage />} />
 
           {/* Public Inquiry Form - No auth required */}
           <Route path="/inquiry" element={<InquiryPage />} />
@@ -322,6 +339,32 @@ function App() {
             }
           />
 
+          {/* Envelope Routes - SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES */}
+          <Route
+            path="/admin/envelopes/new"
+            element={
+              <Layout>
+                <CreateEnvelopePage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/envelopes"
+            element={
+              <Layout>
+                <EnvelopesIndex />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/envelopes/:id"
+            element={
+              <Layout>
+                <EnvelopeDetailPage />
+              </Layout>
+            }
+          />
+
           {/* Design System Demo */}
           <Route
             path="/design-system"
@@ -377,7 +420,8 @@ function App() {
             }
           />
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </StripeProvider>
     </ThemeProvider>
   );
 }
