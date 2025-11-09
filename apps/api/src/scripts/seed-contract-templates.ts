@@ -108,32 +108,55 @@ async function main() {
       },
 
       bodyHtml: `
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+          .contract-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+          .contract-header h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: bold; }
+          .contract-number { margin: 5px 0 0 0; font-size: 12px; color: #666; }
+          section { margin-bottom: 30px; }
+          h2 { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+          h3 { font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 10px; }
+          .party { background: #f9f9f9; padding: 15px; margin: 10px 0; border-left: 3px solid #007bff; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          table tr { border-bottom: 1px solid #ddd; }
+          table td { padding: 10px; }
+          table td:first-child { font-weight: 500; width: 40%; }
+          ul { margin: 10px 0; padding-left: 20px; }
+          li { margin: 8px 0; }
+          .signature-section { margin-top: 40px; }
+          .signature-line { display: inline-block; width: 200px; border-top: 1px solid #000; margin-top: 30px; }
+          .signature-area { display: inline-block; margin-right: 40px; vertical-align: top; }
+          .date-line { display: inline-block; width: 150px; margin-top: 30px; }
+        </style>
+
         <div class="contract-header">
           <h1>Wedding Photography Service Agreement</h1>
           <p class="contract-number">Contract No: {{contract_number}}</p>
+          <p style="font-size: 12px; margin: 10px 0 0 0;">Effective Date: {{effective_date}}</p>
         </div>
 
         <section class="parties">
-          <h2>1. Parties</h2>
-          <p>This Service Agreement ("Agreement") is entered into on {{effective_date}} between:</p>
+          <h2>1. Parties to Agreement</h2>
+          <p>This Wedding Photography Service Agreement ("Agreement") is entered into on {{effective_date}} between:</p>
 
           <div class="party">
-            <strong>Photographer:</strong><br>
+            <p style="margin: 0 0 8px 0;"><strong>Photographer (Service Provider):</strong></p>
             {{photographer_name}}<br>
             {{studio_location}}<br>
-            Email: {{data_controller_email}}
+            <strong>Email:</strong> {{data_controller_email}}<br>
+            <strong>Portfolio/Website:</strong> {{photographer_handle}}
           </div>
 
           <div class="party">
-            <strong>Client:</strong><br>
+            <p style="margin: 0 0 8px 0;"><strong>Client (Purchaser):</strong></p>
             {{client_name}}<br>
-            {{client_email}}<br>
-            {{client_phone}}
+            <strong>Email:</strong> {{client_email}}<br>
+            <strong>Phone:</strong> {{client_phone}}
           </div>
         </section>
 
-        <section class="event-details">
-          <h2>2. Event Details</h2>
+        <section>
+          <h2>2. Event Details & Scope</h2>
           <table>
             <tr>
               <td><strong>Event Type:</strong></td>
@@ -144,11 +167,11 @@ async function main() {
               <td>{{event_date}}</td>
             </tr>
             <tr>
-              <td><strong>Ceremony Time:</strong></td>
+              <td><strong>Ceremony Start Time:</strong></td>
               <td>{{event_time}}</td>
             </tr>
             <tr>
-              <td><strong>Venue:</strong></td>
+              <td><strong>Ceremony Venue:</strong></td>
               <td>{{venue_name}}<br>{{venue_address}}</td>
             </tr>
             {{#if reception_venue}}
@@ -157,59 +180,131 @@ async function main() {
               <td>{{reception_venue}}</td>
             </tr>
             {{/if}}
+            <tr>
+              <td><strong>Hours of Coverage:</strong></td>
+              <td>{{coverage_hours}} hours starting at {{coverage_start}}</td>
+            </tr>
           </table>
         </section>
 
-        <section class="services">
-          <h2>3. Services & Coverage</h2>
-          <p>The Photographer agrees to provide the following photography services:</p>
+        <section>
+          <h2>3. Photographer's Services</h2>
+          <p>The Photographer agrees to provide professional wedding photography services as detailed below:</p>
+
+          <h3>3.1 Coverage Services</h3>
           <ul>
-            <li><strong>Coverage Hours:</strong> {{coverage_hours}} hours starting at {{coverage_start}}</li>
-            <li><strong>Second Shooter:</strong> {{second_shooter}}</li>
-            <li><strong>Engagement Session:</strong> {{engagement_session}}</li>
+            <li>{{coverage_hours}} hours of continuous professional photography coverage</li>
+            <li>Second Shooter Included: {{second_shooter}}</li>
+            <li>Engagement Session: {{engagement_session}}</li>
+            <li>Pre-wedding consultation and planning meeting</li>
+            <li>Delivery of high-resolution digital image files</li>
           </ul>
 
-          <h3>3.1 Deliverables</h3>
+          <h3>3.2 Deliverables</h3>
           <ul>
-            <li>Approximately {{estimated_image_count}} professionally edited high-resolution images</li>
+            <li>Approximately {{estimated_image_count}} professionally edited, high-resolution images (minimum)</li>
             <li>{{sneak_peek_count}} sneak peek images delivered within {{sneak_peek_days}} business days</li>
-            <li>Full gallery delivered within {{full_delivery_weeks}} weeks of the wedding date</li>
-            <li>Online gallery access for {{gallery_access_days}} days</li>
-            <li>Unlimited personal print rights</li>
+            <li>Complete gallery of edited images delivered within {{full_delivery_weeks}} weeks of the wedding</li>
+            <li>Online password-protected gallery access for {{gallery_access_days}} days</li>
+            <li>Digital files in high-resolution JPEG format (300 DPI)</li>
+            <li>Unlimited personal print rights for Client use only</li>
+          </ul>
+
+          <h3>3.3 What is Not Included</h3>
+          <ul>
+            <li>Printed photo albums or bound products (available for additional fee)</li>
+            <li>Additional photographers beyond second shooter</li>
+            <li>Travel costs beyond {{studio_location}} area (mileage fee applies)</li>
+            <li>Video coverage (contact photographer for separate videography quote)</li>
           </ul>
         </section>
 
-        <section class="payment">
-          <h2>4. Payment Terms</h2>
+        <section>
+          <h2>4. Payment Terms & Conditions</h2>
+
+          <h3>4.1 Fees & Deposit</h3>
           <table>
             <tr>
               <td><strong>Total Contract Amount:</strong></td>
-              <td>{{total_amount}}</td>
+              <td style="text-align: right;">{{total_amount}}</td>
             </tr>
             <tr>
-              <td><strong>Non-Refundable Deposit:</strong></td>
-              <td>{{deposit_amount}} due {{deposit_due_date}}</td>
+              <td><strong>Non-Refundable Deposit (due upon signing):</strong></td>
+              <td style="text-align: right;">{{deposit_amount}}</td>
             </tr>
             {{#if second_payment}}
-            <tr>
-              <td><strong>Second Payment:</strong></td>
-              <td>{{second_payment}} due {{second_payment_date}}</td>
+            <tr style="background: #f0f0f0;">
+              <td><strong>Second Payment (due {{second_payment_date}}):</strong></td>
+              <td style="text-align: right;">{{second_payment}}</td>
             </tr>
             {{/if}}
             <tr>
-              <td><strong>Final Balance:</strong></td>
-              <td>{{final_amount}} due {{payment_due_date}}</td>
+              <td><strong>Final Balance (due {{payment_due_date}}):</strong></td>
+              <td style="text-align: right;">{{final_amount}}</td>
             </tr>
           </table>
 
-          <p><strong>Payment Methods:</strong> Bank transfer, credit/debit card, or as otherwise agreed in writing.</p>
-          <p><strong>Late Payment:</strong> Final image delivery will be withheld until all payments are received in full.</p>
+          <h3>4.2 Payment Methods</h3>
+          <p>Payment accepted via bank transfer, credit/debit card, or as otherwise agreed in writing.</p>
+
+          <h3>4.3 Late Payment Policy</h3>
+          <p>If final payment is not received by {{payment_due_date}}, delivery of final edited images will be withheld until payment is received in full. A late fee of £{{late_fee_amount | default '50'}} per week may be applied for payments exceeding 30 days overdue.</p>
+
+          <h3>4.4 Cancellation Policy</h3>
+          <ul>
+            <li><strong>Cancellation 90+ days before wedding:</strong> Deposit fully refunded minus 10% administrative fee</li>
+            <li><strong>Cancellation 30-89 days before wedding:</strong> 50% of deposit retained, remaining balance refunded</li>
+            <li><strong>Cancellation less than 30 days before wedding:</strong> Deposit forfeited in full</li>
+            <li><strong>Photographer cancellation:</strong> Full refund or alternative photographer provided</li>
+          </ul>
         </section>
 
-        <section class="signature">
-          <h2>5. Agreement & Signature</h2>
-          <p>By signing below, both parties acknowledge that they have read, understood, and agree to all terms and conditions of this contract, including all clauses incorporated herein.</p>
+        <section>
+          <h2>5. Copyright & Usage Rights</h2>
+          <ul>
+            <li>All images remain the copyright property of {{photographer_name}}</li>
+            <li>Client receives non-exclusive personal use rights</li>
+            <li>Client may not sell, license, or commercially use any images without written permission</li>
+            <li>Photographer retains the right to display images in portfolio, website, and social media (with watermark if requested)</li>
+            <li>Images may not be altered, edited, or manipulated without photographer's permission</li>
+          </ul>
         </section>
+
+        <section>
+          <h2>6. Liability & Limitations</h2>
+          <p><strong>Weather & Unforeseen Circumstances:</strong> In case of severe weather preventing outdoor photography, images will be taken at alternative locations or rescheduled to an alternative date.</p>
+
+          <p><strong>Equipment Failure:</strong> The Photographer maintains backup equipment. In the unlikely event of total equipment failure, the Photographer will use professional-grade alternative equipment or provide a pro-rated refund.</p>
+
+          <p><strong>Image Delivery Guarantee:</strong> The Photographer guarantees delivery of a minimum of {{estimated_image_count | minus '50'}} edited images. If fewer are delivered, a pro-rated refund will be provided.</p>
+        </section>
+
+        <section class="signature-section">
+          <h2>7. Agreement & Signatures</h2>
+          <p>By signing below, both parties acknowledge that they have read, understood, and agree to all terms and conditions of this Wedding Photography Service Agreement, including all incorporated clauses and conditions.</p>
+
+          <div style="margin-top: 40px;">
+            <div class="signature-area">
+              <strong>Photographer Signature:</strong><br><br>
+              <div class="signature-line"></div><br>
+              {{photographer_name}}<br>
+              <strong>Date:</strong> <span class="date-line" style="border-bottom: 1px solid #000; padding-bottom: 5px;"></span>
+            </div>
+
+            <div class="signature-area" style="margin-left: 60px;">
+              <strong>Client Signature:</strong><br><br>
+              <div class="signature-line"></div><br>
+              {{client_name}}<br>
+              <strong>Date:</strong> <span class="date-line" style="border-bottom: 1px solid #000; padding-bottom: 5px;"></span>
+            </div>
+          </div>
+        </section>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 11px; color: #666;">
+          <p><strong>Governing Law:</strong> This agreement is governed by the laws of {{jurisdiction}}.</p>
+          <p><strong>Entire Agreement:</strong> This agreement constitutes the entire agreement between the parties and supersedes all prior negotiations and understandings.</p>
+          <p style="margin-top: 20px; text-align: center; color: #999;">© {{photographer_name}} | Contract generated {{current_date}}</p>
+        </div>
       `,
     },
   });
@@ -289,102 +384,185 @@ async function main() {
       },
 
       bodyHtml: `
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+          .contract-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+          .contract-header h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: bold; }
+          .contract-number { margin: 5px 0 0 0; font-size: 12px; color: #666; }
+          section { margin-bottom: 30px; }
+          h2 { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+          h3 { font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 10px; }
+          .party { background: #f9f9f9; padding: 15px; margin: 10px 0; border-left: 3px solid #007bff; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          table tr { border-bottom: 1px solid #ddd; }
+          table td { padding: 10px; }
+          table td:first-child { font-weight: 500; width: 40%; }
+          ul { margin: 10px 0; padding-left: 20px; }
+          li { margin: 8px 0; }
+          .signature-section { margin-top: 40px; }
+          .signature-line { display: inline-block; width: 200px; border-top: 1px solid #000; margin-top: 30px; }
+          .signature-area { display: inline-block; margin-right: 40px; vertical-align: top; }
+        </style>
+
         <div class="contract-header">
           <h1>Brand & Editorial Photography License Agreement</h1>
           <p class="contract-number">Contract No: {{contract_number}}</p>
+          <p style="font-size: 12px; margin: 10px 0 0 0;">Effective Date: {{effective_date}}</p>
         </div>
 
         <section class="parties">
-          <h2>1. Parties</h2>
-          <p>This License Agreement is entered into on {{effective_date}} between:</p>
+          <h2>1. Parties to Agreement</h2>
+          <p>This Brand & Editorial Photography License Agreement ("Agreement") is entered into on {{effective_date}} between:</p>
 
           <div class="party">
-            <strong>Photographer/Licensor:</strong><br>
+            <p style="margin: 0 0 8px 0;"><strong>Photographer/Licensor:</strong></p>
             {{photographer_name}}<br>
-            Email: {{data_controller_email}}
+            <strong>Email:</strong> {{data_controller_email}}
           </div>
 
           <div class="party">
-            <strong>Client/Licensee:</strong><br>
+            <p style="margin: 0 0 8px 0;"><strong>Client/Licensee:</strong></p>
             {{client_name}}<br>
-            {{client_email}}<br>
-            {{client_phone}}
+            <strong>Email:</strong> {{client_email}}<br>
+            <strong>Phone:</strong> {{client_phone}}
           </div>
         </section>
 
-        <section class="project">
+        <section>
           <h2>2. Project Scope</h2>
-          <p><strong>Project Name:</strong> {{project_name}}</p>
-          <p><strong>Description:</strong> {{project_description}}</p>
-          <p><strong>Shoot Date:</strong> {{shoot_date}}</p>
-          <p><strong>Location:</strong> {{shoot_location}}</p>
-          <p><strong>Duration:</strong> {{shoot_duration}} hours</p>
-        </section>
-
-        <section class="licensing">
-          <h2>3. License Grant & Usage Rights</h2>
-          <p>The Photographer grants the Client a {{exclusivity}} license to use the photographs subject to the following terms:</p>
-          <ul>
-            <li><strong>Duration:</strong> {{usage_term}} from the date of delivery</li>
-            <li><strong>Territory:</strong> {{usage_territory}}</li>
-            <li><strong>Permitted Media:</strong> {{usage_media}}</li>
-            <li><strong>Exclusivity:</strong> {{exclusivity}}</li>
-            {{#if buyout}}
-            <li><strong>Copyright Buyout:</strong> Full copyright transfer upon final payment</li>
-            {{/if}}
-          </ul>
-
-          <h3>3.1 Usage Restrictions</h3>
-          <p>Unless a copyright buyout has been purchased, the Client may not:</p>
-          <ul>
-            <li>Transfer, sell, or sublicense the images to third parties</li>
-            <li>Use the images beyond the scope of permitted media and territory</li>
-            <li>Modify the images in a way that misrepresents the Photographer's work</li>
-            <li>Remove copyright notices or metadata</li>
-          </ul>
-        </section>
-
-        <section class="deliverables">
-          <h2>4. Deliverables</h2>
-          <p>The Photographer will deliver:</p>
-          <ul>
-            <li>Minimum {{image_count}} professionally edited images</li>
-            <li>Format: {{delivery_format}}</li>
-            <li>Delivery timeline: {{delivery_weeks}} weeks from shoot date</li>
-            <li>Via secure online gallery with download access</li>
-          </ul>
-        </section>
-
-        <section class="payment">
-          <h2>5. Fees & Payment</h2>
           <table>
             <tr>
-              <td><strong>Creative Fee:</strong></td>
-              <td>{{creative_fee}}</td>
+              <td><strong>Project Name:</strong></td>
+              <td>{{project_name}}</td>
             </tr>
             <tr>
-              <td><strong>Licensing Fee:</strong></td>
-              <td>{{licensing_fee}}</td>
+              <td><strong>Description:</strong></td>
+              <td>{{project_description}}</td>
             </tr>
             <tr>
-              <td><strong>Total Amount:</strong></td>
-              <td>{{total_amount}}</td>
+              <td><strong>Shoot Date:</strong></td>
+              <td>{{shoot_date}}</td>
             </tr>
             <tr>
-              <td><strong>Deposit ({{deposit_percent}}%):</strong></td>
-              <td>Due upon contract signing</td>
+              <td><strong>Shoot Location:</strong></td>
+              <td>{{shoot_location}}</td>
             </tr>
             <tr>
-              <td><strong>Final Payment:</strong></td>
-              <td>{{payment_terms}} from invoice date</td>
+              <td><strong>Duration:</strong></td>
+              <td>{{shoot_duration}} hours</td>
             </tr>
           </table>
         </section>
 
-        <section class="signature">
-          <h2>6. Agreement & Signature</h2>
-          <p>By signing below, both parties acknowledge and agree to all terms of this license agreement.</p>
+        <section>
+          <h2>3. License Grant & Usage Rights</h2>
+          <p>The Photographer grants the Client a {{exclusivity}} license to use the photographs as follows:</p>
+
+          <h3>3.1 License Terms</h3>
+          <ul>
+            <li><strong>Duration:</strong> {{usage_term}} from the date of delivery</li>
+            <li><strong>Territory:</strong> {{usage_territory}}</li>
+            <li><strong>Permitted Media:</strong> {{usage_media}}</li>
+            <li><strong>Exclusivity Status:</strong> {{exclusivity}}</li>
+            {{#if buyout}}
+            <li><strong>Copyright Buyout:</strong> Full copyright transfer to Client upon receipt of final payment</li>
+            {{/if}}
+          </ul>
+
+          <h3>3.2 Usage Restrictions</h3>
+          <p>{{#unless buyout}}Unless a copyright buyout has been purchased, {{/unless}}the Client shall:</p>
+          <ul>
+            <li>Not transfer, sell, sublicense, or assign usage rights to any third party</li>
+            <li>Not use images beyond the scope of permitted media, territory, and time period specified herein</li>
+            <li>Not modify, edit, or manipulate the images in a manner that misrepresents the Photographer's original work</li>
+            <li>Not remove or obscure copyright notices, watermarks, or metadata</li>
+            <li>Not use images in any defamatory, illegal, or otherwise objectionable manner</li>
+            <li>Provide attribution to {{photographer_name}} when required</li>
+          </ul>
+
+          <h3>3.3 Photographer's Rights</h3>
+          <ul>
+            <li>Photographer retains all copyright and intellectual property rights to the original images</li>
+            <li>Photographer retains the right to display images in portfolio, website, social media, and exhibitions (subject to Client confidentiality requests in writing)</li>
+            <li>Photographer may use images for self-promotion and marketing purposes</li>
+          </ul>
         </section>
+
+        <section>
+          <h2>4. Deliverables & Timeline</h2>
+          <ul>
+            <li>Minimum {{image_count}} professionally edited, high-resolution images</li>
+            <li>Format: {{delivery_format}}</li>
+            <li>Delivery timeline: {{delivery_weeks}} weeks from shoot date via secure online gallery</li>
+            <li>Client receives private gallery with unlimited download access during the license term</li>
+            <li>Raw/unedited files not included unless separately negotiated</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Fees & Payment Terms</h2>
+
+          <h3>5.1 Fee Schedule</h3>
+          <table>
+            <tr>
+              <td><strong>Creative/Shoot Fee:</strong></td>
+              <td style="text-align: right;">{{creative_fee}}</td>
+            </tr>
+            <tr>
+              <td><strong>Licensing Fee ({{usage_term}}, {{usage_territory}}):</strong></td>
+              <td style="text-align: right;">{{licensing_fee}}</td>
+            </tr>
+            <tr style="background: #f0f0f0; font-weight: bold;">
+              <td><strong>Total Agreement Amount:</strong></td>
+              <td style="text-align: right;">{{total_amount}}</td>
+            </tr>
+          </table>
+
+          <h3>5.2 Payment Schedule</h3>
+          <table>
+            <tr>
+              <td><strong>Deposit ({{deposit_percent}}%) - Due upon signing:</strong></td>
+              <td style="text-align: right;">{{creative_fee | percent: deposit_percent}}</td>
+            </tr>
+            <tr>
+              <td><strong>Final Payment - {{payment_terms}}:</strong></td>
+              <td style="text-align: right;">Balance due</td>
+            </tr>
+          </table>
+
+          <h3>5.3 Late Payment</h3>
+          <p>Invoices are due {{payment_terms}} from invoice date. Late payments will accrue interest at 1.5% per month or the maximum rate allowed by law, whichever is less.</p>
+        </section>
+
+        <section>
+          <h2>6. License Renewal & Extensions</h2>
+          <p>Upon expiration of the license term ({{usage_term}}), all usage rights terminate. Client may negotiate renewal of usage rights at current market rates.</p>
+        </section>
+
+        <section class="signature-section">
+          <h2>7. Agreement & Signatures</h2>
+          <p>By signing below, both parties acknowledge that they have read, understood, and agree to all terms and conditions of this Brand & Editorial Photography License Agreement.</p>
+
+          <div style="margin-top: 40px;">
+            <div class="signature-area">
+              <strong>Photographer Signature:</strong><br><br>
+              <div class="signature-line"></div><br>
+              {{photographer_name}}<br>
+              <strong>Date:</strong> ____________________
+            </div>
+
+            <div class="signature-area" style="margin-left: 60px;">
+              <strong>Client Signature:</strong><br><br>
+              <div class="signature-line"></div><br>
+              {{client_name}}<br>
+              <strong>Date:</strong> ____________________
+            </div>
+          </div>
+        </section>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 11px; color: #666;">
+          <p style="text-align: center; color: #999;">© {{photographer_name}} | Contract generated {{current_date}}</p>
+        </div>
       `,
     },
   });
