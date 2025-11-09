@@ -194,6 +194,204 @@ const weddingBodyHtml = `
   </div>
 `;
 
+// Portrait Photography Contract HTML Template
+const portraitBodyHtml = `
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }
+    .contract-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 20px; margin-bottom: 30px; }
+    .contract-header h1 { margin: 0 0 10px 0; font-size: 24px; font-weight: bold; }
+    .contract-number { margin: 5px 0 0 0; font-size: 12px; color: #666; }
+    section { margin-bottom: 30px; }
+    h2 { font-size: 16px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid #ddd; padding-bottom: 8px; }
+    h3 { font-size: 14px; font-weight: bold; margin-top: 15px; margin-bottom: 10px; }
+    .party { background: #f9f9f9; padding: 15px; margin: 10px 0; border-left: 3px solid #007bff; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+    table tr { border-bottom: 1px solid #ddd; }
+    table td { padding: 10px; }
+    table td:first-child { font-weight: 500; width: 40%; }
+    ul { margin: 10px 0; padding-left: 20px; }
+    li { margin: 8px 0; }
+    .signature-section { margin-top: 40px; }
+    .signature-line { display: inline-block; width: 200px; border-top: 1px solid #000; margin-top: 30px; }
+    .signature-area { display: inline-block; margin-right: 40px; vertical-align: top; }
+  </style>
+
+  <div class="contract-header">
+    <h1>Portrait Photography Session Agreement</h1>
+    <p class="contract-number">Contract No: {{contract_number}}</p>
+    <p style="font-size: 12px; margin: 10px 0 0 0;">Effective Date: {{effective_date}}</p>
+  </div>
+
+  <section class="parties">
+    <h2>1. Parties to Agreement</h2>
+    <p>This Portrait Photography Session Agreement ("Agreement") is entered into on {{effective_date}} between:</p>
+
+    <div class="party">
+      <p style="margin: 0 0 8px 0;"><strong>Photographer:</strong></p>
+      {{photographer_name}}<br>
+      <strong>Email:</strong> {{data_controller_email}}
+    </div>
+
+    <div class="party">
+      <p style="margin: 0 0 8px 0;"><strong>Client:</strong></p>
+      {{client_name}}<br>
+      <strong>Email:</strong> {{client_email}}
+    </div>
+  </section>
+
+  <section>
+    <h2>2. Session Details & Scope</h2>
+    <table>
+      <tr>
+        <td><strong>Session Type:</strong></td>
+        <td>{{session_type}}</td>
+      </tr>
+      <tr>
+        <td><strong>Scheduled Date:</strong></td>
+        <td>{{session_date}} at {{session_time}}</td>
+      </tr>
+      <tr>
+        <td><strong>Location:</strong></td>
+        <td>{{session_location}}</td>
+      </tr>
+      <tr>
+        <td><strong>Session Duration:</strong></td>
+        <td>Up to {{session_duration}} hour(s)</td>
+      </tr>
+    </table>
+  </section>
+
+  <section>
+    <h2>3. Package: {{package_name}}</h2>
+
+    <h3>3.1 What's Included</h3>
+    <ul>
+      <li>Professional portrait session photography</li>
+      <li>{{edited_images}} professionally retouched, high-resolution digital images</li>
+      <li>Online private gallery for viewing and download</li>
+      <li>Unlimited personal printing and use rights</li>
+      <li>Digital delivery via secure online gallery</li>
+    </ul>
+
+    <h3>3.2 Delivery Timeline</h3>
+    <p>Final edited images will be delivered within {{delivery_days}} business days of session date via online gallery link.</p>
+
+    <h3>3.3 Image Rights & Usage</h3>
+    <p>The Client receives a non-exclusive license to use the delivered digital images for personal, non-commercial purposes including:</p>
+    <ul>
+      <li>Personal and family use</li>
+      <li>Social media sharing with proper credit to {{photographer_name}}</li>
+      <li>Printing for personal display</li>
+      <li>Sharing with immediate family and friends</li>
+    </ul>
+    <p><strong>The Client may NOT:</strong></p>
+    <ul>
+      <li>Use images for commercial purposes without written permission</li>
+      <li>Sell, license, or distribute images to third parties</li>
+      <li>Significantly alter or edit images</li>
+      <li>Remove copyright information or metadata from files</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>4. Photographer Rights & Responsibilities</h2>
+
+    <h3>4.1 Photographer Retains Copyright</h3>
+    <p>All original images remain the exclusive property of {{photographer_name}}. The Photographer retains all copyright and intellectual property rights to the images.</p>
+
+    <h3>4.2 Photographer Portfolio Usage</h3>
+    <p>The Photographer may use the images in portfolio, website, social media promotion, and professional publications. The Client may request confidentiality in writing, in which case images will not be publicly shared without explicit Client approval.</p>
+
+    <h3>4.3 Raw Files</h3>
+    <p>Unedited/raw image files are not included in any standard package. Raw files available only upon separate negotiation and additional fee.</p>
+  </section>
+
+  <section>
+    <h2>5. Investment & Payment Terms</h2>
+
+    <h3>5.1 Fees</h3>
+    <table>
+      <tr>
+        <td><strong>Session Fee:</strong></td>
+        <td style="text-align: right;">{{session_fee}}</td>
+      </tr>
+      <tr>
+        <td><strong>Package: {{package_name}}</strong></td>
+        <td style="text-align: right;">Included</td>
+      </tr>
+      <tr style="background: #f0f0f0; font-weight: bold;">
+        <td><strong>Total Due:</strong></td>
+        <td style="text-align: right;">{{session_fee}}</td>
+      </tr>
+    </table>
+
+    <h3>5.2 Payment Schedule</h3>
+    <table>
+      <tr>
+        <td><strong>Deposit to secure booking:</strong></td>
+        <td style="text-align: right;">{{deposit_amount}}</td>
+      </tr>
+      <tr>
+        <td><strong>Final Balance due:</strong></td>
+        <td style="text-align: right;">{{session_fee}} - {{deposit_amount}}</td>
+      </tr>
+      <tr>
+        <td><strong>Payment due:</strong></td>
+        <td style="text-align: right;">{{payment_due}}</td>
+      </tr>
+    </table>
+
+    <h3>5.3 Late Payment & Rescheduling</h3>
+    <p>Session is not confirmed until deposit is received. If balance remains unpaid at the time of the session, session may be rescheduled at {{photographer_name}}'s discretion.</p>
+  </section>
+
+  <section>
+    <h2>6. Cancellation, Rescheduling & Limitations</h2>
+
+    <h3>6.1 Client Cancellation</h3>
+    <ul>
+      <li><strong>More than 30 days before session:</strong> Deposit is fully refundable</li>
+      <li><strong>15-30 days before session:</strong> 50% of deposit is refundable</li>
+      <li><strong>Less than 15 days before session:</strong> Deposit is non-refundable, but may be applied to future session</li>
+    </ul>
+
+    <h3>6.2 Photographer Cancellation</h3>
+    <p>{{photographer_name}} reserves the right to cancel due to illness, emergency, or unforeseen circumstances. Full refund or alternative photographer will be provided.</p>
+
+    <h3>6.3 Inclement Weather & Rescheduling</h3>
+    <p>If severe weather or unsafe conditions prevent the session, session may be rescheduled without penalty. Client must provide notice of rescheduling within 30 days of original session date.</p>
+
+    <h3>6.4 Limited Liability</h3>
+    <p>{{photographer_name}} is not responsible for client's failure to appear at scheduled session time, or loss of access to online gallery after the agreed expiration date.</p>
+  </section>
+
+  <section class="signature-section">
+    <h2>7. Agreement & Signatures</h2>
+    <p>By signing below, both parties acknowledge that they have read, understood, and agree to all terms and conditions of this Portrait Photography Session Agreement.</p>
+
+    <div style="margin-top: 40px;">
+      <div class="signature-area">
+        <strong>Photographer Signature:</strong><br><br>
+        <div class="signature-line"></div><br>
+        {{photographer_name}}<br>
+        <strong>Date:</strong> ____________________
+      </div>
+
+      <div class="signature-area" style="margin-left: 60px;">
+        <strong>Client Signature:</strong><br><br>
+        <div class="signature-line"></div><br>
+        {{client_name}}<br>
+        <strong>Date:</strong> ____________________
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 11px; color: #666;">
+    <p><strong>Governing Law:</strong> This agreement is governed by the laws of England and Wales.</p>
+    <p style="margin-top: 20px; text-align: center; color: #999;">© {{photographer_name}} | Contract generated {{current_date}}</p>
+  </div>
+`;
+
 async function main() {
   console.log('🌱 Starting database seed...');
 
@@ -381,10 +579,12 @@ async function main() {
 
   const portraitTemplate = await prisma.contractTemplate.upsert({
     where: { name: 'Portrait Session Contract' },
-    update: {},
+    update: {
+      bodyHtml: portraitBodyHtml,
+    },
     create: {
       name: 'Portrait Session Contract',
-      description: 'Standard portrait photography contract',
+      description: 'Standard portrait photography session agreement for individuals and families',
       type: 'SERVICE_AGREEMENT',
       eventType: 'PORTRAIT',
       mandatoryClauseIds: [],
@@ -392,13 +592,42 @@ async function main() {
       isPublished: true,
       version: 1,
       createdBy: superAdmin.id,
+      bodyHtml: portraitBodyHtml,
       variablesSchema: {
         sections: [
           {
             title: 'Session Details',
             fields: [
+              { name: 'session_type', type: 'select', label: 'Session Type', required: true, options: ['Family Portrait', 'Individual Portrait', 'Maternity', 'Newborn', 'Senior Portrait', 'Headshot'] },
               { name: 'session_date', type: 'date', label: 'Session Date', required: true },
+              { name: 'session_time', type: 'text', label: 'Session Time', required: true },
               { name: 'session_location', type: 'text', label: 'Location', required: true },
+              { name: 'session_duration', type: 'number', label: 'Session Duration (hours)', required: true, default: 1 },
+            ],
+          },
+          {
+            title: 'Package & Deliverables',
+            fields: [
+              { name: 'package_name', type: 'text', label: 'Package Name', required: true },
+              { name: 'edited_images', type: 'number', label: 'Edited Images Included', required: true },
+              { name: 'delivery_days', type: 'number', label: 'Delivery Timeline (days)', required: true, default: 14 },
+              { name: 'prints_included', type: 'select', label: 'Prints Included', required: false, options: ['None', '5x7 (10 prints)', '8x10 (5 prints)', 'Custom'] },
+            ],
+          },
+          {
+            title: 'Payment',
+            fields: [
+              { name: 'session_fee', type: 'currency', label: 'Session Fee', required: true },
+              { name: 'deposit_amount', type: 'currency', label: 'Deposit Amount', required: true },
+              { name: 'payment_due', type: 'text', label: 'Final Payment Due', required: true, default: 'Upon delivery' },
+            ],
+          },
+          {
+            title: 'Photographer Information',
+            fields: [
+              { name: 'photographer_name', type: 'text', label: 'Photographer Name', required: true },
+              { name: 'photographer_handle', type: 'text', label: 'Social Media Handle', required: false },
+              { name: 'data_controller_email', type: 'email', label: 'Contact Email', required: true },
             ],
           },
         ],
