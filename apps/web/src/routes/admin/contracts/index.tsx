@@ -703,7 +703,7 @@ export default function ContractsIndex() {
           {/* Step 1: Select Template */}
           {generationStep.step === 1 && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Select a Template</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Select a Template</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {templates.map((template) => (
                   <button
@@ -733,10 +733,10 @@ export default function ContractsIndex() {
           {generationStep.step === 2 && (
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Fill Contract Details</h3>
+                <h3 className="text-lg font-semibold text-foreground">Fill Contract Details</h3>
                 <button
                   onClick={() => setGenerationStep({ step: 1 })}
-                  className="text-sm text-primary hover:text-primary dark:text-primary"
+                  className="text-sm text-primary hover:text-primary/80 dark:text-primary dark:hover:text-primary/80"
                 >
                   ← Back to templates
                 </button>
