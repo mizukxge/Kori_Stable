@@ -18,8 +18,8 @@ const CLIENT_TYPE_OPTIONS = [
 ];
 
 const COUNTRY_CODES = [
-  { code: 'US', name: 'United States', prefix: '+1' },
   { code: 'GB', name: 'United Kingdom', prefix: '+44' },
+  { code: 'US', name: 'United States', prefix: '+1' },
   { code: 'CA', name: 'Canada', prefix: '+1' },
   { code: 'AU', name: 'Australia', prefix: '+61' },
   { code: 'NZ', name: 'New Zealand', prefix: '+64' },
@@ -52,16 +52,18 @@ const CONTACT_METHOD_OPTIONS = [
 ];
 
 interface FormData {
-  // Step 0: Client Type
+  // Step 0: Email (with OTP verification)
+  email: string;
+
+  // Step 1: Client Type
   clientType: 'individual' | 'business' | 'organization' | '';
 
-  // Step 1: Contact
+  // Step 2: Contact Info (email pre-filled, disabled)
   name: string;
-  email: string;
   phone: string;
   phoneCountry: string;
 
-  // Step 2: Address (only for business/organization)
+  // Step 3: Address (optional for business/organization)
   company: string;
   address: string;
   city: string;
@@ -69,50 +71,52 @@ interface FormData {
   zipCode: string;
   country: string;
 
-  // Step 3: Preferences
+  // Step 4: Preferences
   source: string;
   preferredContactMethod: string;
 }
 
+interface OTPState {
+  clientId: string;
+  email: string;
+}
+
 const initialFormData: FormData = {
+  email: '',
   clientType: '',
   name: '',
-  email: '',
   phone: '',
-  phoneCountry: 'US',
+  phoneCountry: 'GB',
   company: '',
   address: '',
   city: '',
   state: '',
   zipCode: '',
-  country: 'US',
+  country: 'GB',
   source: '',
   preferredContactMethod: '',
 };
 
 export default function NewClientPage() {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0); // 0=email, 1=type, 2=contact, 3=address, 4=preferences, 5=review, 6=otp, 7=success
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Calculate total steps based on client type
-  const getTotalSteps = () => {
-    if (!formData.clientType) return 1; // Only client type selection
-    if (formData.clientType === 'individual') return 4; // client type, contact, preferences, review
-    return 5; // client type, contact, address, preferences, review
-  };
+  // OTP verification state (happens between step 0 and step 1)
+  const [otpState, setOtpState] = useState<OTPState | null>(null);
+  const [otpInput, setOtpInput] = useState('');
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpLoading, setOtpLoading] = useState(false);
 
   const hasAddressStep = formData.clientType === 'business' || formData.clientType === 'organization';
 
-  // Map actual step to step number for display
-  const getDisplayStep = () => {
-    if (currentStep === 0) return 0; // Client type selection
-    if (!hasAddressStep && currentStep > 1) return currentStep - 1; // Skip address step
-    return currentStep;
+  // Calculate review step based on whether address step exists
+  const getReviewStep = () => {
+    if (formData.clientType === 'individual') return 5; // email-verified, type, contact, preferences, review
+    return 6; // email-verified, type, contact, address, preferences, review
   };
 
   // Load draft from localStorage
@@ -133,13 +137,10 @@ export default function NewClientPage() {
   }, [formData]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -149,30 +150,36 @@ export default function NewClientPage() {
     }
   };
 
-  const validateStep0 = (): boolean => {
+  // Step 0: Email validation
+  const validateEmail = (): boolean => {
     const stepErrors: Record<string, string> = {};
-
-    if (!formData.clientType) {
-      stepErrors.clientType = 'Please select a client type';
+    if (!formData.email.trim()) {
+      stepErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      stepErrors.email = 'Please enter a valid email address';
     }
-
     setErrors(stepErrors);
     return Object.keys(stepErrors).length === 0;
   };
 
-  const validateStep1 = (): boolean => {
+  // Step 1: Client type validation
+  const validateClientType = (): boolean => {
+    const stepErrors: Record<string, string> = {};
+    if (!formData.clientType) {
+      stepErrors.clientType = 'Please select a client type';
+    }
+    setErrors(stepErrors);
+    return Object.keys(stepErrors).length === 0;
+  };
+
+  // Step 2: Contact info validation
+  const validateContact = (): boolean => {
     const stepErrors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
       stepErrors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
       stepErrors.name = 'Name must be at least 2 characters';
-    }
-
-    if (!formData.email.trim()) {
-      stepErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      stepErrors.email = 'Please enter a valid email address';
     }
 
     if (!formData.phone.trim()) {
@@ -188,10 +195,10 @@ export default function NewClientPage() {
     return Object.keys(stepErrors).length === 0;
   };
 
-  const validateStep2 = (): boolean => {
+  // Step 3: Address validation
+  const validateAddress = (): boolean => {
     const stepErrors: Record<string, string> = {};
 
-    // Company is required for business/organization
     if (hasAddressStep && !formData.company.trim()) {
       stepErrors.company = 'Company name is required';
     }
@@ -204,7 +211,8 @@ export default function NewClientPage() {
     return Object.keys(stepErrors).length === 0;
   };
 
-  const validateStep3 = (): boolean => {
+  // Step 4: Preferences validation
+  const validatePreferences = (): boolean => {
     const stepErrors: Record<string, string> = {};
 
     if (!formData.source) {
@@ -219,26 +227,143 @@ export default function NewClientPage() {
     return Object.keys(stepErrors).length === 0;
   };
 
+  // Request OTP for email verification
+  const handleRequestEmailOTP = async () => {
+    if (!validateEmail()) return;
+
+    setLoading(true);
+    setSubmitError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/clients/request-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Error: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+
+      // Move to OTP verification step
+      setOtpState({
+        clientId: result.clientId,
+        email: formData.email.trim(),
+      });
+      setOtpInput('');
+      setOtpError(null);
+      setCurrentStep(0.5); // OTP verification step (between 0 and 1)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setSubmitError(message);
+      console.error('Error requesting OTP:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Verify OTP
+  const handleVerifyOTP = async () => {
+    if (!otpState || otpInput.length !== 6) {
+      setOtpError('Please enter a valid 6-digit code');
+      return;
+    }
+
+    setOtpLoading(true);
+    setOtpError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/clients/${otpState.clientId}/verify-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          otpCode: otpInput,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Invalid OTP code');
+      }
+
+      // OTP verified, move to client type selection
+      setOtpState(null);
+      setOtpInput('');
+      setCurrentStep(1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to verify OTP';
+      setOtpError(message);
+      console.error('Error verifying OTP:', error);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // Resend OTP
+  const handleResendOTP = async () => {
+    if (!otpState) return;
+
+    setOtpLoading(true);
+    setOtpError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/clients/${otpState.clientId}/resend-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to resend OTP');
+      }
+
+      alert('OTP code resent to ' + otpState.email);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to resend OTP';
+      setOtpError(message);
+      console.error('Error resending OTP:', error);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const handleNext = () => {
     let isValid = false;
 
     if (currentStep === 0) {
-      isValid = validateStep0();
+      handleRequestEmailOTP();
+      return;
     } else if (currentStep === 1) {
-      isValid = validateStep1();
+      isValid = validateClientType();
     } else if (currentStep === 2) {
-      isValid = validateStep2();
-    } else if (currentStep === 3) {
-      isValid = validateStep3();
+      isValid = validateContact();
+    } else if (currentStep === 3 && hasAddressStep) {
+      isValid = validateAddress();
+    } else if (currentStep === 3 && !hasAddressStep) {
+      isValid = validatePreferences();
+    } else if (currentStep === 4 && hasAddressStep) {
+      isValid = validatePreferences();
     }
 
     if (isValid) {
       let nextStep = currentStep + 1;
 
-      // Skip address step (step 2) for individuals
-      if (currentStep === 1 && !hasAddressStep) {
-        nextStep = 3;
-      }
+      // Note: Do NOT skip step 3 for individuals - it contains preferences
+      // Step 3 = Address (business/org) or Preferences (individual)
+      // Step 4 = Preferences (business/org) or Review (individual)
+      // Step 5 = Review (individual)
+      // Step 6 = Review (business/org)
 
       setCurrentStep(nextStep);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -246,12 +371,17 @@ export default function NewClientPage() {
   };
 
   const handlePrevious = () => {
+    if (currentStep === 0.5) {
+      // From OTP back to email
+      setOtpState(null);
+      setCurrentStep(0);
+      return;
+    }
+
     let prevStep = currentStep - 1;
 
-    // Skip address step (step 2) for individuals when going back
-    if (currentStep === 3 && !hasAddressStep) {
-      prevStep = 1;
-    }
+    // Note: Do NOT skip step 3 when going back
+    // The step flow is continuous for both individual and business/org types
 
     setCurrentStep(prevStep);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -260,17 +390,15 @@ export default function NewClientPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateStep3()) {
-      return;
-    }
+    // Final validation
+    if (!validatePreferences()) return;
 
     setLoading(true);
     setSubmitError(null);
 
     try {
-      // Format phone number for submission
       const countryPrefix =
-        COUNTRY_CODES.find((c) => c.code === formData.phoneCountry)?.prefix || '+1';
+        COUNTRY_CODES.find((c) => c.code === formData.phoneCountry)?.prefix || '+44';
       const phoneNumber = `${countryPrefix}${formData.phone.replace(/\D/g, '')}`;
 
       const response = await fetch(`${API_BASE_URL}/clients/create`, {
@@ -296,37 +424,22 @@ export default function NewClientPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            `Error: ${response.statusText}`
-        );
+        throw new Error(errorData.message || `Error: ${response.statusText}`);
       }
 
-      const result = await response.json();
-
-      // Clear draft
       localStorage.removeItem('newClientFormDraft');
-
-      setSubmitSuccess(true);
-      setCurrentStep(6); // Show success screen
-
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/');
-      }, 3000);
+      setCurrentStep(7); // Success screen
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'An unexpected error occurred';
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
       setSubmitError(message);
-      console.error('Error submitting client signup:', error);
+      console.error('Error submitting signup:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  // Get country prefix for display
   const getCountryPrefix = () => {
-    return COUNTRY_CODES.find((c) => c.code === formData.phoneCountry)?.prefix || '+1';
+    return COUNTRY_CODES.find((c) => c.code === formData.phoneCountry)?.prefix || '+44';
   };
 
   const getCountryName = (code: string) => {
@@ -334,13 +447,56 @@ export default function NewClientPage() {
   };
 
   const getStepTitle = () => {
-    if (currentStep === 0) return 'Client Type';
-    if (currentStep === 1) return 'Contact Information';
-    if (currentStep === 2 && hasAddressStep) return 'Address Details';
-    if (currentStep === 2 || currentStep === 3) return 'Communication Preferences';
-    if (currentStep === 4) return 'Review Information';
+    if (currentStep === 0) return 'Email Address';
+    if (currentStep === 0.5) return 'Verify Email';
+    if (currentStep === 1) return 'Client Type';
+    if (currentStep === 2) return 'Contact Information';
+    if (currentStep === 3 && hasAddressStep) return 'Address Details';
+    if (currentStep === 3 && !hasAddressStep) return 'Communication Preferences';
+    if (currentStep === 4 && hasAddressStep) return 'Communication Preferences';
+    if (currentStep >= getReviewStep()) return 'Review Information';
     return '';
   };
+
+  // Progress bar calculation
+  // Step flow:
+  // Individual: Step 0 (email) -> 0.5 (OTP) -> 1 (type) -> 2 (contact) -> 3 (preferences) -> 4 (review)
+  // Business/Org: Step 0 (email) -> 0.5 (OTP) -> 1 (type) -> 2 (contact) -> 3 (address) -> 4 (preferences) -> 5 (review)
+  const getTotalSteps = () => {
+    if (!formData.clientType) return 2; // email + type
+    if (formData.clientType === 'individual') return 4; // email (shown as 1), type (1), contact (2), preferences (3), review (4)
+    return 5; // email (1), type (1), contact (2), address (3), preferences (4), review (5)
+  };
+
+  const getProgressStep = () => {
+    if (currentStep === 0 || currentStep === 0.5) return 1; // Email step
+    if (currentStep === 1) return 1; // Client type (shown as step 1)
+    if (currentStep === 2) return 2; // Contact info (shown as step 2)
+    if (currentStep === 3) return hasAddressStep ? 3 : 3; // Address (step 3 for business) or Preferences (step 3 for individual)
+    if (currentStep === 4) return hasAddressStep ? 4 : 4; // Preferences (step 4 for business) or Review (step 4 for individual)
+    if (currentStep === 5) return 5; // Review (business only)
+    if (currentStep >= getReviewStep()) return getTotalSteps();
+    return getTotalSteps();
+  };
+
+  if (currentStep === 7) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700 text-center py-12">
+            <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-white mb-2">Thank You!</h2>
+            <p className="text-slate-300 mb-6">
+              Your details have been received. We'll review your information and contact you shortly.
+            </p>
+            <p className="text-sm text-slate-500">
+              Redirecting you home in a moment...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
@@ -349,21 +505,21 @@ export default function NewClientPage() {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Join Our Studio</h1>
           <p className="text-slate-400">
-            {currentStep < 6
-              ? `Step ${currentStep} of ${getTotalSteps()} - ${getStepTitle()}`
+            {currentStep < 7
+              ? `Step ${getProgressStep()} of ${getTotalSteps()} - ${getStepTitle()}`
               : 'Welcome!'}
           </p>
         </div>
 
         {/* Progress Bar */}
-        {currentStep < 6 && (
+        {currentStep < 7 && currentStep !== 0.5 && (
           <div className="mb-8">
             <div className="flex justify-between mb-2">
               {Array.from({ length: getTotalSteps() }).map((_, i) => (
                 <div
                   key={i}
                   className={`flex-1 h-1 rounded-full mx-1 transition-colors ${
-                    i < currentStep
+                    i < getProgressStep()
                       ? 'bg-blue-500'
                       : 'bg-slate-700'
                   }`}
@@ -375,33 +531,91 @@ export default function NewClientPage() {
 
         {/* Form Container */}
         <div className="bg-slate-800 rounded-lg shadow-2xl p-8 border border-slate-700">
-          {/* Success State */}
-          {currentStep === 6 && submitSuccess && (
-            <div className="text-center py-12">
-              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-2xl font-bold text-white mb-2">Thank You!</h2>
-              <p className="text-slate-300 mb-6">
-                Your details have been received. We'll review your information and contact you shortly.
-              </p>
-              <p className="text-sm text-slate-500">
-                Redirecting you home in a moment...
-              </p>
-            </div>
-          )}
-
-          {/* Error State */}
           {submitError && (
             <div className="mb-6 p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex gap-3">
               <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <div>
-                <h3 className="font-semibold text-red-400">Submission Error</h3>
+                <h3 className="font-semibold text-red-400">Error</h3>
                 <p className="text-red-300 text-sm">{submitError}</p>
               </div>
             </div>
           )}
 
-          {/* Step 0: Client Type Selection */}
+          {/* Step 0: Email */}
           {currentStep === 0 && (
+            <form className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="john@example.com"
+                  className={`w-full px-4 py-2 bg-slate-700 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
+                    errors.email ? 'border-red-500' : 'border-slate-600'
+                  }`}
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+                )}
+              </div>
+            </form>
+          )}
+
+          {/* Step 0.5: OTP Verification */}
+          {currentStep === 0.5 && otpState && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold text-white mb-2">Verify Your Email</h3>
+                <p className="text-slate-400 text-sm mb-6">
+                  We've sent a 6-digit verification code to<br />
+                  <strong>{otpState.email}</strong>
+                </p>
+              </div>
+
+              {otpError && (
+                <div className="p-4 bg-red-900/20 border border-red-500/50 rounded-lg flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-semibold text-red-400">Verification Error</h3>
+                    <p className="text-red-300 text-sm">{otpError}</p>
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-3">
+                  Verification Code *
+                </label>
+                <input
+                  type="text"
+                  value={otpInput}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setOtpInput(value);
+                    if (otpError) setOtpError(null);
+                  }}
+                  placeholder="000000"
+                  maxLength={6}
+                  className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white text-2xl text-center font-mono placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 tracking-widest"
+                />
+              </div>
+
+              <button
+                onClick={handleResendOTP}
+                disabled={otpLoading}
+                className="text-blue-400 hover:text-blue-300 text-sm disabled:opacity-50"
+              >
+                Didn't receive the code? Resend
+              </button>
+            </div>
+          )}
+
+          {/* Step 1: Client Type */}
+          {currentStep === 1 && (
             <form className="space-y-4">
               <label className="block text-sm font-medium text-slate-200 mb-4">
                 How would you like to work with us? *
@@ -439,9 +653,23 @@ export default function NewClientPage() {
             </form>
           )}
 
-          {/* Step 1: Contact Information */}
-          {currentStep === 1 && (
+          {/* Step 2: Contact Information */}
+          {currentStep === 2 && (
             <form className="space-y-6">
+              {/* Email (read-only) */}
+              <div>
+                <label className="block text-sm font-medium text-slate-200 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  disabled
+                  className="w-full px-4 py-2 bg-slate-600 border border-slate-600 rounded-lg text-slate-300 placeholder-slate-500 cursor-not-allowed"
+                />
+                <p className="text-xs text-slate-500 mt-1">Verified email - cannot be changed</p>
+              </div>
+
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-2">
@@ -462,27 +690,7 @@ export default function NewClientPage() {
                 )}
               </div>
 
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-slate-200 mb-2">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  placeholder="john@example.com"
-                  className={`w-full px-4 py-2 bg-slate-700 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
-                    errors.email ? 'border-red-500' : 'border-slate-600'
-                  }`}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-400">{errors.email}</p>
-                )}
-              </div>
-
-              {/* Phone Number with Country Code */}
+              {/* Phone Number */}
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-2">
                   Phone Number *
@@ -505,7 +713,7 @@ export default function NewClientPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="555 123 4567"
+                    placeholder="7911 123456"
                     className={`flex-1 px-4 py-2 bg-slate-700 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
                       errors.phone ? 'border-red-500' : 'border-slate-600'
                     }`}
@@ -514,20 +722,17 @@ export default function NewClientPage() {
                 {errors.phone && (
                   <p className="mt-1 text-sm text-red-400">{errors.phone}</p>
                 )}
-                <p className="mt-1 text-xs text-slate-500">
-                  Format: {getCountryPrefix()} followed by phone number
-                </p>
               </div>
             </form>
           )}
 
-          {/* Step 2: Address Details */}
-          {currentStep === 2 && (
+          {/* Step 3: Address (only for business/organization) */}
+          {currentStep === 3 && hasAddressStep && (
             <form className="space-y-6">
               {/* Company */}
               <div>
                 <label className="block text-sm font-medium text-slate-200 mb-2">
-                  Company Name {hasAddressStep && '*'}
+                  Company Name *
                 </label>
                 <input
                   type="text"
@@ -569,23 +774,23 @@ export default function NewClientPage() {
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
-                  placeholder="San Francisco"
+                  placeholder="London"
                   className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
 
-              {/* State and Zip Code */}
+              {/* State and Postal Code */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-2">
-                    State / Province
+                    State / Region
                   </label>
                   <input
                     type="text"
                     name="state"
                     value={formData.state}
                     onChange={handleInputChange}
-                    placeholder="CA"
+                    placeholder="England"
                     className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
@@ -598,7 +803,7 @@ export default function NewClientPage() {
                     name="zipCode"
                     value={formData.zipCode}
                     onChange={handleInputChange}
-                    placeholder="94102"
+                    placeholder="SW1A 1AA"
                     className={`w-full px-4 py-2 bg-slate-700 border rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 ${
                       errors.zipCode ? 'border-red-500' : 'border-slate-600'
                     }`}
@@ -630,8 +835,9 @@ export default function NewClientPage() {
             </form>
           )}
 
-          {/* Step 3: Communication Preferences */}
-          {currentStep === 3 && (
+          {/* Step 3 or 4: Communication Preferences */}
+          {((currentStep === 3 && !hasAddressStep) || (currentStep === 4 && hasAddressStep)) && (
+            <div className="w-full">
             <form className="space-y-6">
               {/* How Did You Find Us */}
               <div>
@@ -691,10 +897,11 @@ export default function NewClientPage() {
                 )}
               </div>
             </form>
+            </div>
           )}
 
-          {/* Step 4: Review */}
-          {currentStep === 4 && (
+          {/* Step 5 or 6: Review */}
+          {currentStep === getReviewStep() && (
             <div className="space-y-6">
               <div className="bg-slate-700/50 rounded-lg p-6 space-y-4">
                 <div>
@@ -705,18 +912,18 @@ export default function NewClientPage() {
                     {CLIENT_TYPE_OPTIONS.find((o) => o.value === formData.clientType)?.label}
                   </p>
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-slate-400 mb-1">
-                    Full Name
-                  </h3>
-                  <p className="text-lg text-white">{formData.name}</p>
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <h3 className="text-sm font-medium text-slate-400 mb-1">
                       Email
                     </h3>
                     <p className="text-white">{formData.email}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-slate-400 mb-1">
+                      Name
+                    </h3>
+                    <p className="text-white">{formData.name}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-slate-400 mb-1">
@@ -779,10 +986,10 @@ export default function NewClientPage() {
           )}
 
           {/* Navigation Buttons */}
-          {currentStep < 6 && (
+          {currentStep !== 7 && (
             <div className="mt-8 flex justify-between gap-4">
               <button
-                onClick={handlePrevious}
+                onClick={currentStep === 0.5 ? handlePrevious : handlePrevious}
                 disabled={currentStep === 0}
                 className="flex items-center gap-2 px-6 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
@@ -790,7 +997,25 @@ export default function NewClientPage() {
                 Previous
               </button>
 
-              {currentStep === 4 ? (
+              {currentStep === 0.5 ? (
+                <button
+                  onClick={handleVerifyOTP}
+                  disabled={otpLoading || otpInput.length !== 6}
+                  className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {otpLoading ? (
+                    <>
+                      <Loader className="w-4 h-4 animate-spin" />
+                      Verifying...
+                    </>
+                  ) : (
+                    <>
+                      Verify Email
+                      <CheckCircle2 className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              ) : currentStep === getReviewStep() ? (
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
