@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { InvoiceService } from '../services/invoice.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { notifyInvoiceCreated, notifyPaymentReceived } from '../services/notify.js';
 
 export async function invoicesRoutes(fastify: FastifyInstance) {
   // All routes require admin authentication
@@ -121,6 +122,19 @@ export async function invoicesRoutes(fastify: FastifyInstance) {
         },
         'Invoice created'
       );
+
+      // Send notification about new invoice creation
+      try {
+        await notifyInvoiceCreated(
+          invoice.id,
+          invoice.invoiceNumber,
+          invoice.title,
+          invoice.total.toString()
+        );
+      } catch (notifyError) {
+        request.log.warn('Failed to send invoice created notification:', notifyError);
+        // Don't fail the request if notification fails
+      }
 
       return reply.status(201).send({
         success: true,
@@ -250,6 +264,18 @@ export async function invoicesRoutes(fastify: FastifyInstance) {
         'Invoice marked as paid'
       );
 
+      // Send notification about payment received
+      try {
+        await notifyPaymentReceived(
+          id,
+          invoice.invoiceNumber,
+          invoice.total.toString()
+        );
+      } catch (notifyError) {
+        request.log.warn('Failed to send payment received notification:', notifyError);
+        // Don't fail the request if notification fails
+      }
+
       return reply.status(200).send({
         success: true,
         message: 'Invoice marked as paid',
@@ -330,14 +356,10 @@ export async function invoicesRoutes(fastify: FastifyInstance) {
           throw new Error('Failed to generate PDF');
         }
 
-        return reply.sendFile(updated.pdfPath.split('/').pop()!, {
-          root: updated.pdfPath.substring(0, updated.pdfPath.lastIndexOf('/')),
-        });
+        return reply.download(updated.pdfPath);
       }
 
-      return reply.sendFile(invoice.pdfPath.split('/').pop()!, {
-        root: invoice.pdfPath.substring(0, invoice.pdfPath.lastIndexOf('/')),
-      });
+      return reply.download(invoice.pdfPath);
     } catch (error) {
       if (error instanceof Error && error.message === 'Invoice not found') {
         return reply.status(404).send({
