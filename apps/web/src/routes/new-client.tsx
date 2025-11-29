@@ -114,9 +114,10 @@ export default function NewClientPage() {
   const hasAddressStep = formData.clientType === 'business' || formData.clientType === 'organization';
 
   // Calculate review step based on whether address step exists
+  // This should return the actual currentStep value when showing review
   const getReviewStep = () => {
-    if (formData.clientType === 'individual') return 5; // email-verified, type, contact, preferences, review
-    return 6; // email-verified, type, contact, address, preferences, review
+    if (formData.clientType === 'individual') return 4; // 0 (email), 0.5 (OTP), 1 (type), 2 (contact), 3 (preferences), 4 (review)
+    return 5; // 0 (email), 0.5 (OTP), 1 (type), 2 (contact), 3 (address), 4 (preferences), 5 (review)
   };
 
   // Load draft from localStorage
@@ -454,7 +455,8 @@ export default function NewClientPage() {
     if (currentStep === 3 && hasAddressStep) return 'Address Details';
     if (currentStep === 3 && !hasAddressStep) return 'Communication Preferences';
     if (currentStep === 4 && hasAddressStep) return 'Communication Preferences';
-    if (currentStep >= getReviewStep()) return 'Review Information';
+    if (currentStep === 4 && !hasAddressStep) return 'Review Information'; // Individual review
+    if (currentStep === 5 && hasAddressStep) return 'Review Information'; // Business/org review
     return '';
   };
 
@@ -464,8 +466,8 @@ export default function NewClientPage() {
   // Business/Org: Step 0 (email) -> 0.5 (OTP) -> 1 (type) -> 2 (contact) -> 3 (address) -> 4 (preferences) -> 5 (review)
   const getTotalSteps = () => {
     if (!formData.clientType) return 2; // email + type
-    if (formData.clientType === 'individual') return 4; // email (shown as 1), type (1), contact (2), preferences (3), review (4)
-    return 5; // email (1), type (1), contact (2), address (3), preferences (4), review (5)
+    if (formData.clientType === 'individual') return 4; // Shown as: Step 1 (email), Step 2 (type), Step 3 (contact), Step 4 (preferences/review combined display)
+    return 5; // Shown as: Step 1 (email), Step 2 (type), Step 3 (contact), Step 4 (address), Step 5 (preferences/review combined display)
   };
 
   const getProgressStep = () => {
