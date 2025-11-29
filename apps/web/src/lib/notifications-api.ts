@@ -1,4 +1,5 @@
-import { API_URL } from './api';
+// API URL - development uses port 3001, production uses environment variable
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export interface Notification {
   id: string;
@@ -43,7 +44,7 @@ export async function getNotifications(
     unreadOnly: String(unreadOnly),
   });
 
-  const response = await fetch(`${API_URL}/notifications?${params}`, {
+  const response = await fetch(`${API_BASE_URL}/notifications?${params}`, {
     method: 'GET',
     credentials: 'include',
     headers: {
@@ -62,7 +63,7 @@ export async function getNotifications(
  * Mark a single notification as read
  */
 export async function markNotificationAsRead(notificationId: string): Promise<Notification> {
-  const response = await fetch(`${API_URL}/notifications/${notificationId}/read`, {
+  const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}/read`, {
     method: 'PATCH',
     credentials: 'include',
     headers: {
@@ -81,7 +82,7 @@ export async function markNotificationAsRead(notificationId: string): Promise<No
  * Mark all notifications as read
  */
 export async function markAllNotificationsAsRead(): Promise<{ updated: number }> {
-  const response = await fetch(`${API_URL}/notifications/read-all`, {
+  const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -100,7 +101,7 @@ export async function markAllNotificationsAsRead(): Promise<{ updated: number }>
  * Delete/dismiss a notification
  */
 export async function deleteNotification(notificationId: string): Promise<void> {
-  const response = await fetch(`${API_URL}/notifications/${notificationId}`, {
+  const response = await fetch(`${API_BASE_URL}/notifications/${notificationId}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {
