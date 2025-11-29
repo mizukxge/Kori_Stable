@@ -115,6 +115,16 @@ async function createInAppNotification(data: NotificationData): Promise<string> 
   });
 
   console.log(`[Notify] Created in-app notification ${notification.id}`);
+
+  // Broadcast notification to WebSocket connections if available
+  try {
+    const { notifyUser } = await import('./websocket.js');
+    notifyUser(data.userId, notification);
+  } catch (error) {
+    // WebSocket service may not be available, that's okay
+    console.debug('[Notify] WebSocket broadcast skipped (service unavailable)');
+  }
+
   return notification.id;
 }
 

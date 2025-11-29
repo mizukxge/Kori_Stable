@@ -3,6 +3,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { ThemeToggle } from '../ThemeToggle';
+import { NotificationBell } from '../notifications/NotificationBell';
+import { NotificationTray } from '../notifications/NotificationTray';
+import { useNotifications } from '../../hooks/useNotifications';
 import { logout } from '../../lib/api';
 import { cn } from '../../lib/utils';
 
@@ -12,7 +15,16 @@ interface HeaderProps {
 
 export function Header({ onMenuClick }: HeaderProps) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationTrayOpen, setNotificationTrayOpen] = useState(false);
   const navigate = useNavigate();
+
+  const {
+    notifications,
+    unreadCount,
+    connected,
+    setNotifications,
+    setUnreadCount,
+  } = useNotifications();
 
   const handleLogout = async () => {
     try {
@@ -27,7 +39,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-sticky border-b bg-card">
+    <header className="sticky top-0 z-sticky border-b bg-card text-foreground">
       <div className="flex h-16 items-center gap-4 px-6">
         <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick}>
           <Menu className="h-5 w-5" />
@@ -37,13 +49,30 @@ export function Header({ onMenuClick }: HeaderProps) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
             K
           </div>
-          <span className="hidden font-semibold sm:inline-block">Kori</span>
+          <span className="hidden font-semibold sm:inline-block text-foreground">Kori</span>
         </div>
 
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
+
+          {/* Notifications */}
+          <div className="relative">
+            <NotificationBell
+              unreadCount={unreadCount}
+              onClick={() => setNotificationTrayOpen(!notificationTrayOpen)}
+              isOpen={notificationTrayOpen}
+            />
+
+            <NotificationTray
+              isOpen={notificationTrayOpen}
+              onClose={() => setNotificationTrayOpen(false)}
+              notifications={notifications}
+              onNotificationsChange={setNotifications}
+              onUnreadCountChange={setUnreadCount}
+            />
+          </div>
 
           {/* User Avatar Dropdown */}
           <div className="relative">

@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { GalleryService } from '../services/gallery.js';
+import { notifyGalleryViewed } from '../services/notify.js';
 
 export async function publicGalleryRoutes(fastify: FastifyInstance) {
   /**
@@ -129,6 +130,18 @@ export async function publicGalleryRoutes(fastify: FastifyInstance) {
         'Gallery items accessed'
       );
 
+      // Send notification to gallery owner
+      try {
+        await notifyGalleryViewed(
+          result.gallery.userId,
+          result.gallery.name,
+          result.gallery.client?.name
+        );
+      } catch (notifyError) {
+        request.log.warn('Failed to send gallery view notification:', notifyError);
+        // Don't fail the request if notification fails
+      }
+
       return reply.status(200).send({
         success: true,
         data: items,
@@ -154,5 +167,131 @@ export async function publicGalleryRoutes(fastify: FastifyInstance) {
   fastify.get('/g/:token', async (request, reply) => {
     const { token } = request.params as { token: string };
     return reply.redirect(301, `/g/${token}/meta`);
+  });
+
+  /**
+   * GET /g/:token/style
+   * Get gallery's default style (public, no auth required)
+   */
+  fastify.get('/g/:token/style', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+
+      const gallery = await GalleryService.getGalleryByToken(token);
+      const style = await GalleryService.getGalleryStyle(gallery.id);
+
+      return reply.status(200).send({
+        success: true,
+        data: style,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error fetching gallery style');
+      throw error;
+    }
+  });
+
+  /**
+   * GET /g/:token/preferences
+   * Get viewer's style preferences for this gallery
+   */
+  fastify.get('/g/:token/preferences', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+      const viewerIdentifier = (request.query as any).viewerId || '';
+
+      const gallery = await GalleryService.getGalleryByToken(token);
+      const preferences = await GalleryService.getViewerPreferences(
+        gallery.id,
+        viewerIdentifier
+      );
+
+      return reply.status(200).send({
+        success: true,
+        data: preferences,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      request.log.error(error, 'Error fetching viewer preferences');
+      throw error;
+    }
+  });
+
+  /**
+   * POST /g/:token/preferences
+   * Save viewer's style preferences for this gallery
+   */
+  fastify.post('/g/:token/preferences', async (request, reply) => {
+    try {
+      const { token } = request.params as { token: string };
+      const { viewerId, styleName, customSettings } = request.body as {
+        viewerId: string;
+        styleName: string;
+        customSettings?: Record<string, any>;
+      };
+
+      if (!viewerId) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'viewerId is required',
+        });
+      }
+
+      if (!styleName) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'styleName is required',
+        });
+      }
+
+      const gallery = await GalleryService.getGalleryByToken(token);
+      const preferences = await GalleryService.updateViewerPreferences(
+        gallery.id,
+        viewerId,
+        styleName,
+        customSettings
+      );
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Preferences saved successfully',
+        data: preferences,
+      });
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Gallery not found') {
+        return reply.status(404).send({
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Gallery not found',
+        });
+      }
+
+      if (error instanceof Error && error.message.includes('Invalid style')) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: error.message,
+        });
+      }
+
+      request.log.error(error, 'Error saving viewer preferences');
+      throw error;
+    }
   });
 }

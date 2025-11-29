@@ -1,6 +1,8 @@
 import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
+import { uploadsRoutes } from './uploads.js';
 import { authRoutes } from './auth.js';
+import { websocketRoutes } from './websocket.js';
 import { clientRoutes, adminClientRoutes } from './clients.js';
 import { inquiryRoutes, adminInquiryRoutes } from './inquiries.js';
 import { ingestRoutes } from './ingest.js';
@@ -17,6 +19,8 @@ import { contractsRoutes } from './contracts.js';
 import { publicContractRoutes } from './publicContract.js';
 import { clausesRoutes } from './clauses.js';
 import { contractTemplatesRoutes } from './contract-templates.js';
+import { registerTemplateSchemaRoutes } from './contract-templates-schema.js';
+import { registerContractGenerationRoutes } from './contract-generation.js';
 import { invoicesRoutes } from './invoices.js';
 import { publicInvoiceRoutes } from './publicInvoice.js';
 import { paymentsRoutes } from './payments.js';
@@ -33,16 +37,23 @@ import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
 import { envelopesRoutes } from './envelopes.js';
+import { appointmentsRoutes } from './appointments.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
-  // CDN & Image Optimization routes (public image serving + admin management)
-  await fastify.register(cdnRoutes);
-
   // Health check routes (public)
   await fastify.register(healthRoutes);
 
+  // Uploads serving routes (public - RAW, EDIT, VIDEO assets)
+  await fastify.register(uploadsRoutes);
+
+  // CDN & Image Optimization routes (public image serving + admin management)
+  await fastify.register(cdnRoutes);
+
   // Authentication routes
   await fastify.register(authRoutes);
+
+  // WebSocket routes (real-time notifications)
+  await fastify.register(websocketRoutes);
 
   // Public gallery routes (no auth required)
   await fastify.register(publicGalleryRoutes);
@@ -102,8 +113,14 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Contract template management routes (admin only)
   await fastify.register(contractTemplatesRoutes);
 
+  // Contract template schema routes (admin only) - form schema and client search
+  await fastify.register(registerTemplateSchemaRoutes);
+
   // Contract routes (admin only)
   await fastify.register(contractsRoutes);
+
+  // Contract generation routes (admin only) - variable collection, preview, draft
+  await fastify.register(registerContractGenerationRoutes);
 
   // Invoice routes (admin only)
   await fastify.register(invoicesRoutes);
@@ -143,6 +160,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Analytics routes (admin only)
   await fastify.register(analyticsRoutes);
+
+  // Appointments scheduling routes (admin + public)
+  await fastify.register(appointmentsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {

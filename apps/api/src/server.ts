@@ -1,9 +1,9 @@
 import Fastify from 'fastify';
-import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import cookie from '@fastify/cookie';
+import websocket from '@fastify/websocket';
 import { env } from '../../../config/env.js';
 import { metricsMiddleware } from './observability/metricsMiddleware.js';
 
@@ -23,55 +23,42 @@ export async function buildServer() {
     requestIdLogLabel: 'reqId',
   });
 
-  // Register CORS FIRST - before Helmet
+  // Parse CORS origins
   const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim());
 
-  await fastify.register(cors, {
-    origin: (origin, cb) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        cb(null, true);
-      } else {
-        cb(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Type', 'Content-Length'],
-    optionsSuccessStatus: 200,
-  });
-
-  // Explicit credentials header hook - runs BEFORE route handlers
-  // This ensures the header is set for ALL requests including OPTIONS (preflight)
+  // Manual CORS handling via preHandler hook (instead of @fastify/cors plugin)
+  // This ensures Access-Control-Allow-Credentials header is set correctly
   fastify.addHook('preHandler', async (request, reply) => {
     const origin = request.headers.origin as string | undefined;
+    const requestMethod = request.method;
 
-    // If origin is allowed, ensure credentials header is set
+    // Set CORS headers for allowed origins
     if (origin && allowedOrigins.includes(origin)) {
+      reply.header('Access-Control-Allow-Origin', origin);
       reply.header('Access-Control-Allow-Credentials', 'true');
+      reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      reply.header('Access-Control-Expose-Headers', 'Content-Type, Content-Length');
+      reply.header('Vary', 'Origin');
+    }
+
+    // Handle OPTIONS (preflight) requests
+    if (requestMethod === 'OPTIONS') {
+      return reply.code(200).send();
     }
   });
 
-  // Also set on response (onSend) as backup
-  fastify.addHook('onSend', async (request, reply, payload) => {
-    const origin = request.headers.origin as string | undefined;
+  // Register metrics middleware to track all requests
+  fastify.addHook('onRequest', metricsMiddleware);
 
-    // Ensure credentials header is always set for allowed origins
-    if (origin && allowedOrigins.includes(origin)) {
-      reply.header('Access-Control-Allow-Credentials', 'true');
-    }
-
-    return payload;
-  });
-
-  // Register security middleware - Helmet AFTER CORS
+  // Register security middleware - Helmet AFTER CORS so it doesn't interfere
   await fastify.register(helmet, {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         scriptSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        imgSrc: ["'self'", 'data:', 'https:', 'http://localhost:*'],
         frameSrc: ["'self'"],
         objectSrc: ["'self'"],
       },
@@ -80,6 +67,8 @@ export async function buildServer() {
     crossOriginEmbedderPolicy: false,
     // Disable X-Frame-Options to allow iframe embedding (we use CSP frame-ancestors instead)
     frameguard: false,
+    // Don't set CORS headers - let @fastify/cors plugin handle it
+    permittedCrossDomainPolicies: false,
   });
 
   // Register cookie plugin
@@ -91,9 +80,14 @@ export async function buildServer() {
       sameSite: 'lax',
     },
   });
-  // Register metrics middleware to track all requests
-  fastify.addHook('onRequest', metricsMiddleware);
 
+  // Register WebSocket plugin for real-time notifications
+  await fastify.register(websocket, {
+    options: {
+      maxPayload: 1048576, // 1MB max payload
+      clientTracking: false, // We'll manage connections ourselves
+    },
+  });
 
   // Register rate limiting
   await fastify.register(rateLimit, {
@@ -125,12 +119,6 @@ export async function buildServer() {
     const isProduction = env.NODE_ENV === 'production';
     const statusCode = error.statusCode || 500;
 
-    // Ensure CORS credentials header is set for error responses too
-    const origin = request.headers.origin as string | undefined;
-    if (origin && allowedOrigins.includes(origin)) {
-      reply.header('Access-Control-Allow-Credentials', 'true');
-    }
-
     reply.status(statusCode).send({
       statusCode,
       error: error.name || 'Internal Server Error',
@@ -143,12 +131,6 @@ export async function buildServer() {
 
   // Not found handler
   fastify.setNotFoundHandler((request, reply) => {
-    // Ensure CORS credentials header is set for 404 responses too
-    const origin = request.headers.origin as string | undefined;
-    if (origin && allowedOrigins.includes(origin)) {
-      reply.header('Access-Control-Allow-Credentials', 'true');
-    }
-
     reply.status(404).send({
       statusCode: 404,
       error: 'Not Found',

@@ -1,6 +1,10 @@
 import { FastifyInstance } from 'fastify';
+import { PrismaClient } from '@prisma/client';
 import { MagicLinkService } from '../services/magic-link.js';
 import { SignatureService } from '../services/signature.js';
+import { notifyContractSigned } from '../services/notify.js';
+
+const prisma = new PrismaClient();
 
 /**
  * Public Contract Signing Routes
@@ -9,6 +13,58 @@ import { SignatureService } from '../services/signature.js';
  */
 
 export async function publicContractRoutes(fastify: FastifyInstance) {
+  /**
+   * GET /contract/dev/otp/:contractId
+   * [DEVELOPMENT ONLY] Retrieve OTP code for a contract
+   * Used during development when EMAIL_ENABLED=false
+   */
+  fastify.get('/contract/dev/otp/:contractId', async (request, reply) => {
+    try {
+      // Safety check: only allow in development
+      if (process.env.NODE_ENV === 'production') {
+        return reply.status(403).send({
+          success: false,
+          message: 'This endpoint is not available in production',
+        });
+      }
+
+      const { contractId } = request.params as { contractId: string };
+
+      // Get the current OTP from database
+      const contract = await prisma.contract.findUnique({
+        where: { id: contractId },
+        select: {
+          id: true,
+          otpCode: true,
+          otpEmail: true,
+          otpExpiresAt: true,
+        },
+      });
+
+      if (!contract) {
+        return reply.status(404).send({
+          success: false,
+          message: 'Contract not found',
+        });
+      }
+
+      return reply.status(200).send({
+        success: true,
+        contractId,
+        otpCode: contract.otpCode || null,
+        otpEmail: contract.otpEmail || null,
+        otpExpiresAt: contract.otpExpiresAt || null,
+        message: '[DEVELOPMENT ONLY] OTP Code (check API logs for security)',
+      });
+    } catch (error: any) {
+      request.log.error(error, 'Error retrieving OTP');
+      return reply.status(500).send({
+        success: false,
+        message: 'Failed to retrieve OTP info',
+      });
+    }
+  });
+
   /**
    * GET /contract/validate/:token
    * Validate magic link token
@@ -83,11 +139,17 @@ export async function publicContractRoutes(fastify: FastifyInstance) {
         message: 'OTP sent to your email',
         expiresAt: result.expiresAt,
       });
-    } catch (error) {
-      request.log.error(error, 'Error generating OTP');
+    } catch (error: any) {
+      request.log.error(
+        {
+          error: error?.message || String(error),
+          stack: error?.stack,
+        },
+        'Error generating OTP'
+      );
       return reply.status(500).send({
         success: false,
-        message: 'Failed to generate OTP',
+        message: `Failed to generate OTP: ${error?.message || 'Unknown error'}`,
       });
     }
   });
@@ -268,6 +330,25 @@ export async function publicContractRoutes(fastify: FastifyInstance) {
         },
         'Contract signed successfully'
       );
+
+      // Send notification to contract creator
+      try {
+        const contract = await prisma.contract.findUnique({
+          where: { id: contractId },
+          include: { client: true },
+        });
+
+        if (contract && contract.createdById) {
+          await notifyContractSigned(
+            contract.createdById,
+            contract.contractNumber || contractId,
+            contract.client?.name || 'Client'
+          );
+        }
+      } catch (notifyError) {
+        request.log.warn('Failed to send contract signed notification:', notifyError);
+        // Don't fail the response if notification fails
+      }
 
       return reply.status(200).send({
         success: true,
