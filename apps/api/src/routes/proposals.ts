@@ -5,6 +5,64 @@ import { ProposalEmailTemplateService } from '../services/proposalEmailTemplate.
 import { sendEmail } from '../services/email.js';
 import { requireAdmin } from '../middleware/auth.js';
 
+// Helper function to convert Decimal fields to numbers
+function convertProposalDecimals(proposal: any) {
+  if (!proposal) return proposal;
+
+  // Normalize tax rate to percentage (0-100 scale)
+  // Tax rate in DB can be stored as decimal (0.2) or percentage (20)
+  // We need to ensure it's always returned as percentage (0-100 scale)
+  const taxRateNum = Number(proposal.taxRate);
+  const subtotalNum = Number(proposal.subtotal);
+  const taxAmountNum = Number(proposal.taxAmount);
+  let normalizedTaxRate = taxRateNum;
+  let taxAmount = taxAmountNum;
+
+  // Smart detection: if tax amount seems wrong relative to tax rate, recalculate
+  // For example: if taxRate is 0.002 and taxAmount is 0.69 with subtotal 345
+  // Then the stored rate is 0.002 (which was 20/100 sent from frontend bug)
+  // We should detect this as 20% and recalculate
+
+  if (taxRateNum > 0 && taxRateNum < 1) {
+    // Tax rate is stored as a decimal (0-1 scale), but we need it as a percentage (0-100 scale)
+    // Simply multiply by 100: 0.2 → 20%, 0.002 → 0.2% (though 0.002 is likely a data error)
+
+    // However, if tax amount is suspiciously wrong relative to the stored rate, recalculate
+    // For example: if taxRate=0.002 and taxAmount=69 with subtotal=345
+    // The actual rate is 69/345 = 0.2 (20%), so taxRate=0.002 is a double-division error
+
+    const calculatedDecimalRate = taxAmountNum / subtotalNum;
+    const calculatedPercentageRate = calculatedDecimalRate * 100;
+
+    // If the difference is large, trust the tax amount instead
+    if (Math.abs(calculatedDecimalRate - taxRateNum) > 0.01) {
+      // Data mismatch: recalculate from tax amount
+      normalizedTaxRate = calculatedPercentageRate;
+      // Keep the tax amount as-is since it's the ground truth
+      taxAmount = taxAmountNum;
+    } else {
+      // Normal case: stored decimal and tax amount are consistent
+      normalizedTaxRate = taxRateNum * 100;
+      taxAmount = subtotalNum * (normalizedTaxRate / 100);
+    }
+  }
+
+  const total = subtotalNum + taxAmount;
+
+  return {
+    ...proposal,
+    subtotal: subtotalNum,
+    taxRate: normalizedTaxRate,
+    taxAmount: taxAmount,
+    total: total,
+  };
+}
+
+// Helper function to convert array of proposals
+function convertProposalsDecimals(proposals: any[]) {
+  return proposals.map(convertProposalDecimals);
+}
+
 export async function proposalsRoutes(fastify: FastifyInstance) {
   // All routes require admin authentication
   fastify.addHook('preHandler', requireAdmin);
@@ -42,7 +100,7 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send({
         success: true,
-        data: proposals,
+        data: convertProposalsDecimals(proposals),
       });
     } catch (error) {
       request.log.error(error, 'Error listing proposals');
@@ -62,7 +120,7 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send({
         success: true,
-        data: proposal,
+        data: convertProposalDecimals(proposal),
       });
     } catch (error) {
       if (error instanceof Error && error.message === 'Proposal not found') {
@@ -128,14 +186,7 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
       return reply.status(201).send({
         success: true,
         message: 'Proposal created successfully',
-        data: {
-          id: proposal.id,
-          proposalNumber: proposal.proposalNumber,
-          title: proposal.title,
-          total: proposal.total.toString(),
-          status: proposal.status,
-          createdAt: proposal.createdAt,
-        },
+        data: convertProposalDecimals(proposal),
       });
     } catch (error) {
       request.log.error(error, 'Error creating proposal');
@@ -179,7 +230,7 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         success: true,
         message: 'Proposal updated successfully',
-        data: proposal,
+        data: convertProposalDecimals(proposal),
       });
     } catch (error) {
       if (error instanceof Error && error.message === 'Proposal not found') {
@@ -492,7 +543,7 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
         success: true,
         message: 'Proposal accepted and converted successfully',
         data: {
-          proposal: result.proposal,
+          proposal: convertProposalDecimals(result.proposal),
           contract: result.contract,
           invoice: result.invoice,
         },

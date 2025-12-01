@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { QRCodeModal } from '../../../components/QRCodeModal';
+import { useTheme } from '../../../components/providers/ThemeProvider';
 import {
   getProposalById,
   sendProposal,
@@ -29,6 +30,8 @@ import {
 export default function ProposalDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { actualTheme } = useTheme();
+  const isDark = actualTheme === 'dark';
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -125,15 +128,15 @@ export default function ProposalDetailPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'DRAFT':
-        return 'bg-muted text-foreground';
+        return 'bg-gray-200 text-gray-900';
       case 'SENT':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-200 text-blue-900';
       case 'VIEWED':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-200 text-purple-900';
       case 'ACCEPTED':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-200 text-green-900';
       case 'DECLINED':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-200 text-red-900';
       default:
         return 'bg-muted text-foreground';
     }
@@ -160,7 +163,7 @@ export default function ProposalDetailPage() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${isDark ? 'border-blue-400' : 'border-blue-600'} mx-auto`}></div>
           <p className="mt-4 text-muted-foreground">Loading proposal...</p>
         </div>
       </div>
@@ -172,7 +175,7 @@ export default function ProposalDetailPage() {
       <div className="p-6">
         <button
           onClick={() => navigate('/admin/proposals')}
-          className="flex items-center text-blue-600 hover:text-blue-700 mb-6"
+          className={isDark ? 'flex items-center text-blue-400 hover:text-blue-300 mb-6' : 'flex items-center text-blue-600 hover:text-blue-700 mb-6'}
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Proposals
@@ -317,7 +320,7 @@ export default function ProposalDetailPage() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Tax Rate</span>
-                <span className="font-medium text-foreground">{Number(proposal.taxRate) * 100}%</span>
+                <span className="font-medium text-foreground">{Number(proposal.taxRate)}%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Tax Amount</span>
@@ -332,7 +335,7 @@ export default function ProposalDetailPage() {
 
             <div className="flex justify-between items-center mb-6">
               <span className="text-lg font-semibold text-foreground">Total</span>
-              <span className="text-2xl font-bold text-blue-600">
+              <span className={isDark ? 'text-2xl font-bold text-blue-400' : 'text-2xl font-bold text-blue-600'}>
                 £{Number(proposal.total).toLocaleString('en-US', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -342,9 +345,9 @@ export default function ProposalDetailPage() {
 
             {/* Validity Information */}
             {proposal.validUntil && (
-              <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6">
-                <p className="text-sm text-blue-900">
-                  <Calendar className="w-4 h-4 inline mr-2" />
+              <div className={isDark ? 'bg-slate-700/80 border border-slate-600 rounded p-4 mb-6' : 'bg-blue-50 border border-blue-200 rounded p-4 mb-6'}>
+                <p className={isDark ? 'text-sm text-slate-100 flex items-center gap-2' : 'text-sm text-blue-900 flex items-center gap-2'}>
+                  <Calendar className="w-4 h-4" />
                   Valid until: {new Date(proposal.validUntil).toLocaleDateString()}
                 </p>
               </div>

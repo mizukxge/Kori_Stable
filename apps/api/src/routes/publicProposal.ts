@@ -13,6 +13,33 @@ export async function publicProposalRoutes(fastify: FastifyInstance) {
 
       const proposal = await ProposalService.getProposalByNumber(proposalNumber);
 
+      // Helper to format tax rate as percentage (0-100 scale)
+      // Uses smart detection to handle both decimal and percentage formats
+      // Also detects and recovers from double-division bugs
+      const formatTaxRate = (rate: any): number => {
+        const numRate = Number(rate);
+        const subtotalNum = Number(proposal.subtotal);
+        const taxAmountNum = Number(proposal.taxAmount);
+
+        if (numRate > 0 && numRate < 1) {
+          // Stored as decimal, need to convert to percentage
+          const calculatedDecimalRate = taxAmountNum / subtotalNum;
+          const calculatedPercentageRate = calculatedDecimalRate * 100;
+
+          // If difference is large, data mismatch detected (likely double-division bug)
+          if (Math.abs(calculatedDecimalRate - numRate) > 0.01) {
+            // Return the rate calculated from tax amount
+            return calculatedPercentageRate;
+          } else {
+            // Normal case: multiply by 100
+            return numRate * 100;
+          }
+        }
+
+        // Already in percentage format or zero
+        return numRate;
+      };
+
       // Don't expose sensitive internal fields
       const publicProposal = {
         proposalNumber: proposal.proposalNumber,
@@ -29,7 +56,7 @@ export async function publicProposalRoutes(fastify: FastifyInstance) {
           amount: item.amount.toString(),
         })),
         subtotal: proposal.subtotal.toString(),
-        taxRate: proposal.taxRate.toString(),
+        taxRate: formatTaxRate(proposal.taxRate).toString(),
         taxAmount: proposal.taxAmount.toString(),
         total: proposal.total.toString(),
         currency: proposal.currency,

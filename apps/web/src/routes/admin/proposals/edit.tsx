@@ -38,7 +38,7 @@ export default function EditProposalPage() {
       setTitle(data.title);
       setDescription(data.description || '');
       setItems(data.items);
-      setTaxRate(Number(data.taxRate) * 100);
+      setTaxRate(Number(data.taxRate));
 
       // Handle validUntil - only set if it's a valid date format (YYYY-MM-DD)
       if (data.validUntil && /^\d{4}-\d{2}-\d{2}/.test(data.validUntil)) {
@@ -99,7 +99,7 @@ export default function EditProposalPage() {
         title,
         description,
         items,
-        taxRate: taxRate / 100,
+        taxRate,
         ...(validUntil && { validUntil }), // Only include validUntil if it has a value
         terms,
         notes,
