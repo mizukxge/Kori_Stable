@@ -278,12 +278,13 @@ export class InvoiceService {
       const invoice = await this.createInvoice(invoiceData, userId);
 
       // Update invoice with the correct tax (full proposal tax amount)
+      const invoiceTotal = remainderSubtotal + fullTax;
       const updatedInvoice = await prisma.invoice.update({
         where: { id: invoice.id },
         data: {
           taxAmount: new Decimal(fullTax.toFixed(2)),
-          total: new Decimal(remainderSubtotal.toFixed(2)) + new Decimal(fullTax.toFixed(2)),
-          amountDue: new Decimal(remainderSubtotal.toFixed(2)) + new Decimal(fullTax.toFixed(2)),
+          total: new Decimal(invoiceTotal.toFixed(2)),
+          amountDue: new Decimal(invoiceTotal.toFixed(2)),
           // Set taxRate to the proposal rate for display purposes
           taxRate: new Decimal((Number(proposal.taxRate)).toFixed(2)),
         },
