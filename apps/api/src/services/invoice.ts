@@ -237,27 +237,22 @@ export class InvoiceService {
       if (depositAmount === 0 || remainderAmount === 0) {
         throw new Error('Cannot create remainder invoice for this proposal');
       }
-      // For remainder invoice: calculate remaining amount after deposit
-      // Key: Deposit is taken without tax, so ALL remaining tax liability is on the final invoice
-      // Example: £50 subtotal + £10 tax (20%) = £60 total
-      //          £25 deposit (no tax) + £35 remainder (£25 subtotal + £10 tax = £35 total)
-      const fullSubtotal = Number(proposal.subtotal);
+      // For remainder invoice: remaining amount to invoice is total - deposit
+      // The full tax liability applies to this remaining amount
+      // Example: £60 total - £25 deposit = £35 subtotal for remainder invoice
+      //          Remainder invoice shows: £35 subtotal + full tax of £12 = £47 total
       const fullTax = Number(proposal.taxAmount);
-      const remainderSubtotal = fullSubtotal - depositAmount;
 
       console.log('[createInvoiceFromProposal] REMAINDER calculation:', {
         proposalTotal: totalAmount,
-        proposalSubtotal: fullSubtotal,
-        proposalTax: fullTax,
+        proposalTaxAmount: fullTax,
         proposalTaxRate: Number(proposal.taxRate),
         depositAmount: depositAmount,
         remainderAmount: remainderAmount,
-        calculatedRemainderSubtotal: remainderSubtotal,
       });
 
       // Create remainder invoice for the remaining balance
-      // Note: We create a special invoice with 0% tax, then manually set the taxAmount
-      // This is necessary because the full tax amount stays with the remainder invoice
+      // The remainder amount (after deposit) becomes the subtotal shown on the invoice
       invoiceData = {
         title: `Final Invoice - ${proposal.title}`,
         description: `Final payment for proposal ${proposal.proposalNumber}`,
@@ -266,7 +261,7 @@ export class InvoiceService {
           {
             description: `Final Payment - ${proposal.title}`,
             quantity: 1,
-            unitPrice: remainderSubtotal, // Remaining subtotal after deposit
+            unitPrice: remainderAmount, // Remaining amount after deposit (this becomes the subtotal)
           },
         ],
         taxRate: 0, // Temporarily set to 0 to avoid double-taxation in createInvoice
@@ -278,7 +273,7 @@ export class InvoiceService {
       const invoice = await this.createInvoice(invoiceData, userId);
 
       // Update invoice with the correct tax (full proposal tax amount)
-      const invoiceTotal = remainderSubtotal + fullTax;
+      const invoiceTotal = remainderAmount + fullTax;
       const updatedInvoice = await prisma.invoice.update({
         where: { id: invoice.id },
         data: {
@@ -296,11 +291,11 @@ export class InvoiceService {
         },
       });
 
-      console.log('[createInvoiceFromProposal] REMAINDER invoice updated with full tax:', {
+      console.log('[createInvoiceFromProposal] REMAINDER invoice created with full tax:', {
         invoiceId: updatedInvoice.id,
-        subtotal: remainderSubtotal.toFixed(2),
+        subtotal: remainderAmount.toFixed(2),
         taxAmount: fullTax.toFixed(2),
-        total: (remainderSubtotal + fullTax).toFixed(2),
+        total: invoiceTotal.toFixed(2),
       });
 
       return updatedInvoice;
