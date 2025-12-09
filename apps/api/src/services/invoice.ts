@@ -181,6 +181,203 @@ export class InvoiceService {
   }
 
   /**
+   * Create invoice from proposal with deposit/full/remainder payment tracking
+   */
+  static async createInvoiceFromProposal(
+    proposalId: string,
+    paymentType: 'DEPOSIT' | 'FULL' | 'REMAINDER',
+    userId: string
+  ) {
+    // Fetch proposal with all details
+    const proposal = await prisma.proposal.findUnique({
+      where: { id: proposalId },
+      include: {
+        client: true,
+        items: {
+          orderBy: { position: 'asc' },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new Error('Proposal not found');
+    }
+
+    if (proposal.status !== 'ACCEPTED') {
+      throw new Error('Proposal must be accepted to create an invoice');
+    }
+
+    // Determine invoice details based on payment type
+    let invoiceData: CreateInvoiceData;
+    const depositAmount = Number(proposal.depositAmount);
+    const totalAmount = Number(proposal.total);
+    const remainderAmount = totalAmount - depositAmount;
+
+    if (paymentType === 'DEPOSIT') {
+      if (depositAmount === 0) {
+        throw new Error('This proposal does not have a deposit amount');
+      }
+      // Create deposit invoice
+      invoiceData = {
+        title: `Deposit for ${proposal.title}`,
+        description: `Deposit payment for proposal ${proposal.proposalNumber}`,
+        clientId: proposal.clientId,
+        items: [
+          {
+            description: `Deposit - ${proposal.title}`,
+            quantity: 1,
+            unitPrice: depositAmount,
+          },
+        ],
+        taxRate: 0, // Deposit invoices have no tax
+        paymentTerms: 'Due on Receipt',
+        notes: `This is a deposit invoice. Remaining balance: £${remainderAmount.toFixed(2)}`,
+      };
+    } else if (paymentType === 'REMAINDER') {
+      if (depositAmount === 0 || remainderAmount === 0) {
+        throw new Error('Cannot create remainder invoice for this proposal');
+      }
+      // For remainder invoice: calculate remaining amount after deposit
+      // Key: Deposit is taken without tax, so ALL remaining tax liability is on the final invoice
+      // Example: £50 subtotal + £10 tax (20%) = £60 total
+      //          £25 deposit (no tax) + £35 remainder (£25 subtotal + £10 tax = £35 total)
+      const fullSubtotal = Number(proposal.subtotal);
+      const fullTax = Number(proposal.taxAmount);
+      const remainderSubtotal = fullSubtotal - depositAmount;
+
+      console.log('[createInvoiceFromProposal] REMAINDER calculation:', {
+        proposalTotal: totalAmount,
+        proposalSubtotal: fullSubtotal,
+        proposalTax: fullTax,
+        proposalTaxRate: Number(proposal.taxRate),
+        depositAmount: depositAmount,
+        remainderAmount: remainderAmount,
+        calculatedRemainderSubtotal: remainderSubtotal,
+      });
+
+      // Create remainder invoice for the remaining balance
+      // Note: We create a special invoice with 0% tax, then manually set the taxAmount
+      // This is necessary because the full tax amount stays with the remainder invoice
+      invoiceData = {
+        title: `Final Invoice - ${proposal.title}`,
+        description: `Final payment for proposal ${proposal.proposalNumber}`,
+        clientId: proposal.clientId,
+        items: [
+          {
+            description: `Final Payment - ${proposal.title}`,
+            quantity: 1,
+            unitPrice: remainderSubtotal, // Remaining subtotal after deposit
+          },
+        ],
+        taxRate: 0, // Temporarily set to 0 to avoid double-taxation in createInvoice
+        paymentTerms: 'Due on Receipt',
+        notes: `This is the final payment invoice. Deposit of £${depositAmount.toFixed(2)} was previously paid.`,
+      };
+
+      // Create invoice and then manually update the tax
+      const invoice = await this.createInvoice(invoiceData, userId);
+
+      // Update invoice with the correct tax (full proposal tax amount)
+      const updatedInvoice = await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: {
+          taxAmount: new Decimal(fullTax.toFixed(2)),
+          total: new Decimal(remainderSubtotal.toFixed(2)) + new Decimal(fullTax.toFixed(2)),
+          amountDue: new Decimal(remainderSubtotal.toFixed(2)) + new Decimal(fullTax.toFixed(2)),
+          // Set taxRate to the proposal rate for display purposes
+          taxRate: new Decimal((Number(proposal.taxRate)).toFixed(2)),
+        },
+        include: {
+          items: {
+            orderBy: { position: 'asc' },
+          },
+          client: true,
+        },
+      });
+
+      console.log('[createInvoiceFromProposal] REMAINDER invoice updated with full tax:', {
+        invoiceId: updatedInvoice.id,
+        subtotal: remainderSubtotal.toFixed(2),
+        taxAmount: fullTax.toFixed(2),
+        total: (remainderSubtotal + fullTax).toFixed(2),
+      });
+
+      return updatedInvoice;
+    } else {
+      // FULL payment
+      // Create full invoice
+      invoiceData = {
+        title: proposal.title,
+        description: `Invoice for proposal ${proposal.proposalNumber}`,
+        clientId: proposal.clientId,
+        items: proposal.items.map((item) => ({
+          description: item.description,
+          quantity: item.quantity,
+          unitPrice: Number(item.unitPrice),
+        })),
+        taxRate: Number(proposal.taxRate),
+        paymentTerms: 'Due on Receipt',
+        notes: proposal.notes || undefined,
+      };
+    }
+
+    // Create the invoice using the standard createInvoice logic
+    const invoice = await this.createInvoice(invoiceData, userId);
+
+    // Log the creation
+    console.log('[createInvoiceFromProposal] Invoice created:', {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber,
+      paymentType: paymentType,
+      subtotal: invoice.subtotal.toString(),
+      taxRate: invoice.taxRate.toString(),
+      taxAmount: invoice.taxAmount.toString(),
+      total: invoice.total.toString(),
+    });
+
+    return invoice;
+  }
+
+  /**
+   * Get deposit payment status for a proposal
+   */
+  static async getProposalDepositStatus(proposalId: string) {
+    const proposal = await prisma.proposal.findUnique({
+      where: { id: proposalId },
+      include: {
+        client: {
+          select: { name: true, email: true },
+        },
+      },
+    });
+
+    if (!proposal) {
+      throw new Error('Proposal not found');
+    }
+
+    const depositAmount = Number(proposal.depositAmount);
+    const totalAmount = Number(proposal.total);
+    const remainderAmount = totalAmount - depositAmount;
+
+    return {
+      proposalId: proposal.id,
+      proposalNumber: proposal.proposalNumber,
+      clientName: proposal.client.name,
+      status: proposal.status,
+      totalAmount: totalAmount,
+      depositAmount: depositAmount,
+      remainderAmount: remainderAmount,
+      depositPaid: (proposal as any).depositPaid || false,
+      depositPaidAt: (proposal as any).depositPaidAt || null,
+      depositInvoiceId: (proposal as any).depositInvoiceId || null,
+      // Can create deposit invoice if deposit is set up and not yet paid
+      canCreateDepositInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0,
+      // Can create remainder invoice if deposit is paid
+      canCreateRemainderInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0 && remainderAmount > 0,
+    };
+  }
+
+  /**
    * List invoices
    */
   static async listInvoices(filters: {
