@@ -242,27 +242,6 @@ export class InvoiceService {
       // Example: £60 total - £25 deposit = £35 subtotal for remainder invoice
       //          Remainder invoice shows: £35 subtotal + full tax of £12 = £47 total
       const fullTax = Number(proposal.taxAmount);
-      const fullSubtotal = Number(proposal.subtotal);
-      const rawTaxAmount = proposal.taxAmount;
-
-      console.log('[createInvoiceFromProposal] REMAINDER - Full Proposal Data:', {
-        proposalId: proposal.id,
-        proposalNumber: proposal.proposalNumber,
-        proposalStatus: proposal.status,
-        rawTaxAmount: rawTaxAmount,
-        rawTaxType: typeof rawTaxAmount,
-        fullTaxNumbered: fullTax,
-        fullSubtotal: fullSubtotal,
-        proposalTaxRate: Number(proposal.taxRate),
-        proposalTotal: totalAmount,
-      });
-
-      console.log('[createInvoiceFromProposal] REMAINDER - Calculation Details:', {
-        depositAmount: depositAmount,
-        remainderAmount: remainderAmount,
-        expectedTax: `£${fullTax.toFixed(2)}`,
-        calculatedTotal: remainderAmount + fullTax,
-      });
 
       // Create remainder invoice for the remaining balance
       // The remainder amount (after deposit) becomes the subtotal shown on the invoice
@@ -302,24 +281,6 @@ export class InvoiceService {
           },
           client: true,
         },
-      });
-
-      console.log('[createInvoiceFromProposal] REMAINDER invoice created with full tax:', {
-        invoiceId: updatedInvoice.id,
-        subtotal: remainderAmount.toFixed(2),
-        expectedTaxAmount: fullTax.toFixed(2),
-        calculatedTotal: invoiceTotal.toFixed(2),
-      });
-
-      // Log the actual database values to verify they were saved correctly
-      console.log('[createInvoiceFromProposal] REMAINDER invoice - DATABASE VALUES:', {
-        invoiceId: updatedInvoice.id,
-        invoiceNumber: updatedInvoice.invoiceNumber,
-        storedSubtotal: updatedInvoice.subtotal.toString(),
-        storedTaxAmount: updatedInvoice.taxAmount.toString(),
-        storedTaxRate: updatedInvoice.taxRate.toString(),
-        storedTotal: updatedInvoice.total.toString(),
-        storedAmountDue: updatedInvoice.amountDue.toString(),
       });
 
       return updatedInvoice;
