@@ -237,14 +237,16 @@ export class InvoiceService {
       if (depositAmount === 0 || remainderAmount === 0) {
         throw new Error('Cannot create remainder invoice for this proposal');
       }
-      // For remainder invoice: remaining amount to invoice is total - deposit
-      // The full tax liability applies to this remaining amount
-      // Example: £60 total - £25 deposit = £35 subtotal for remainder invoice
-      //          Remainder invoice shows: £35 subtotal + full tax of £12 = £47 total
+      // For remainder invoice: remaining subtotal is original subtotal - deposit
+      // The full tax liability applies to this remaining subtotal
+      // Example: £50 subtotal - £25 deposit = £25 remaining subtotal
+      //          Remainder invoice shows: £25 subtotal + full tax of £10 = £35 total
+      const fullSubtotal = Number(proposal.subtotal);
       const fullTax = Number(proposal.taxAmount);
+      const remainderSubtotal = fullSubtotal - depositAmount;
 
       // Create remainder invoice for the remaining balance
-      // The remainder amount (after deposit) becomes the subtotal shown on the invoice
+      // The remainder subtotal (after deposit) becomes the subtotal shown on the invoice
       invoiceData = {
         title: `Final Invoice - ${proposal.title}`,
         description: `Final payment for proposal ${proposal.proposalNumber}`,
@@ -253,7 +255,7 @@ export class InvoiceService {
           {
             description: `Final Payment - ${proposal.title}`,
             quantity: 1,
-            unitPrice: remainderAmount, // Remaining amount after deposit (this becomes the subtotal)
+            unitPrice: remainderSubtotal, // Remaining subtotal after deposit
           },
         ],
         taxRate: 0, // Temporarily set to 0 to avoid double-taxation in createInvoice
@@ -265,7 +267,7 @@ export class InvoiceService {
       const invoice = await this.createInvoice(invoiceData, userId);
 
       // Update invoice with the correct tax (full proposal tax amount)
-      const invoiceTotal = remainderAmount + fullTax;
+      const invoiceTotal = remainderSubtotal + fullTax;
       const updatedInvoice = await prisma.invoice.update({
         where: { id: invoice.id },
         data: {
