@@ -370,10 +370,12 @@ export class InvoiceService {
       depositPaid: (proposal as any).depositPaid || false,
       depositPaidAt: (proposal as any).depositPaidAt || null,
       depositInvoiceId: (proposal as any).depositInvoiceId || null,
-      // Can create deposit invoice if deposit is set up and not yet paid
-      canCreateDepositInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0,
-      // Can create remainder invoice if deposit is paid
-      canCreateRemainderInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0 && remainderAmount > 0,
+      // Can create deposit invoice if: status is ACCEPTED, deposit is set up, and NOT yet paid
+      canCreateDepositInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0 && !(proposal as any).depositPaid,
+      // Can create total/remainder payment if status is ACCEPTED and (no deposit, or deposit already paid)
+      canCreateTotalPayment: proposal.status === 'ACCEPTED' && (depositAmount === 0 || (proposal as any).depositPaid),
+      // Can create remainder invoice only if deposit is paid and there's a remainder
+      canCreateRemainderInvoice: proposal.status === 'ACCEPTED' && depositAmount > 0 && (proposal as any).depositPaid && remainderAmount > 0,
     };
   }
 
