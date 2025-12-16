@@ -4,39 +4,44 @@ import argon2 from 'argon2';
 const prisma = new PrismaClient();
 
 async function createAdminUser() {
+  const email = 'michael@shotbymizu.co.uk';
+  const password = '#Admin:123';
+  const name = 'Michael';
+
   try {
-    console.log('🔐 Creating admin user...');
+    // Check if user already exists
+    const existingUser = await prisma.adminUser.findUnique({
+      where: { email },
+    });
 
-    const email = 'michael@shotbymizu.co.uk';
-    const password = '#Admin:123';
-    const name = 'Michael Admin';
+    if (existingUser) {
+      console.log(`✅ User ${email} already exists`);
+      return;
+    }
 
-    // Hash the password using argon2
+    // Hash the password
     const hashedPassword = await argon2.hash(password);
 
-    // Create or update the admin user
-    const adminUser = await prisma.adminUser.upsert({
-      where: { email },
-      update: { password: hashedPassword },
-      create: {
+    // Create the admin user
+    const user = await prisma.adminUser.create({
+      data: {
         email,
-        password: hashedPassword,
         name,
+        password: hashedPassword,
+        isActive: true,
       },
     });
 
-    console.log('✅ Admin user created successfully!');
-    console.log('');
-    console.log('📋 Login Details:');
-    console.log(`   Email: ${adminUser.email}`);
+    console.log(`✅ Admin user created successfully!`);
+    console.log(`   Email: ${user.email}`);
+    console.log(`   Name: ${user.name}`);
+    console.log(`   ID: ${user.id}`);
+    console.log(`\n🎯 You can now log in with:`);
+    console.log(`   Email: ${email}`);
     console.log(`   Password: ${password}`);
-    console.log(`   Name: ${adminUser.name}`);
-    console.log('');
-    console.log('🔗 Login at: https://kori-web-production.up.railway.app');
-
   } catch (error) {
     console.error('❌ Error creating admin user:', error);
-    process.exit(1);
+    throw error;
   } finally {
     await prisma.$disconnect();
   }

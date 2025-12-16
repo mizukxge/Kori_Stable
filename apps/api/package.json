@@ -19,7 +19,8 @@
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
-    "db:push": "prisma db push"
+    "db:push": "prisma db push",
+    "create:admin": "tsx create-admin-user.ts"
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.922.0",
