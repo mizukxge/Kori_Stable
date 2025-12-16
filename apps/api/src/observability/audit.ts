@@ -1,7 +1,15 @@
-import { PrismaClient } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
 
-const prisma = new PrismaClient();
+// Lazy-load Prisma client to allow proper initialization at runtime
+let prisma: any = null;
+
+async function getPrismaClient() {
+  if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client');
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 export interface AuditLogData {
   action: string;
@@ -24,7 +32,8 @@ export class AuditService {
    */
   static async log(data: AuditLogData) {
     try {
-      await prisma.auditLog.create({
+      const db = await getPrismaClient();
+      await db.auditLog.create({
         data: {
           action: data.action,
           entityType: data.entityType,
@@ -131,7 +140,8 @@ export class AuditService {
    * Get recent audit logs
    */
   static async getRecentLogs(limit = 100) {
-    return prisma.auditLog.findMany({
+    const db = await getPrismaClient();
+    return db.auditLog.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
@@ -155,7 +165,8 @@ export class AuditService {
    * Get audit logs for specific entity
    */
   static async getEntityLogs(entityType: string, entityId: string) {
-    return prisma.auditLog.findMany({
+    const db = await getPrismaClient();
+    return db.auditLog.findMany({
       where: {
         entityType,
         entityId,
@@ -176,7 +187,8 @@ export class AuditService {
    * Get audit logs for specific user
    */
   static async getUserLogs(userId: string, limit = 100) {
-    return prisma.auditLog.findMany({
+    const db = await getPrismaClient();
+    return db.auditLog.findMany({
       where: { userId },
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -187,6 +199,7 @@ export class AuditService {
    * Get audit log statistics
    */
   static async getStats(startDate?: Date, endDate?: Date) {
+    const db = await getPrismaClient();
     const where: any = {};
 
     if (startDate || endDate) {
@@ -196,13 +209,13 @@ export class AuditService {
     }
 
     const [total, byAction, byEntity] = await Promise.all([
-      prisma.auditLog.count({ where }),
-      prisma.auditLog.groupBy({
+      db.auditLog.count({ where }),
+      db.auditLog.groupBy({
         by: ['action'],
         where,
         _count: true,
       }),
-      prisma.auditLog.groupBy({
+      db.auditLog.groupBy({
         by: ['entityType'],
         where,
         _count: true,
