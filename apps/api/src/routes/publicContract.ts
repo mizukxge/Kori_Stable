@@ -346,7 +346,7 @@ export async function publicContractRoutes(fastify: FastifyInstance) {
           );
         }
       } catch (notifyError) {
-        request.log.warn('Failed to send contract signed notification:', notifyError);
+        request.log.warn(notifyError, 'Failed to send contract signed notification');
         // Don't fail the response if notification fails
       }
 

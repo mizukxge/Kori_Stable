@@ -305,14 +305,14 @@ export async function publicProposalRoutes(fastify: FastifyInstance) {
           throw new Error('Failed to generate PDF');
         }
 
-        return reply.sendFile(updated.pdfPath.split('/').pop()!, {
-          root: updated.pdfPath.substring(0, updated.pdfPath.lastIndexOf('/')),
-        });
+        const filename1 = updated.pdfPath.split('/').pop()!;
+        const root1 = updated.pdfPath.substring(0, updated.pdfPath.lastIndexOf('/'));
+        return reply.sendFile(filename1, root1);
       }
 
-      return reply.sendFile(proposal.pdfPath.split('/').pop()!, {
-        root: proposal.pdfPath.substring(0, proposal.pdfPath.lastIndexOf('/')),
-      });
+      const filename = proposal.pdfPath.split('/').pop()!;
+      const root = proposal.pdfPath.substring(0, proposal.pdfPath.lastIndexOf('/'));
+      return reply.sendFile(filename, root);
     } catch (error) {
       if (error instanceof Error && error.message === 'Proposal not found') {
         return reply.status(404).send({

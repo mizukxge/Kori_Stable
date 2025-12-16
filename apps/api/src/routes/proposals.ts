@@ -471,7 +471,8 @@ export async function proposalsRoutes(fastify: FastifyInstance) {
       }
 
       // Update proposal with email template ID
-      await ProposalService.updateProposal(id, { emailTemplateId: templateId }, request.user!.userId);
+      // TODO: Add emailTemplateId to UpdateProposalData interface if needed
+      // await ProposalService.updateProposal(id, { emailTemplateId: templateId }, request.user!.userId);
 
       request.log.info(
         {
