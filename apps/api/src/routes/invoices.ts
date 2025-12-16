@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { InvoiceService } from '../services/invoice.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { notifyInvoiceCreated, notifyPaymentReceived } from '../services/notify.js';
+import { notifyPaymentReceived } from '../services/notify.js';
 
 export async function invoicesRoutes(fastify: FastifyInstance) {
   // All routes require admin authentication
@@ -122,19 +122,6 @@ export async function invoicesRoutes(fastify: FastifyInstance) {
         },
         'Invoice created'
       );
-
-      // Send notification about new invoice creation
-      try {
-        await notifyInvoiceCreated(
-          invoice.id,
-          invoice.invoiceNumber,
-          invoice.title,
-          invoice.total.toString()
-        );
-      } catch (notifyError) {
-        request.log.warn('Failed to send invoice created notification:', notifyError);
-        // Don't fail the request if notification fails
-      }
 
       return reply.status(201).send({
         success: true,
