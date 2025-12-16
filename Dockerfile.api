@@ -18,5 +18,5 @@ RUN pnpm --filter @kori/api exec -- npx prisma generate
 # Expose port
 EXPOSE 3001
 
-# Start API with database initialization inline
-CMD ["sh", "-c", "cd apps/api && echo 'Syncing schema...' && npx prisma db push --accept-data-loss 2>&1 | head -20 && echo 'Seeding...' && npx prisma db seed 2>&1 | tail -5 && echo 'Starting API...' && npm run start"]
+# Start API (database initialization is handled by npm start script)
+CMD ["sh", "-c", "cd apps/api && npm run start"]
