@@ -12,8 +12,8 @@ COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 COPY apps/web ./apps/web
 COPY apps/api/package.json ./apps/api/
 
-# Install dependencies
-RUN pnpm install
+# Install dependencies (skip build scripts for API postinstall)
+RUN pnpm install --ignore-scripts
 
 # Build web app
 RUN pnpm --filter @kori/web build
