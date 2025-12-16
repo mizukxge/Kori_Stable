@@ -1,11 +1,11 @@
 import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
-import { PrismaClient } from '@prisma/client';
 
 // Lazy-load Prisma client to allow proper initialization at runtime
-let prisma: PrismaClient | null = null;
+let prisma: any = null;
 
-function getPrismaClient(): PrismaClient {
+async function getPrismaClient() {
   if (!prisma) {
+    const { PrismaClient } = await import('@prisma/client');
     prisma = new PrismaClient();
   }
   return prisma;
@@ -155,7 +155,7 @@ export const dbQueryDuration = new Histogram({
  */
 export async function updateBusinessMetrics() {
   try {
-    const db = getPrismaClient();
+    const db = await getPrismaClient();
 
     // Update client metrics
     const [activeClients, allClients] = await Promise.all([
