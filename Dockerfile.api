@@ -21,5 +21,5 @@ RUN chmod +x apps/api/start.sh
 # Expose port
 EXPOSE 3001
 
-# Start API with initialization script
-CMD ["sh", "apps/api/start.sh"]
+# Start API with initialization script (must use absolute path from WORKDIR)
+CMD ["/bin/bash", "-c", "cd /app/apps/api && bash /app/apps/api/start.sh"]
