@@ -92,6 +92,12 @@ class MediaProcessJob {
         const outputFile = join(dir, `${base}-${presetName}.mp4`);
         console.log(`Output: ${outputFile}`);
         
+        const VideoTools = await this.getVideoTools();
+        if (!VideoTools) {
+          console.error(`Video processing not available`);
+          return;
+        }
+
         const result = await VideoTools.processVideo({
           inputPath: filePath,
           outputPath: outputFile,
@@ -161,10 +167,10 @@ class MediaProcessJob {
       }
 
       console.log(`Found: ${asset.filename}`);
-      console.log(`Type: ${asset.fileType}`);
+      console.log(`Type: ${asset.mimeType}`);
 
       // Process the asset
-      await this.processFile(asset.filePath, presetName);
+      await this.processFile(asset.filepath, presetName);
     } catch (error) {
       console.error(`âŒ Error processing asset:`, error);
     }
@@ -193,8 +199,8 @@ class MediaProcessJob {
         select: {
           id: true,
           filename: true,
-          filePath: true,
-          fileType: true,
+          filepath: true,
+          mimeType: true,
         },
       });
 
@@ -205,9 +211,9 @@ class MediaProcessJob {
 
       for (const asset of assets) {
         console.log(`\n[${processed + failed + 1}/${assets.length}] Processing: ${asset.filename}`);
-        
+
         try {
-          await this.processFile(asset.filePath, presetName);
+          await this.processFile(asset.filepath, presetName);
           processed++;
         } catch (error) {
           console.error(`Failed: ${error}`);

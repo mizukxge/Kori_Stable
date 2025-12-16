@@ -188,7 +188,7 @@ export async function updateBusinessMetrics() {
     }, {} as Record<string, number>);
 
     Object.entries(revenueByCurrency).forEach(([currency, amount]) => {
-      totalRevenue.set({ currency }, amount);
+      totalRevenue.set({ currency }, Number(amount));
     });
 
     // Update gallery metrics

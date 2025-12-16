@@ -32,7 +32,7 @@ async function addPhotosToGallery() {
             position: 0,
           },
         });
-      } catch (e) {
+      } catch {
         // Ignore if already exists
       }
     }

@@ -1,5 +1,5 @@
 /* eslint-env node */
-﻿import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -8,10 +8,10 @@ async function createTestGallery() {
   try {
     // Create a test user first (if doesn't exist)
     let user = await prisma.adminUser.findFirst();
-    
+
     if (!user) {
       const hashedPassword = await bcrypt.hash('password123', 10);
-      
+
       user = await prisma.adminUser.create({
         data: {
           email: 'admin@test.com',

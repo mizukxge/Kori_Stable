@@ -731,7 +731,7 @@ async function main() {
   console.log('✅ Created Contract 3: SENT');
 
   // Contract 4: DRAFT
-  const contract4 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(4) },
     update: {},
     create: {
@@ -754,7 +754,7 @@ async function main() {
   console.log('✅ Created Contract 4: DRAFT');
 
   // Contract 5: SIGNED (Wedding - Different client)
-  const contract5 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(5) },
     update: {},
     create: {
@@ -780,7 +780,7 @@ async function main() {
   console.log('✅ Created Contract 5: SIGNED');
 
   // Contract 6: VOIDED (using VOIDED status instead of DECLINED)
-  const contract6 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(6) },
     update: {},
     create: {
@@ -805,7 +805,7 @@ async function main() {
   console.log('✅ Created Contract 6: VOIDED');
 
   // Contract 7: EXPIRED
-  const contract7 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(7) },
     update: {},
     create: {
@@ -832,7 +832,7 @@ async function main() {
   console.log('✅ Created Contract 7: EXPIRED');
 
   // Contract 8: SENT (Recent)
-  const contract8 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(8) },
     update: {},
     create: {
@@ -858,7 +858,7 @@ async function main() {
   console.log('✅ Created Contract 8: SENT');
 
   // Contract 9: DRAFT
-  const contract9 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(9) },
     update: {},
     create: {
@@ -879,7 +879,7 @@ async function main() {
   console.log('✅ Created Contract 9: DRAFT');
 
   // Contract 10: SIGNED (Recent)
-  const contract10 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(10) },
     update: {},
     create: {
