@@ -98,7 +98,7 @@ async function main() {
     if (preset.keywords.length > 0) {
       console.log(`   Keywords: ${preset.keywords.join(', ')}`);
     }
-  } catch (error) {
+  } catch {
     console.error('❌ Error: Invalid preset ID');
     process.exit(1);
   }

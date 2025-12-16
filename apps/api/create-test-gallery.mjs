@@ -1,4 +1,4 @@
-/* eslint-env node */
+/* eslint-disable no-undef */
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 

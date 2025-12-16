@@ -1,4 +1,3 @@
-import nodemailer from 'nodemailer';
 import { createTransport, Transporter, SendMailOptions } from 'nodemailer';
 import Handlebars from 'handlebars';
 import { readFileSync } from 'fs';

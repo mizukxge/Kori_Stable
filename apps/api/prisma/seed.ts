@@ -1010,7 +1010,7 @@ async function main() {
     },
   });
 
-  const sig3 = await prisma.signature.create({
+  await prisma.signature.create({
     data: {
       envelopeId: envelope1.id,
       signerId: signer3.id,

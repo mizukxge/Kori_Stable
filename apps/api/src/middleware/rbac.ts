@@ -61,7 +61,7 @@ export async function hasPermission(
           // Check if scope matches (if specified)
           if (resourceId && userRole.scope) {
             // Scope format: "resource:id" e.g., "client:abc123"
-            const [scopeResource, scopeId] = userRole.scope.split(':');
+            const [, scopeId] = userRole.scope.split(':');
             if (scopeId === resourceId) {
               hasAccess = true;
               break;

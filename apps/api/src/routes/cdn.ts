@@ -169,7 +169,7 @@ export async function cdnRoutes(fastify: FastifyInstance) {
     '/img/*',
     async (request, reply) => {
       const path = `/${request.params['*']}`;
-      const query = request.query;
+      const query = request.query as Record<string, string | undefined>;
 
       // Verify signature
       const isValid = verifyRequestSignature(path, query);
@@ -183,19 +183,19 @@ export async function cdnRoutes(fastify: FastifyInstance) {
 
       // Extract parameters
       const params: ImageParams = {};
-      if (typeof query.w === 'string') params.w = parseInt(query.w, 10);
-      if (typeof query.h === 'string') params.h = parseInt(query.h, 10);
-      if (typeof query.fit === 'string') params.fit = query.fit;
-      if (typeof query.q === 'string') params.q = parseInt(query.q, 10);
-      if (typeof query.f === 'string') params.f = query.f;
-      if (typeof query.dpr === 'string') params.dpr = parseInt(query.dpr, 10);
-      if (typeof query.crop === 'string') params.crop = query.crop;
-      if (typeof query.blur === 'string') params.blur = parseFloat(query.blur);
-      if (typeof query.sharpen === 'string') params.sharpen = parseFloat(query.sharpen);
-      if (typeof query.grayscale === 'string') params.grayscale = query.grayscale === 'true';
-      if (typeof query.rotate === 'string') params.rotate = parseInt(query.rotate, 10);
-      if (typeof query.flip === 'string') params.flip = query.flip;
-      if (typeof query.bg === 'string') params.bg = query.bg;
+      if (query.w) params.w = parseInt(query.w, 10);
+      if (query.h) params.h = parseInt(query.h, 10);
+      if (query.fit) params.fit = query.fit;
+      if (query.q) params.q = parseInt(query.q, 10);
+      if (query.f) params.f = query.f;
+      if (query.dpr) params.dpr = parseInt(query.dpr, 10);
+      if (query.crop) params.crop = query.crop;
+      if (query.blur) params.blur = parseFloat(query.blur);
+      if (query.sharpen) params.sharpen = parseFloat(query.sharpen);
+      if (query.grayscale) params.grayscale = query.grayscale === 'true';
+      if (query.rotate) params.rotate = parseInt(query.rotate, 10);
+      if (query.flip) params.flip = query.flip;
+      if (query.bg) params.bg = query.bg;
 
       try {
         // Find source file

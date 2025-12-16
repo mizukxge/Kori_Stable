@@ -158,10 +158,7 @@ export async function updateBusinessMetrics() {
     const db = await getPrismaClient();
 
     // Update client metrics
-    const [activeClients, allClients] = await Promise.all([
-      db.client.count({ where: { status: 'ACTIVE' } }),
-      db.client.count(),
-    ]);
+    const activeClients = await db.client.count({ where: { status: 'ACTIVE' } });
     activeClientsTotal.set(activeClients);
 
     // Update invoice metrics by status
