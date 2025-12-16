@@ -11,8 +11,8 @@ COPY . .
 # Install dependencies
 RUN pnpm install
 
-# Generate Prisma client (use dummy DATABASE_URL for build-time generation)
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost/dummy" pnpm --filter @kori/api db:generate
+# Generate Prisma client from schema
+RUN pnpm --filter @kori/api db:generate
 
 # Expose port
 EXPOSE 3001
