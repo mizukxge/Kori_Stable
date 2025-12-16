@@ -20,4 +20,4 @@ EXPOSE 3001
 
 # Run migrations, seed database, and start API
 # Important: Migrations MUST succeed before API starts
-CMD ["sh", "-c", "set -e && echo 'Starting API with migrations...' && pnpm --filter @kori/api db:migrate:prod && echo 'Migrations completed successfully!' && echo 'Seeding database with default data...' && pnpm --filter @kori/api db:seed && echo 'Seed completed successfully!' && echo 'Starting API server...' && pnpm --filter @kori/api start"]
+CMD ["sh", "-c", "cd apps/api && set -e && echo 'Starting API with migrations...' && npx prisma migrate deploy && echo 'Migrations completed successfully!' && echo 'Seeding database with default data...' && npx prisma db seed && echo 'Seed completed successfully!' && echo 'Starting API server...' && npm run start"]
