@@ -1,7 +1,15 @@
 import { Registry, Counter, Histogram, Gauge, collectDefaultMetrics } from 'prom-client';
 import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// Lazy-load Prisma client to allow proper initialization at runtime
+let prisma: PrismaClient | null = null;
+
+function getPrismaClient(): PrismaClient {
+  if (!prisma) {
+    prisma = new PrismaClient();
+  }
+  return prisma;
+}
 
 // Create a Registry
 export const register = new Registry();
@@ -147,15 +155,17 @@ export const dbQueryDuration = new Histogram({
  */
 export async function updateBusinessMetrics() {
   try {
+    const db = getPrismaClient();
+
     // Update client metrics
     const [activeClients, allClients] = await Promise.all([
-      prisma.client.count({ where: { status: 'ACTIVE' } }),
-      prisma.client.count(),
+      db.client.count({ where: { status: 'ACTIVE' } }),
+      db.client.count(),
     ]);
     activeClientsTotal.set(activeClients);
 
     // Update invoice metrics by status
-    const invoicesByStatus = await prisma.invoice.groupBy({
+    const invoicesByStatus = await db.invoice.groupBy({
       by: ['status'],
       _count: true,
     });
@@ -165,7 +175,7 @@ export async function updateBusinessMetrics() {
     });
 
     // Update total revenue (paid invoices)
-    const paidInvoices = await prisma.invoice.findMany({
+    const paidInvoices = await db.invoice.findMany({
       where: { status: 'PAID' },
       select: { total: true, currency: true },
     });
@@ -183,14 +193,14 @@ export async function updateBusinessMetrics() {
 
     // Update gallery metrics
     const [activeGalleries, totalGalleriesCount] = await Promise.all([
-      prisma.gallery.count({ where: { isActive: true } }),
-      prisma.gallery.count(),
+      db.gallery.count({ where: { isActive: true } }),
+      db.gallery.count(),
     ]);
     galleriesTotal.set({ status: 'active' }, activeGalleries);
     galleriesTotal.set({ status: 'total' }, totalGalleriesCount);
 
     // Update records metrics
-    const recordsByStatus = await prisma.record.groupBy({
+    const recordsByStatus = await db.record.groupBy({
       by: ['verificationStatus'],
       where: { disposedAt: null },
       _count: true,
@@ -201,7 +211,7 @@ export async function updateBusinessMetrics() {
     });
 
     // Update accounting period metrics
-    const periodsByStatus = await prisma.accountingPeriod.groupBy({
+    const periodsByStatus = await db.accountingPeriod.groupBy({
       by: ['status'],
       _count: true,
     });
@@ -211,7 +221,7 @@ export async function updateBusinessMetrics() {
     });
 
     // Update active sessions
-    const activeSessions = await prisma.session.count({
+    const activeSessions = await db.session.count({
       where: {
         expiresAt: {
           gt: new Date(),
