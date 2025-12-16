@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { InquiryService } from '../services/inquiry.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { notifyNewInquiry } from '../services/notify.js';
 import {
   CreateInquirySchema,
   UpdateInquirySchema,
@@ -67,19 +66,6 @@ export async function inquiryRoutes(fastify: FastifyInstance) {
           },
           'Inquiry created'
         );
-
-        // Send notification to all admins about new inquiry
-        try {
-          await notifyNewInquiry(
-            inquiry.id,
-            inquiry.inquiryType,
-            inquiry.email,
-            inquiry.name
-          );
-        } catch (notifyError) {
-          request.log.warn('Failed to send new inquiry notification:', notifyError);
-          // Don't fail the request if notification fails
-        }
 
         return reply.status(201).send({
           success: true,
