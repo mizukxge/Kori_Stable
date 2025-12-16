@@ -58,7 +58,16 @@
       "Bash(prisma migrate:*)",
       "Bash(apps/web/src/components/proposal-email-templates/EmailTemplateEditor.tsx)",
       "Bash(apps/web/src/components/proposal-email-templates/SendProposalEmail.tsx)",
-      "Bash(timeout 30 pnpm typecheck:*)"
+      "Bash(timeout 30 pnpm typecheck:*)",
+      "Bash(pnpm install:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm --filter @kori/api build:*)",
+      "Bash(pnpm db:generate:*)",
+      "Bash(timeout 15s git push origin main)",
+      "Bash(set \"DATABASE_URL=postgresql://postgres:BbYmjvNwCfcOYXMaytiNkUXTGKKskftr@postgres.railway.internal:5432/railway\")",
+      "Bash(move \"E:\\Applications\\kori_web_stable\\create-admin-user.ts\" \"E:\\Applications\\kori_web_stable\\apps\\api\\create-admin-user.ts\")",
+      "Bash(pnpm db:migrate:prod:*)"
     ],
     "deny": [],
     "ask": []

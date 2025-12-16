@@ -15,5 +15,5 @@ RUN pnpm install
 # Expose port
 EXPOSE 3001
 
-# Run migrations and start the API
-CMD ["sh", "-c", "echo 'Running database migrations...' && pnpm --filter @kori/api db:migrate:prod && echo 'Starting API server...' && pnpm --filter @kori/api start"]
+# Run migrations before starting API
+CMD ["sh", "-c", "pnpm --filter @kori/api db:migrate:prod 2>&1 && pnpm --filter @kori/api start"]
