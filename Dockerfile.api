@@ -1,19 +1,12 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 WORKDIR /app
 
 # Install pnpm
 RUN npm install -g pnpm
 
-# Copy root package files
-COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
-
-# Copy config and environment files
-COPY config ./config
-
-# Copy only API package
-COPY apps/api ./apps/api
-COPY apps/web/package.json ./apps/web/
+# Copy everything
+COPY . .
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
