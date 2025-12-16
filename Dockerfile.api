@@ -19,4 +19,5 @@ RUN pnpm --filter @kori/api exec -- npx prisma generate
 EXPOSE 3001
 
 # Run migrations, seed database, and start API
-CMD ["sh", "-c", "echo 'Starting API with migrations...' && pnpm --filter @kori/api db:migrate:prod || echo 'Migrations skipped or completed' && echo 'Seeding database with default data...' && pnpm --filter @kori/api db:seed || echo 'Seed completed or skipped' && echo 'Starting API server...' && pnpm --filter @kori/api start"]
+# Important: Migrations MUST succeed before API starts
+CMD ["sh", "-c", "set -e && echo 'Starting API with migrations...' && pnpm --filter @kori/api db:migrate:prod && echo 'Migrations completed successfully!' && echo 'Seeding database with default data...' && pnpm --filter @kori/api db:seed && echo 'Seed completed successfully!' && echo 'Starting API server...' && pnpm --filter @kori/api start"]
