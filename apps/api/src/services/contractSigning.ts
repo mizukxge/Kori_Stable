@@ -75,7 +75,7 @@ export class ContractSigningService {
           otpEmail: email,
           otpCode,
           otpExpiresAt: expiresAt,
-          otpAttempts: 0, // Reset attempt counter
+          failedAttempts: 0, // Reset attempt counter
         },
       });
 
@@ -117,7 +117,7 @@ export class ContractSigningService {
       }
 
       // Check if max attempts exceeded
-      if (contract.otpAttempts && contract.otpAttempts >= 3) {
+      if (contract.failedAttempts && contract.failedAttempts >= 3) {
         // Lock the signing link
         await prisma.contract.update({
           where: { id: contractId },
@@ -138,7 +138,7 @@ export class ContractSigningService {
         await prisma.contract.update({
           where: { id: contractId },
           data: {
-            otpAttempts: (contract.otpAttempts || 0) + 1,
+            failedAttempts: (contract.failedAttempts || 0) + 1,
           },
         });
 
@@ -159,7 +159,7 @@ export class ContractSigningService {
         data: {
           signerSessionId: sessionId,
           signerSessionExpiresAt: sessionExpiresAt,
-          otpAttempts: 0, // Reset attempts on successful verification
+          failedAttempts: 0, // Reset attempts on successful verification
           // Clear OTP after successful verification
           otpCode: null,
           otpExpiresAt: null,
@@ -326,8 +326,9 @@ export class ContractSigningService {
         data: {
           status: 'SIGNED',
           signedAt: new Date(),
-          signatureIP: signatureData.ipAddress,
-          signatureAgent: signatureData.userAgent,
+          // TODO: Store signature IP and agent in audit log or separate signature table
+          // signatureIP: signatureData.ipAddress,
+          // signatureAgent: signatureData.userAgent,
           // TODO: Store signature image/data securely (encryption at rest)
           // signatureDataUrl: encryptSignature(signatureData.signatureDataUrl),
         },

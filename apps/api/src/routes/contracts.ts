@@ -480,7 +480,7 @@ export async function contractsRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         success: true,
         message: 'PDF regenerated successfully',
-        data: contract,
+        data: { pdfPath, contractId: id },
       });
     } catch (error) {
       request.log.error(error, 'Error regenerating PDF');

@@ -89,7 +89,7 @@ export class TemplateService {
         name: data.name,
         description: data.description,
         content: data.content,
-        variables: data.variables || [],
+        variables: (data.variables || []) as any,
         createdBy: userId,
       },
     });
@@ -211,7 +211,7 @@ export class TemplateService {
         name: data.name,
         description: data.description,
         content: data.content,
-        variables: data.variables !== undefined ? data.variables : undefined,
+        variables: (data.variables !== undefined ? data.variables : undefined) as any,
         isActive: data.isActive,
         version: existing.version + versionIncrement,
       },

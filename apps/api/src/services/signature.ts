@@ -405,7 +405,7 @@ export class SignatureService {
     await prisma.contract.update({
       where: { id: contractId },
       data: {
-        status: ContractStatus.DECLINED,
+        status: 'VOIDED',
         voidedReason: reason || 'Declined by client',
         signerSessionId: null,
         signerSessionExpiresAt: null,
@@ -473,7 +473,7 @@ export class SignatureService {
     const events = await prisma.contractEvent.findMany({
       where: {
         contractId,
-        eventType: 'CONTRACT_SIGNED',
+        type: 'SIGNED',
       },
       orderBy: {
         createdAt: 'desc',
@@ -485,6 +485,6 @@ export class SignatureService {
       return null;
     }
 
-    return events[0].metadata;
+    return events[0].meta;
   }
 }

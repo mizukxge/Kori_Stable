@@ -70,7 +70,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
       return reply.send(organization);
     } catch (error) {
-      fastify.log.error('Error fetching organization:', error);
+      request.log.error(error, 'Error fetching organization');
       return reply.code(500).send({ error: 'Failed to fetch organization' });
     }
   });
@@ -134,7 +134,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid data', details: error.issues });
       }
-      fastify.log.error('Error updating organization:', error);
+      request.log.error(error, 'Error updating organization');
       return reply.code(500).send({ error: 'Failed to update organization' });
     }
   });
@@ -164,7 +164,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
         return reply.send(settings);
       } catch (error) {
-        fastify.log.error('Error fetching settings:', error);
+        request.log.error(error, 'Error fetching settings');
         return reply.code(500).send({ error: 'Failed to fetch settings' });
       }
     }
@@ -188,7 +188,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
       return reply.send(setting);
     } catch (error) {
-      fastify.log.error('Error fetching setting:', error);
+      request.log.error(error, 'Error fetching setting');
       return reply.code(500).send({ error: 'Failed to fetch setting' });
     }
   });
@@ -270,7 +270,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid data', details: error.issues });
         }
-        fastify.log.error('Error updating setting:', error);
+        request.log.error(error, 'Error updating setting');
         return reply.code(500).send({ error: 'Failed to update setting' });
       }
     }
@@ -330,7 +330,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
       return reply.code(204).send();
     } catch (error) {
-      fastify.log.error('Error deleting setting:', error);
+      request.log.error(error, 'Error deleting setting');
       return reply.code(500).send({ error: 'Failed to delete setting' });
     }
   });
@@ -375,7 +375,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (error) {
-        fastify.log.error('Error fetching setting history:', error);
+        request.log.error(error, 'Error fetching setting history');
         return reply.code(500).send({ error: 'Failed to fetch history' });
       }
     }
@@ -399,7 +399,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
       return reply.send({ features: organization.features || {} });
     } catch (error) {
-      fastify.log.error('Error fetching features:', error);
+      request.log.error(error, 'Error fetching features');
       return reply.code(500).send({ error: 'Failed to fetch features' });
     }
   });
@@ -459,7 +459,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid data', details: error.issues });
         }
-        fastify.log.error('Error updating feature:', error);
+        request.log.error(error, 'Error updating feature');
         return reply.code(500).send({ error: 'Failed to update feature' });
       }
     }
@@ -545,7 +545,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid data', details: error.issues });
         }
-        fastify.log.error('Error bulk updating settings:', error);
+        request.log.error(error, 'Error bulk updating settings');
         return reply.code(500).send({ error: 'Failed to bulk update settings' });
       }
     }

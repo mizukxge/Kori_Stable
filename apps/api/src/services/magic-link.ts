@@ -142,7 +142,7 @@ export class MagicLinkService {
   }> {
     const { expiresInMinutes = this.DEFAULT_OTP_EXPIRY_MINUTES } = options;
 
-    const otpCode = this.generateOTP();
+    const otpCode = this.generateOTPCode();
     const expiresAt = addMinutes(new Date(), expiresInMinutes);
 
     // Get contract details for email

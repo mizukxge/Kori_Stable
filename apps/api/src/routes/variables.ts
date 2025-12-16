@@ -13,7 +13,6 @@ export async function registerVariableRoutes(fastify: FastifyInstance) {
     '/admin/variables',
     {
       schema: {
-        description: 'Get all available template variables',
         tags: ['Variables'],
         response: {
           200: {
@@ -52,7 +51,6 @@ export async function registerVariableRoutes(fastify: FastifyInstance) {
     '/admin/variables/by-category',
     {
       schema: {
-        description: 'Get available variables grouped by category',
         tags: ['Variables'],
         response: {
           200: {
@@ -88,7 +86,6 @@ export async function registerVariableRoutes(fastify: FastifyInstance) {
     '/admin/variables/category/:category',
     {
       schema: {
-        description: 'Get variables for a specific category',
         tags: ['Variables'],
         params: {
           type: 'object',
@@ -122,7 +119,6 @@ export async function registerVariableRoutes(fastify: FastifyInstance) {
     '/admin/variables/substitute',
     {
       schema: {
-        description: 'Preview variable substitution with sample data',
         tags: ['Variables'],
         body: {
           type: 'object',
@@ -196,7 +192,6 @@ export async function registerVariableRoutes(fastify: FastifyInstance) {
     '/admin/variables/validate',
     {
       schema: {
-        description: 'Validate variables in text',
         tags: ['Variables'],
         body: {
           type: 'object',

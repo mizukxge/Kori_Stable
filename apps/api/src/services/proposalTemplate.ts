@@ -137,7 +137,7 @@ export class ProposalTemplateService {
       return template;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`Validation error: ${error.errors[0].message}`);
+        throw new Error(`Validation error: ${error.issues[0].message}`);
       }
       console.error('Failed to create proposal template:', error);
       throw new Error('Failed to create proposal template');
@@ -198,7 +198,7 @@ export class ProposalTemplateService {
       return template;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        throw new Error(`Validation error: ${error.errors[0].message}`);
+        throw new Error(`Validation error: ${error.issues[0].message}`);
       }
       if (error instanceof Error) {
         throw error;

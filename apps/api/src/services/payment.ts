@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 // Initialize Stripe (only if keys are provided)
 const stripeKey = process.env.STRIPE_SECRET_KEY;
-const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' }) : null;
+const stripe = stripeKey ? new Stripe(stripeKey, { apiVersion: '2025-09-30.clover' }) : null;
 
 export interface CreatePaymentData {
   invoiceId: string;

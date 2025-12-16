@@ -28,14 +28,15 @@ const createPermissionSchema = z.object({
   isDangerous: z.boolean().default(false),
 });
 
-const assignRoleSchema = z.object({
+// Note: Schema definitions kept for potential future use in API routes
+const _assignRoleSchema = z.object({
   userId: z.string().cuid(),
   roleId: z.string().cuid(),
   scope: z.string().optional(),
   expiresAt: z.string().datetime().optional(),
 });
 
-const assignPermissionSchema = z.object({
+const _assignPermissionSchema = z.object({
   roleId: z.string().cuid(),
   permissionId: z.string().cuid(),
 });
@@ -76,7 +77,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
       return reply.send(roles);
     } catch (error) {
-      fastify.log.error('Error fetching roles:', error);
+      request.log.error(error, 'Error fetching roles');
       return reply.code(500).send({ error: 'Failed to fetch roles' });
     }
   });
@@ -115,7 +116,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.send(role);
       } catch (error) {
-        fastify.log.error('Error fetching role:', error);
+        request.log.error(error, 'Error fetching role');
         return reply.code(500).send({ error: 'Failed to fetch role' });
       }
     }
@@ -163,7 +164,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid role data', details: error.issues });
       }
-      fastify.log.error('Error creating role:', error);
+      request.log.error(error, 'Error creating role');
       return reply.code(500).send({ error: 'Failed to create role' });
     }
   });
@@ -223,7 +224,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid role data', details: error.issues });
         }
-        fastify.log.error('Error updating role:', error);
+        request.log.error(error, 'Error updating role');
         return reply.code(500).send({ error: 'Failed to update role' });
       }
     }
@@ -265,7 +266,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting role:', error);
+        request.log.error(error, 'Error deleting role');
         return reply.code(500).send({ error: 'Failed to delete role' });
       }
     }
@@ -292,7 +293,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
       return reply.send(permissions);
     } catch (error) {
-      fastify.log.error('Error fetching permissions:', error);
+      request.log.error(error, 'Error fetching permissions');
       return reply.code(500).send({ error: 'Failed to fetch permissions' });
     }
   });
@@ -334,7 +335,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid permission data', details: error.issues });
       }
-      fastify.log.error('Error creating permission:', error);
+      request.log.error(error, 'Error creating permission');
       return reply.code(500).send({ error: 'Failed to create permission' });
     }
   });
@@ -367,7 +368,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting permission:', error);
+        request.log.error(error, 'Error deleting permission');
         return reply.code(500).send({ error: 'Failed to delete permission' });
       }
     }
@@ -424,7 +425,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid data', details: error.issues });
         }
-        fastify.log.error('Error assigning permission:', error);
+        request.log.error(error, 'Error assigning permission');
         return reply.code(500).send({ error: 'Failed to assign permission' });
       }
     }
@@ -456,7 +457,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error removing permission:', error);
+        request.log.error(error, 'Error removing permission');
         return reply.code(500).send({ error: 'Failed to remove permission' });
       }
     }
@@ -493,7 +494,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.send(userRoles);
       } catch (error) {
-        fastify.log.error('Error fetching user roles:', error);
+        request.log.error(error, 'Error fetching user roles');
         return reply.code(500).send({ error: 'Failed to fetch user roles' });
       }
     }
@@ -513,7 +514,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.send({ permissions });
       } catch (error) {
-        fastify.log.error('Error fetching user permissions:', error);
+        request.log.error(error, 'Error fetching user permissions');
         return reply.code(500).send({ error: 'Failed to fetch user permissions' });
       }
     }
@@ -569,7 +570,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid data', details: error.issues });
         }
-        fastify.log.error('Error assigning role:', error);
+        request.log.error(error, 'Error assigning role');
         return reply.code(500).send({ error: 'Failed to assign role' });
       }
     }
@@ -597,7 +598,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error removing role:', error);
+        request.log.error(error, 'Error removing role');
         return reply.code(500).send({ error: 'Failed to remove role' });
       }
     }
@@ -622,7 +623,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
       return reply.send(policies);
     } catch (error) {
-      fastify.log.error('Error fetching policies:', error);
+      request.log.error(error, 'Error fetching policies');
       return reply.code(500).send({ error: 'Failed to fetch policies' });
     }
   });
@@ -654,7 +655,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid policy data', details: error.issues });
       }
-      fastify.log.error('Error creating policy:', error);
+      request.log.error(error, 'Error creating policy');
       return reply.code(500).send({ error: 'Failed to create policy' });
     }
   });
@@ -691,7 +692,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid policy data', details: error.issues });
         }
-        fastify.log.error('Error updating policy:', error);
+        request.log.error(error, 'Error updating policy');
         return reply.code(500).send({ error: 'Failed to update policy' });
       }
     }
@@ -713,7 +714,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting policy:', error);
+        request.log.error(error, 'Error deleting policy');
         return reply.code(500).send({ error: 'Failed to delete policy' });
       }
     }

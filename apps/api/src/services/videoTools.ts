@@ -260,7 +260,7 @@ export class VideoTools {
             fps: this.parseFps(videoStream.r_frame_rate),
             hasAudio: !!audioStream,
             audioCodec: audioStream?.codec_name,
-            audioBitrate: audioStream?.bit_rate,
+            audioBitrate: audioStream?.bit_rate ? parseInt(audioStream.bit_rate, 10) : undefined,
           });
         });
       } catch (error) {

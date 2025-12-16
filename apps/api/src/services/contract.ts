@@ -469,7 +469,7 @@ export class ContractService {
     doc.end();
 
     // Wait for PDF to finish writing
-    await new Promise((resolve) => stream.on('finish', resolve));
+    await new Promise<void>((resolve) => stream.on('finish', () => resolve()));
 
     // Update contract with PDF path
     await prisma.contract.update({
@@ -597,7 +597,7 @@ export class ContractService {
     }
 
     // Generate new PDF
-    return this.generatePDF(contractId, userId);
+    return this.generatePDF(contractId);
   }
 
   /**

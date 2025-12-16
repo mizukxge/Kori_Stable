@@ -278,7 +278,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid search parameters', details: error.issues });
       }
-      fastify.log.error('Search error:', error);
+      request.log.error(error, 'Search error');
       return reply.code(500).send({ error: 'Search failed' });
     }
   });
@@ -310,7 +310,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
       return reply.send(filters);
     } catch (error) {
-      fastify.log.error('Error fetching saved filters:', error);
+      request.log.error(error, 'Error fetching saved filters');
       return reply.code(500).send({ error: 'Failed to fetch saved filters' });
     }
   });
@@ -358,7 +358,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid filter data', details: error.issues });
       }
-      fastify.log.error('Error saving filter:', error);
+      request.log.error(error, 'Error saving filter');
       return reply.code(500).send({ error: 'Failed to save filter' });
     }
   });
@@ -420,7 +420,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid filter data', details: error.issues });
         }
-        fastify.log.error('Error updating filter:', error);
+        request.log.error(error, 'Error updating filter');
         return reply.code(500).send({ error: 'Failed to update filter' });
       }
     }
@@ -450,7 +450,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting filter:', error);
+        request.log.error(error, 'Error deleting filter');
         return reply.code(500).send({ error: 'Failed to delete filter' });
       }
     }
@@ -476,7 +476,7 @@ export default async function searchRoutes(fastify: FastifyInstance) {
 
         return reply.send(filter);
       } catch (error) {
-        fastify.log.error('Error tracking filter usage:', error);
+        request.log.error(error, 'Error tracking filter usage');
         return reply.code(500).send({ error: 'Failed to track filter usage' });
       }
     }

@@ -209,7 +209,7 @@ export class InvoiceService {
 
     // Determine invoice details based on payment type
     let invoiceData: CreateInvoiceData;
-    const depositAmount = Number(proposal.depositAmount);
+    const depositAmount = 0; // TODO: Implement deposit feature
     const totalAmount = Number(proposal.total);
     const remainderAmount = totalAmount - depositAmount;
 
@@ -338,7 +338,7 @@ export class InvoiceService {
       throw new Error('Proposal not found');
     }
 
-    const depositAmount = Number(proposal.depositAmount);
+    const depositAmount = 0; // TODO: Implement deposit feature
     const totalAmount = Number(proposal.total);
     const remainderAmount = totalAmount - depositAmount;
 
@@ -668,7 +668,7 @@ export class InvoiceService {
       .text(`Subtotal:`, 350, doc.y, { continued: true })
       .text(`$${invoice.subtotal}`, { align: 'right' });
 
-    if (parseFloat(invoice.taxRate) > 0) {
+    if (parseFloat(invoice.taxRate.toString()) > 0) {
       doc
         .text(`Tax (${invoice.taxRate}%):`, 350, doc.y, { continued: true })
         .text(`$${invoice.taxAmount}`, { align: 'right' });
@@ -707,7 +707,7 @@ export class InvoiceService {
     doc.end();
 
     // Wait for PDF to finish writing
-    await new Promise((resolve) => stream.on('finish', resolve));
+    await new Promise<void>((resolve) => stream.on('finish', () => resolve()));
 
     // Update invoice with PDF path
     await prisma.invoice.update({

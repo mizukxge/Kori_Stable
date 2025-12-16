@@ -1,11 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ClientStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Seeding clients...');
 
-  const clients = [
+  const clients: Array<{ name: string; email: string; phone: string; company?: string; status: ClientStatus; address: string; city: string; state: string; zipCode: string; country: string; notes: string; tags: string[] }> = [
     {
       name: 'Sarah & Michael Thompson',
       email: 'sarah.thompson@email.com',

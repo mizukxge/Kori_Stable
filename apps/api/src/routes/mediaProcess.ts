@@ -316,27 +316,29 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
           if (!preset) continue;
 
           // Determine if this preset applies to this asset type
-          const isApplicable = 
+          const isImage = asset.mimeType?.startsWith('image/');
+          const isVideo = asset.mimeType?.startsWith('video/');
+          const isApplicable =
             preset.type === 'both' ||
-            (preset.type === 'image' && asset.fileType === 'IMAGE') ||
-            (preset.type === 'video' && asset.fileType === 'VIDEO');
+            (preset.type === 'image' && isImage) ||
+            (preset.type === 'video' && isVideo);
 
           if (!isApplicable) continue;
 
           try {
             let result;
-            
-            if (asset.fileType === 'IMAGE' && preset.image) {
-              const outputPath = asset.filePath.replace(/(\.\w+)$/, `-${presetName}$1`);
+
+            if (isImage && preset.image) {
+              const outputPath = asset.filepath.replace(/(\.\w+)$/, `-${presetName}$1`);
               result = await ImageTools.processImage({
-                inputPath: asset.filePath,
+                inputPath: asset.filepath,
                 outputPath,
                 ...preset.image,
               });
-            } else if (asset.fileType === 'VIDEO' && preset.video) {
-              const outputPath = asset.filePath.replace(/\.\w+$/, `-${presetName}.mp4`);
+            } else if (isVideo && preset.video) {
+              const outputPath = asset.filepath.replace(/\.\w+$/, `-${presetName}.mp4`);
               result = await VideoTools.processVideo({
-                inputPath: asset.filePath,
+                inputPath: asset.filepath,
                 outputPath,
                 ...preset.video,
               });
@@ -416,17 +418,17 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
 
         let metadata: any = null;
 
-        if (asset.fileType === 'IMAGE') {
-          metadata = await ImageTools.getMetadata(asset.filePath);
-        } else if (asset.fileType === 'VIDEO') {
-          metadata = await VideoTools.getMetadata(asset.filePath);
+        if (asset.mimeType?.startsWith('image/')) {
+          metadata = await ImageTools.getMetadata(asset.filepath);
+        } else if (asset.mimeType?.startsWith('video/')) {
+          metadata = await VideoTools.getMetadata(asset.filepath);
         }
 
         return reply.status(200).send({
           success: true,
           data: {
             assetId,
-            fileType: asset.fileType,
+            mimeType: asset.mimeType,
             metadata,
           },
         });

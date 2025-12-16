@@ -517,7 +517,7 @@ export class ProposalService {
     doc.end();
 
     // Wait for PDF to finish writing
-    await new Promise((resolve) => stream.on('finish', resolve));
+    await new Promise<void>((resolve) => stream.on('finish', () => resolve()));
 
     // Update proposal with PDF path
     await prisma.proposal.update({

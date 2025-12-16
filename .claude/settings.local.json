@@ -72,7 +72,10 @@
       "Bash(python:*)",
       "Bash(for file in *.mjs)",
       "Bash(do if [ -f \"$file\" ])",
-      "Bash(then sed -i '1i/* eslint-env node */' \"$file\")"
+      "Bash(then sed -i '1i/* eslint-env node */' \"$file\")",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh api:*)"
     ],
     "deny": [],
     "ask": []

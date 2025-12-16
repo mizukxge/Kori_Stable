@@ -70,7 +70,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid request data', details: error.issues });
       }
-      fastify.log.error('Error starting proof set:', error);
+      request.log.error(error, 'Error starting proof set');
       return reply.code(500).send({ error: 'Failed to start proofing session' });
     }
   });
@@ -132,7 +132,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
 
         return reply.send(proofSet);
       } catch (error) {
-        fastify.log.error('Error fetching proof set:', error);
+        request.log.error(error, 'Error fetching proof set');
         return reply.code(500).send({ error: 'Failed to fetch proof set' });
       }
     }
@@ -155,7 +155,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
 
         return reply.send(proofSet);
       } catch (error) {
-        fastify.log.error('Error completing proof set:', error);
+        request.log.error(error, 'Error completing proof set');
         return reply.code(500).send({ error: 'Failed to complete proof set' });
       }
     }
@@ -239,7 +239,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid request data', details: error.issues });
         }
-        fastify.log.error('Error creating selection:', error);
+        request.log.error(error, 'Error creating selection');
         return reply.code(500).send({ error: 'Failed to create selection' });
       }
     }
@@ -282,7 +282,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting selection:', error);
+        request.log.error(error, 'Error deleting selection');
         return reply.code(500).send({ error: 'Failed to delete selection' });
       }
     }
@@ -350,7 +350,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid request data', details: error.issues });
         }
-        fastify.log.error('Error creating comment:', error);
+        request.log.error(error, 'Error creating comment');
         return reply.code(500).send({ error: 'Failed to create comment' });
       }
     }
@@ -388,7 +388,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid request data', details: error.issues });
         }
-        fastify.log.error('Error updating comment:', error);
+        request.log.error(error, 'Error updating comment');
         return reply.code(500).send({ error: 'Failed to update comment' });
       }
     }
@@ -413,7 +413,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting comment:', error);
+        request.log.error(error, 'Error deleting comment');
         return reply.code(500).send({ error: 'Failed to delete comment' });
       }
     }
@@ -481,7 +481,7 @@ export default async function proofRoutes(fastify: FastifyInstance) {
           .header('Content-Disposition', `attachment; filename="selections-${proofSet.gallery.name}-${Date.now()}.csv"`)
           .send(csv);
       } catch (error) {
-        fastify.log.error('Error exporting selections:', error);
+        request.log.error(error, 'Error exporting selections');
         return reply.code(500).send({ error: 'Failed to export selections' });
       }
     }

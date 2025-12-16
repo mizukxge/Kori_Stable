@@ -125,8 +125,8 @@ export class ImageURLSigner {
       }
       
       // Extract parameters
-      const params: ImageParams = {};
-      
+      const params: any = {};
+
       ALLOWED_PARAMS.forEach((param) => {
         const value = searchParams.get(param);
         if (value !== null) {
@@ -139,13 +139,13 @@ export class ImageURLSigner {
             case 'sharpen':
             case 'dpr':
             case 'rotate':
-              params[param] = parseInt(value, 10) as any;
+              params[param] = parseInt(value, 10);
               break;
             case 'grayscale':
               params[param] = value === 'true';
               break;
             default:
-              params[param] = value as any;
+              params[param] = value;
           }
         }
       });
@@ -311,10 +311,10 @@ export function verifyRequestSignature(path: string, query: Record<string, any>)
   }
   
   // Extract params (exclude signature)
-  const params: ImageParams = {};
+  const params: any = {};
   ALLOWED_PARAMS.forEach((param) => {
     if (query[param] !== undefined) {
-      params[param as keyof ImageParams] = query[param] as any;
+      params[param] = query[param];
     }
   });
   

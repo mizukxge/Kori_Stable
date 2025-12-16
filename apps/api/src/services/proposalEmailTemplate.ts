@@ -329,7 +329,7 @@ export class ProposalEmailTemplateService {
       title: proposal.title,
       description: proposal.description || '',
       url: `${process.env.APP_URL || 'http://localhost:3000'}/proposals/${proposal.proposalNumber}`,
-    };
+    } as any;
 
     // Substitute variables in subject and content
     const subject = VariableSubstitutionService.substitute(template.subject, context);

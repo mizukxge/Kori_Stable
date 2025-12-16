@@ -80,7 +80,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
           unreadCount,
         });
       } catch (error) {
-        fastify.log.error('Error fetching notifications:', error);
+        request.log.error(error, 'Error fetching notifications');
         return reply.code(500).send({ error: 'Failed to fetch notifications' });
       }
     }
@@ -114,7 +114,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
         return reply.send(notification);
       } catch (error) {
-        fastify.log.error('Error marking notification as read:', error);
+        request.log.error(error, 'Error marking notification as read');
         return reply.code(500).send({ error: 'Failed to update notification' });
       }
     }
@@ -144,7 +144,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
       return reply.send({ updated: result.count });
     } catch (error) {
-      fastify.log.error('Error marking all as read:', error);
+      request.log.error(error, 'Error marking all as read');
       return reply.code(500).send({ error: 'Failed to update notifications' });
     }
   });
@@ -171,7 +171,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting notification:', error);
+        request.log.error(error, 'Error deleting notification');
         return reply.code(500).send({ error: 'Failed to delete notification' });
       }
     }
@@ -199,7 +199,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
       return reply.send(preferences);
     } catch (error) {
-      fastify.log.error('Error fetching preferences:', error);
+      request.log.error(error, 'Error fetching preferences');
       return reply.code(500).send({ error: 'Failed to fetch preferences' });
     }
   });
@@ -251,7 +251,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid preference data', details: error.issues });
       }
-      fastify.log.error('Error updating preference:', error);
+      request.log.error(error, 'Error updating preference');
       return reply.code(500).send({ error: 'Failed to update preference' });
     }
   });
@@ -283,7 +283,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
       return reply.send(webhooks);
     } catch (error) {
-      fastify.log.error('Error fetching webhooks:', error);
+      request.log.error(error, 'Error fetching webhooks');
       return reply.code(500).send({ error: 'Failed to fetch webhooks' });
     }
   });
@@ -320,7 +320,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
       if (error instanceof z.ZodError) {
         return reply.code(400).send({ error: 'Invalid webhook data', details: error.issues });
       }
-      fastify.log.error('Error creating webhook:', error);
+      request.log.error(error, 'Error creating webhook');
       return reply.code(500).send({ error: 'Failed to create webhook' });
     }
   });
@@ -362,7 +362,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
         if (error instanceof z.ZodError) {
           return reply.code(400).send({ error: 'Invalid webhook data', details: error.issues });
         }
-        fastify.log.error('Error updating webhook:', error);
+        request.log.error(error, 'Error updating webhook');
         return reply.code(500).send({ error: 'Failed to update webhook' });
       }
     }
@@ -390,7 +390,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
         return reply.code(204).send();
       } catch (error) {
-        fastify.log.error('Error deleting webhook:', error);
+        request.log.error(error, 'Error deleting webhook');
         return reply.code(500).send({ error: 'Failed to delete webhook' });
       }
     }
@@ -447,7 +447,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (error) {
-        fastify.log.error('Error fetching deliveries:', error);
+        request.log.error(error, 'Error fetching deliveries');
         return reply.code(500).send({ error: 'Failed to fetch deliveries' });
       }
     }
@@ -483,7 +483,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
         return reply.send({ success });
       } catch (error) {
-        fastify.log.error('Error retrying delivery:', error);
+        request.log.error(error, 'Error retrying delivery');
         return reply.code(500).send({ error: 'Failed to retry delivery' });
       }
     }
@@ -528,7 +528,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
 
         return reply.send({ message: 'Test webhook sent' });
       } catch (error) {
-        fastify.log.error('Error sending test webhook:', error);
+        request.log.error(error, 'Error sending test webhook');
         return reply.code(500).send({ error: 'Failed to send test webhook' });
       }
     }
@@ -583,7 +583,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
           },
         });
       } catch (error) {
-        fastify.log.error('Error fetching email logs:', error);
+        request.log.error(error, 'Error fetching email logs');
         return reply.code(500).send({ error: 'Failed to fetch email logs' });
       }
     }

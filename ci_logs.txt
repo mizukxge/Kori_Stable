@@ -1,0 +1,715 @@
+﻿2025-12-16T17:02:35.6856438Z Current runner version: '2.329.0'
+2025-12-16T17:02:35.6890750Z ##[group]Runner Image Provisioner
+2025-12-16T17:02:35.6892188Z Hosted Compute Agent
+2025-12-16T17:02:35.6893132Z Version: 20251202.455
+2025-12-16T17:02:35.6894186Z Commit: 6c10caca4910e198df60de23adf20ad317c474e3
+2025-12-16T17:02:35.6895718Z Build Date: 2025-12-02T15:56:59Z
+2025-12-16T17:02:35.6896947Z Worker ID: {879dea00-1884-4ae9-956e-8bd67850baa8}
+2025-12-16T17:02:35.6898175Z ##[endgroup]
+2025-12-16T17:02:35.6899266Z ##[group]Operating System
+2025-12-16T17:02:35.6900210Z Ubuntu
+2025-12-16T17:02:35.6901019Z 24.04.3
+2025-12-16T17:02:35.6901934Z LTS
+2025-12-16T17:02:35.6902689Z ##[endgroup]
+2025-12-16T17:02:35.6903576Z ##[group]Runner Image
+2025-12-16T17:02:35.6904638Z Image: ubuntu-24.04
+2025-12-16T17:02:35.6905778Z Version: 20251208.163.1
+2025-12-16T17:02:35.6907595Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251208.163/images/ubuntu/Ubuntu2404-Readme.md
+2025-12-16T17:02:35.6910541Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251208.163
+2025-12-16T17:02:35.6912287Z ##[endgroup]
+2025-12-16T17:02:35.6914267Z ##[group]GITHUB_TOKEN Permissions
+2025-12-16T17:02:35.6917916Z Contents: read
+2025-12-16T17:02:35.6918877Z Metadata: read
+2025-12-16T17:02:35.6920034Z Packages: read
+2025-12-16T17:02:35.6920872Z ##[endgroup]
+2025-12-16T17:02:35.6923650Z Secret source: Actions
+2025-12-16T17:02:35.6925859Z Prepare workflow directory
+2025-12-16T17:02:35.7295662Z Prepare all required actions
+2025-12-16T17:02:35.7351271Z Getting action download info
+2025-12-16T17:02:36.1370034Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2025-12-16T17:02:36.4486487Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-12-16T17:02:36.5424392Z Download action repository 'pnpm/action-setup@v3' (SHA:a3252b78c470c02df07e9d59298aecedc3ccdd6d)
+2025-12-16T17:02:37.0546195Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2025-12-16T17:02:37.2576992Z Complete job name: Type Check
+2025-12-16T17:02:37.3428022Z ##[group]Run actions/checkout@v4
+2025-12-16T17:02:37.3429344Z with:
+2025-12-16T17:02:37.3430124Z   repository: mizukxge/Kori_Stable
+2025-12-16T17:02:37.3431468Z   token: ***
+2025-12-16T17:02:37.3432205Z   ssh-strict: true
+2025-12-16T17:02:37.3432971Z   ssh-user: git
+2025-12-16T17:02:37.3433907Z   persist-credentials: true
+2025-12-16T17:02:37.3434787Z   clean: true
+2025-12-16T17:02:37.3435695Z   sparse-checkout-cone-mode: true
+2025-12-16T17:02:37.3436673Z   fetch-depth: 1
+2025-12-16T17:02:37.3437454Z   fetch-tags: false
+2025-12-16T17:02:37.3438232Z   show-progress: true
+2025-12-16T17:02:37.3439031Z   lfs: false
+2025-12-16T17:02:37.3439756Z   submodules: false
+2025-12-16T17:02:37.3440565Z   set-safe-directory: true
+2025-12-16T17:02:37.3441699Z ##[endgroup]
+2025-12-16T17:02:37.4564770Z Syncing repository: mizukxge/Kori_Stable
+2025-12-16T17:02:37.4567976Z ##[group]Getting Git version info
+2025-12-16T17:02:37.4569461Z Working directory is '/home/runner/work/Kori_Stable/Kori_Stable'
+2025-12-16T17:02:37.4571475Z [command]/usr/bin/git version
+2025-12-16T17:02:37.4651515Z git version 2.52.0
+2025-12-16T17:02:37.4679109Z ##[endgroup]
+2025-12-16T17:02:37.4694836Z Temporarily overriding HOME='/home/runner/work/_temp/66108be2-746b-4b03-ba26-2778ddef5851' before making global git config changes
+2025-12-16T17:02:37.4697764Z Adding repository directory to the temporary git global config as a safe directory
+2025-12-16T17:02:37.4708244Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:02:37.4750745Z Deleting the contents of '/home/runner/work/Kori_Stable/Kori_Stable'
+2025-12-16T17:02:37.4754344Z ##[group]Initializing the repository
+2025-12-16T17:02:37.4758635Z [command]/usr/bin/git init /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:02:37.4866515Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-12-16T17:02:37.4870679Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2025-12-16T17:02:37.4873493Z hint: to use in all of your new repositories, which will suppress this warning,
+2025-12-16T17:02:37.4875140Z hint: call:
+2025-12-16T17:02:37.4876233Z hint:
+2025-12-16T17:02:37.4877584Z hint: 	git config --global init.defaultBranch <name>
+2025-12-16T17:02:37.4878925Z hint:
+2025-12-16T17:02:37.4879987Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-12-16T17:02:37.4881757Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-12-16T17:02:37.4883606Z hint:
+2025-12-16T17:02:37.4884329Z hint: 	git branch -m <name>
+2025-12-16T17:02:37.4885187Z hint:
+2025-12-16T17:02:37.4886889Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-12-16T17:02:37.4888892Z Initialized empty Git repository in /home/runner/work/Kori_Stable/Kori_Stable/.git/
+2025-12-16T17:02:37.4892046Z [command]/usr/bin/git remote add origin https://github.com/mizukxge/Kori_Stable
+2025-12-16T17:02:37.4921496Z ##[endgroup]
+2025-12-16T17:02:37.4922898Z ##[group]Disabling automatic garbage collection
+2025-12-16T17:02:37.4924686Z [command]/usr/bin/git config --local gc.auto 0
+2025-12-16T17:02:37.4954484Z ##[endgroup]
+2025-12-16T17:02:37.4956156Z ##[group]Setting up auth
+2025-12-16T17:02:37.4961113Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-12-16T17:02:37.4992162Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-12-16T17:02:37.5361828Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-12-16T17:02:37.5393181Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-12-16T17:02:37.5622585Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-12-16T17:02:37.5654025Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-12-16T17:02:37.5902904Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-12-16T17:02:37.5939663Z ##[endgroup]
+2025-12-16T17:02:37.5942145Z ##[group]Fetching the repository
+2025-12-16T17:02:37.5952097Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +782dfaf1413b6fecd2120ede1e2a8c36efbec8c5:refs/remotes/origin/main
+2025-12-16T17:02:38.4317357Z From https://github.com/mizukxge/Kori_Stable
+2025-12-16T17:02:38.4320633Z  * [new ref]         782dfaf1413b6fecd2120ede1e2a8c36efbec8c5 -> origin/main
+2025-12-16T17:02:38.4353770Z ##[endgroup]
+2025-12-16T17:02:38.4356021Z ##[group]Determining the checkout info
+2025-12-16T17:02:38.4357958Z ##[endgroup]
+2025-12-16T17:02:38.4360226Z [command]/usr/bin/git sparse-checkout disable
+2025-12-16T17:02:38.4403188Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-12-16T17:02:38.4430583Z ##[group]Checking out the ref
+2025-12-16T17:02:38.4433417Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-12-16T17:02:38.5400937Z Switched to a new branch 'main'
+2025-12-16T17:02:38.5402809Z branch 'main' set up to track 'origin/main'.
+2025-12-16T17:02:38.5420395Z ##[endgroup]
+2025-12-16T17:02:38.5459303Z [command]/usr/bin/git log -1 --format=%H
+2025-12-16T17:02:38.5482930Z 782dfaf1413b6fecd2120ede1e2a8c36efbec8c5
+2025-12-16T17:02:38.5773445Z ##[group]Run actions/setup-node@v4
+2025-12-16T17:02:38.5774415Z with:
+2025-12-16T17:02:38.5775076Z   node-version: 22
+2025-12-16T17:02:38.5776082Z   always-auth: false
+2025-12-16T17:02:38.5776895Z   check-latest: false
+2025-12-16T17:02:38.5777952Z   token: ***
+2025-12-16T17:02:38.5778695Z ##[endgroup]
+2025-12-16T17:02:38.7583222Z Found in cache @ /opt/hostedtoolcache/node/22.21.1/x64
+2025-12-16T17:02:38.7590687Z ##[group]Environment details
+2025-12-16T17:02:41.0456631Z node: v22.21.1
+2025-12-16T17:02:41.0457380Z npm: 10.9.4
+2025-12-16T17:02:41.0457777Z yarn: 1.22.22
+2025-12-16T17:02:41.0458837Z ##[endgroup]
+2025-12-16T17:02:41.0584886Z ##[group]Run pnpm/action-setup@v3
+2025-12-16T17:02:41.0585216Z with:
+2025-12-16T17:02:41.0585891Z   version: 9
+2025-12-16T17:02:41.0586160Z   run_install: false
+2025-12-16T17:02:41.0586396Z   dest: ~/setup-pnpm
+2025-12-16T17:02:41.0586643Z   package_json_file: package.json
+2025-12-16T17:02:41.0586914Z   standalone: false
+2025-12-16T17:02:41.0587149Z ##[endgroup]
+2025-12-16T17:02:41.1593515Z ##[group]Running self-installer...
+2025-12-16T17:02:41.9095166Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2025-12-16T17:02:41.9208867Z Packages: +1
+2025-12-16T17:02:41.9209519Z +
+2025-12-16T17:02:42.8047362Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2025-12-16T17:02:42.8341240Z 
+2025-12-16T17:02:42.8341974Z dependencies:
+2025-12-16T17:02:42.8342723Z + pnpm 9.15.9 (10.26.0 is available)
+2025-12-16T17:02:42.8343186Z 
+2025-12-16T17:02:42.8377798Z Done in 1.5s
+2025-12-16T17:02:42.8548326Z ##[endgroup]
+2025-12-16T17:02:42.8552088Z Installation Completed!
+2025-12-16T17:02:42.8665251Z ##[group]Run echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+2025-12-16T17:02:42.8666356Z [36;1mecho "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV[0m
+2025-12-16T17:02:42.8744262Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-12-16T17:02:42.8744618Z env:
+2025-12-16T17:02:42.8744852Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:02:42.8745184Z ##[endgroup]
+2025-12-16T17:02:43.5564137Z ##[group]Run actions/cache@v4
+2025-12-16T17:02:43.5564415Z with:
+2025-12-16T17:02:43.5564669Z   path: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:02:43.5565164Z   key: Linux-pnpm-store-2deb7749fcb3d9cb44ae105a587b69205ad712a3c01d2c95287e6bda82b5675d
+2025-12-16T17:02:43.5565870Z   restore-keys: Linux-pnpm-store-
+
+2025-12-16T17:02:43.5566135Z   enableCrossOsArchive: false
+2025-12-16T17:02:43.5566381Z   fail-on-cache-miss: false
+2025-12-16T17:02:43.5566592Z   lookup-only: false
+2025-12-16T17:02:43.5566787Z   save-always: false
+2025-12-16T17:02:43.5566964Z env:
+2025-12-16T17:02:43.5567186Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:02:43.5567538Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:02:43.5567849Z ##[endgroup]
+2025-12-16T17:02:43.8891133Z Cache not found for input keys: Linux-pnpm-store-2deb7749fcb3d9cb44ae105a587b69205ad712a3c01d2c95287e6bda82b5675d, Linux-pnpm-store-
+2025-12-16T17:02:43.8959458Z ##[group]Run pnpm install --frozen-lockfile
+2025-12-16T17:02:43.8959808Z [36;1mpnpm install --frozen-lockfile[0m
+2025-12-16T17:02:43.8993328Z shell: /usr/bin/bash -e {0}
+2025-12-16T17:02:43.8993563Z env:
+2025-12-16T17:02:43.8993798Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:02:43.8994210Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:02:43.8994525Z ##[endgroup]
+2025-12-16T17:02:44.3186848Z Scope: all 3 workspace projects
+2025-12-16T17:02:44.3874839Z Lockfile is up to date, resolution step is skipped
+2025-12-16T17:02:44.4539356Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2025-12-16T17:02:44.6225881Z Packages: +994
+2025-12-16T17:02:44.6226583Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2025-12-16T17:02:45.4548097Z Progress: resolved 994, reused 0, downloaded 127, added 127
+2025-12-16T17:02:46.4693377Z Progress: resolved 994, reused 0, downloaded 383, added 378
+2025-12-16T17:02:47.4693907Z Progress: resolved 994, reused 0, downloaded 407, added 395
+2025-12-16T17:02:48.4726201Z Progress: resolved 994, reused 0, downloaded 506, added 500
+2025-12-16T17:02:49.4706237Z Progress: resolved 994, reused 0, downloaded 692, added 690
+2025-12-16T17:02:50.4744939Z Progress: resolved 994, reused 0, downloaded 888, added 888
+2025-12-16T17:02:51.3719242Z Progress: resolved 994, reused 0, downloaded 994, added 994, done
+2025-12-16T17:02:51.7169459Z .../node_modules/@prisma/engines postinstall$ node scripts/postinstall.js
+2025-12-16T17:02:51.7175816Z .../@ffmpeg-installer/linux-x64 postinstall$ chmod u+x ffmpeg
+2025-12-16T17:02:51.7178514Z .../@ffprobe-installer/linux-x64 postinstall$ chmod u+x ffprobe
+2025-12-16T17:02:51.7584829Z .../@ffmpeg-installer/linux-x64 postinstall: Done
+2025-12-16T17:02:51.7630033Z .../@ffprobe-installer/linux-x64 postinstall: Done
+2025-12-16T17:02:51.7658527Z .../argon2@0.44.0/node_modules/argon2 install$ cross-env ZERO_AR_DATE=1 node-gyp-build
+2025-12-16T17:02:51.7663973Z .../esbuild@0.25.11/node_modules/esbuild postinstall$ node install.js
+2025-12-16T17:02:51.8449397Z .../esbuild@0.25.11/node_modules/esbuild postinstall: Done
+2025-12-16T17:02:51.9103600Z .../bcrypt@6.0.0/node_modules/bcrypt install$ node-gyp-build
+2025-12-16T17:02:52.0239339Z .../argon2@0.44.0/node_modules/argon2 install: Done
+2025-12-16T17:02:52.0474417Z .../bcrypt@6.0.0/node_modules/bcrypt install: Done
+2025-12-16T17:02:52.0509324Z .../node_modules/puppeteer postinstall$ node install.mjs
+2025-12-16T17:02:52.0908085Z .../sharp@0.34.4/node_modules/sharp install$ node install/check.js
+2025-12-16T17:02:52.1312884Z .../esbuild@0.21.5/node_modules/esbuild postinstall$ node install.js
+2025-12-16T17:02:52.2574551Z .../esbuild@0.21.5/node_modules/esbuild postinstall: Done
+2025-12-16T17:02:52.3177128Z .../sharp@0.34.4/node_modules/sharp install: Done
+2025-12-16T17:02:52.3437149Z .../node_modules/puppeteer postinstall: **INFO** Skipping Firefox download as instructed.
+2025-12-16T17:02:52.6173064Z .../node_modules/@prisma/engines postinstall: Done
+2025-12-16T17:02:56.3934540Z .../node_modules/puppeteer postinstall: chrome-headless-shell (142.0.7444.59) downloaded to /home/runner/.cache/puppeteer/chrome-headless-shell/linux-142.0.7444.59
+2025-12-16T17:02:57.4162351Z .../node_modules/puppeteer postinstall: chrome (142.0.7444.59) downloaded to /home/runner/.cache/puppeteer/chrome/linux-142.0.7444.59
+2025-12-16T17:02:57.4265661Z .../node_modules/puppeteer postinstall: Done
+2025-12-16T17:02:57.4428876Z .../node_modules/prisma preinstall$ node scripts/preinstall-entry.js
+2025-12-16T17:02:57.5064615Z .../node_modules/prisma preinstall: Done
+2025-12-16T17:02:57.7090013Z .../node_modules/@prisma/client postinstall$ node scripts/postinstall.js
+2025-12-16T17:02:59.6754141Z .../node_modules/@prisma/client postinstall: prisma:warn We could not find your Prisma schema in the default locations (see: https://pris.ly/d/prisma-schema-location).
+2025-12-16T17:02:59.6756799Z .../node_modules/@prisma/client postinstall: If you have a Prisma schema file in a custom path, you will need to run
+2025-12-16T17:02:59.6758856Z .../node_modules/@prisma/client postinstall: `prisma generate --schema=./path/to/your/schema.prisma` to generate Prisma Client.
+2025-12-16T17:02:59.6760527Z .../node_modules/@prisma/client postinstall: If you do not have a Prisma schema file yet, you can ignore this message.
+2025-12-16T17:02:59.6927704Z .../node_modules/@prisma/client postinstall: Done
+2025-12-16T17:03:00.0800400Z 
+2025-12-16T17:03:00.0801350Z dependencies:
+2025-12-16T17:03:00.0801793Z + dotenv 17.2.3
+2025-12-16T17:03:00.0802174Z + zod 4.1.12
+2025-12-16T17:03:00.0802368Z 
+2025-12-16T17:03:00.0802538Z devDependencies:
+2025-12-16T17:03:00.0802951Z + @eslint/js 9.38.0
+2025-12-16T17:03:00.0803498Z + @typescript-eslint/eslint-plugin 8.46.1
+2025-12-16T17:03:00.0804139Z + @typescript-eslint/parser 8.46.1
+2025-12-16T17:03:00.0804625Z + eslint 9.38.0
+2025-12-16T17:03:00.0805054Z + eslint-plugin-react 7.37.5
+2025-12-16T17:03:00.0805857Z + eslint-plugin-react-hooks 5.2.0
+2025-12-16T17:03:00.0806368Z + tsx 4.20.6
+2025-12-16T17:03:00.0806732Z + typescript 5.9.3
+2025-12-16T17:03:00.0806985Z 
+2025-12-16T17:03:00.1280612Z apps/api postinstall$ prisma generate
+2025-12-16T17:03:00.8302402Z apps/api postinstall: warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+2025-12-16T17:03:00.8304615Z apps/api postinstall: For more information, see: https://pris.ly/prisma-config
+2025-12-16T17:03:00.9854995Z apps/api postinstall: Prisma schema loaded from prisma/schema.prisma
+2025-12-16T17:03:01.8752723Z apps/api postinstall: ✔ Generated Prisma Client (v6.17.1) to ./../../node_modules/.pnpm/@prisma+client@6.17.1_prisma@6.17.1_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client in 493ms
+2025-12-16T17:03:01.8754707Z apps/api postinstall: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-12-16T17:03:01.8756120Z apps/api postinstall: Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+2025-12-16T17:03:01.9074691Z apps/api postinstall: Done
+2025-12-16T17:03:01.9297680Z Done in 18s using pnpm v9.15.9
+2025-12-16T17:03:01.9712447Z ##[group]Run pnpm typecheck
+2025-12-16T17:03:01.9712764Z [36;1mpnpm typecheck[0m
+2025-12-16T17:03:01.9746477Z shell: /usr/bin/bash -e {0}
+2025-12-16T17:03:01.9746715Z env:
+2025-12-16T17:03:01.9746943Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:03:01.9747319Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:03:01.9747636Z ##[endgroup]
+2025-12-16T17:03:02.4317393Z 
+2025-12-16T17:03:02.4318348Z > kori-monorepo@1.0.0 typecheck /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:03:02.4318901Z > tsc --build
+2025-12-16T17:03:02.4319068Z 
+2025-12-16T17:03:09.9897389Z ##[error]apps/api/src/routes/contracts.ts(483,15): error TS2304: Cannot find name 'contract'.
+2025-12-16T17:03:09.9908306Z ##[error]apps/api/src/routes/mediaProcess.ts(321,47): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9911667Z ##[error]apps/api/src/routes/mediaProcess.ts(322,47): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9914860Z ##[error]apps/api/src/routes/mediaProcess.ts(329,23): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9919960Z ##[error]apps/api/src/routes/mediaProcess.ts(330,40): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9923461Z ##[error]apps/api/src/routes/mediaProcess.ts(332,34): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9927026Z ##[error]apps/api/src/routes/mediaProcess.ts(336,30): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9930438Z ##[error]apps/api/src/routes/mediaProcess.ts(337,40): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9934122Z ##[error]apps/api/src/routes/mediaProcess.ts(339,34): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9937699Z ##[error]apps/api/src/routes/mediaProcess.ts(419,19): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9941288Z ##[error]apps/api/src/routes/mediaProcess.ts(420,57): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9944946Z ##[error]apps/api/src/routes/mediaProcess.ts(421,26): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9948583Z ##[error]apps/api/src/routes/mediaProcess.ts(422,57): error TS2551: Property 'filePath' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'. Did you mean 'filepath'?
+2025-12-16T17:03:09.9951833Z ##[error]apps/api/src/routes/mediaProcess.ts(429,29): error TS2339: Property 'fileType' does not exist on type '{ id: string; createdAt: Date; updatedAt: Date; category: AssetCategory; metadata: JsonValue; clientId: string; width: number; height: number; duration: number; ... 6 more ...; uploadedBy: string; }'.
+2025-12-16T17:03:09.9953750Z ##[error]apps/api/src/routes/notifications.ts(26,14): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:03:09.9954996Z ##[error]apps/api/src/routes/notifications.ts(83,60): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9956275Z   Overload 1 of 3, '(obj: "Error fetching notifications:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9956865Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9957487Z   Overload 2 of 3, '(obj: "Error fetching notifications:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9958088Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9958876Z ##[error]apps/api/src/routes/notifications.ts(117,66): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9959951Z   Overload 1 of 3, '(obj: "Error marking notification as read:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9960522Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9961149Z   Overload 2 of 3, '(obj: "Error marking notification as read:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9961753Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9962509Z ##[error]apps/api/src/routes/notifications.ts(147,55): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9963525Z   Overload 1 of 3, '(obj: "Error marking all as read:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9964049Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9964639Z   Overload 2 of 3, '(obj: "Error marking all as read:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9965537Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9966415Z ##[error]apps/api/src/routes/notifications.ts(174,59): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9967508Z   Overload 1 of 3, '(obj: "Error deleting notification:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9968058Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9968671Z   Overload 2 of 3, '(obj: "Error deleting notification:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9969244Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9970023Z ##[error]apps/api/src/routes/notifications.ts(202,56): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9971210Z   Overload 1 of 3, '(obj: "Error fetching preferences:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9971793Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9972426Z   Overload 2 of 3, '(obj: "Error fetching preferences:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9973020Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9973817Z ##[error]apps/api/src/routes/notifications.ts(254,55): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9975752Z   Overload 1 of 3, '(obj: "Error updating preference:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9976467Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9977097Z   Overload 2 of 3, '(obj: "Error updating preference:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9977693Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9978596Z ##[error]apps/api/src/routes/notifications.ts(286,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9979741Z   Overload 1 of 3, '(obj: "Error fetching webhooks:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9980286Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9980888Z   Overload 2 of 3, '(obj: "Error fetching webhooks:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9981452Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9982716Z ##[error]apps/api/src/routes/notifications.ts(312,11): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:03:09.9984170Z   Type 'Record<string, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:03:09.9985170Z ##[error]apps/api/src/routes/notifications.ts(323,52): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9986469Z   Overload 1 of 3, '(obj: "Error creating webhook:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9987004Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9987591Z   Overload 2 of 3, '(obj: "Error creating webhook:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9988151Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9989411Z ##[error]apps/api/src/routes/notifications.ts(354,13): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:03:09.9990853Z   Type 'Record<string, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:03:09.9991835Z ##[error]apps/api/src/routes/notifications.ts(365,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9993130Z   Overload 1 of 3, '(obj: "Error updating webhook:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9993658Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9994249Z   Overload 2 of 3, '(obj: "Error updating webhook:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9994815Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9995755Z ##[error]apps/api/src/routes/notifications.ts(393,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:09.9996828Z   Overload 1 of 3, '(obj: "Error deleting webhook:", msg?: never): void', gave the following error.
+2025-12-16T17:03:09.9997351Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9998056Z   Overload 2 of 3, '(obj: "Error deleting webhook:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:09.9998632Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:09.9999414Z ##[error]apps/api/src/routes/notifications.ts(450,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0000440Z   Overload 1 of 3, '(obj: "Error fetching deliveries:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0000970Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0001563Z   Overload 2 of 3, '(obj: "Error fetching deliveries:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0002126Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0002873Z ##[error]apps/api/src/routes/notifications.ts(486,55): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0003899Z   Overload 1 of 3, '(obj: "Error retrying delivery:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0004422Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0005017Z   Overload 2 of 3, '(obj: "Error retrying delivery:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0005802Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0006577Z ##[error]apps/api/src/routes/notifications.ts(531,58): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0007655Z   Overload 1 of 3, '(obj: "Error sending test webhook:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0008179Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0008773Z   Overload 2 of 3, '(obj: "Error sending test webhook:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0009337Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0010083Z ##[error]apps/api/src/routes/notifications.ts(586,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0011107Z   Overload 1 of 3, '(obj: "Error fetching email logs:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0011627Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0012217Z   Overload 2 of 3, '(obj: "Error fetching email logs:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0012781Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0013484Z ##[error]apps/api/src/routes/proof.ts(73,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0014466Z   Overload 1 of 3, '(obj: "Error starting proof set:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0014989Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0015772Z   Overload 2 of 3, '(obj: "Error starting proof set:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0016509Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0017265Z ##[error]apps/api/src/routes/proof.ts(135,56): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0018303Z   Overload 1 of 3, '(obj: "Error fetching proof set:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0018834Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0019423Z   Overload 2 of 3, '(obj: "Error fetching proof set:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0019983Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0020682Z ##[error]apps/api/src/routes/proof.ts(158,58): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0021791Z   Overload 1 of 3, '(obj: "Error completing proof set:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0022331Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0022934Z   Overload 2 of 3, '(obj: "Error completing proof set:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0023497Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0024225Z ##[error]apps/api/src/routes/proof.ts(242,56): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0025223Z   Overload 1 of 3, '(obj: "Error creating selection:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0026030Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0026653Z   Overload 2 of 3, '(obj: "Error creating selection:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0027215Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0027969Z ##[error]apps/api/src/routes/proof.ts(285,56): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0028991Z   Overload 1 of 3, '(obj: "Error deleting selection:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0029518Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0030100Z   Overload 2 of 3, '(obj: "Error deleting selection:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0030659Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0031360Z ##[error]apps/api/src/routes/proof.ts(353,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0032335Z   Overload 1 of 3, '(obj: "Error creating comment:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0032847Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0033424Z   Overload 2 of 3, '(obj: "Error creating comment:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0033984Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0034674Z ##[error]apps/api/src/routes/proof.ts(391,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0035827Z   Overload 1 of 3, '(obj: "Error updating comment:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0036363Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0036944Z   Overload 2 of 3, '(obj: "Error updating comment:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0037503Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0038233Z ##[error]apps/api/src/routes/proof.ts(416,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0039257Z   Overload 1 of 3, '(obj: "Error deleting comment:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0039779Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0040525Z   Overload 2 of 3, '(obj: "Error deleting comment:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0041078Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0041800Z ##[error]apps/api/src/routes/proof.ts(484,58): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0042816Z   Overload 1 of 3, '(obj: "Error exporting selections:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0043356Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0043964Z   Overload 2 of 3, '(obj: "Error exporting selections:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0044541Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0046186Z ##[error]apps/api/src/routes/proposalTemplates.ts(20,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0047976Z ##[error]apps/api/src/routes/proposalTemplates.ts(49,84): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0049386Z ##[error]apps/api/src/routes/proposalTemplates.ts(67,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0051313Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0052685Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0054186Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0055748Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0056835Z ##[error]apps/api/src/routes/proposalTemplates.ts(80,100): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0058242Z ##[error]apps/api/src/routes/proposalTemplates.ts(98,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0060099Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0061447Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0062929Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0064288Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0065311Z ##[error]apps/api/src/routes/proposalTemplates.ts(127,84): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0068298Z ##[error]apps/api/src/routes/proposalTemplates.ts(127,88): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ name: string; items: { description: string; quantity: number; unitPrice?: string | number; position?: number; }[]; description?: string; title?: string; defaultTerms?: string; }'.
+2025-12-16T17:03:10.0070642Z   Type '{}' is missing the following properties from type '{ name: string; items: { description: string; quantity: number; unitPrice?: string | number; position?: number; }[]; description?: string; title?: string; defaultTerms?: string; }': name, items
+2025-12-16T17:03:10.0071940Z ##[error]apps/api/src/routes/proposalTemplates.ts(145,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0073843Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0075523Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0077098Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0078496Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0079602Z ##[error]apps/api/src/routes/proposalTemplates.ts(181,103): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0081021Z ##[error]apps/api/src/routes/proposalTemplates.ts(202,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0082913Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0084288Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0085983Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0087365Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0088440Z ##[error]apps/api/src/routes/proposalTemplates.ts(215,86): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0089860Z ##[error]apps/api/src/routes/proposalTemplates.ts(233,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0091780Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0093178Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0094682Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0096251Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0097548Z ##[error]apps/api/src/routes/proposalTemplates.ts(252,106): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0099475Z ##[error]apps/api/src/routes/proposalTemplates.ts(270,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0101129Z ##[error]apps/api/src/routes/proposalTemplates.ts(286,83): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:03:10.0103040Z ##[error]apps/api/src/routes/proposals.ts(474,50): error TS2353: Object literal may only specify known properties, and 'emailTemplateId' does not exist in type 'UpdateProposalData'.
+2025-12-16T17:03:10.0106609Z ##[error]apps/api/src/routes/publicContract.ts(341,34): error TS2551: Property 'createdById' does not exist on type '{ client: { status: ClientStatus; name: string; email: string; id: string; createdAt: Date; updatedAt: Date; phone: string; company: string; address: string; city: string; ... 7 more ...; preferredContactMethod: string; }; } & { ...; }'. Did you mean 'createdBy'?
+2025-12-16T17:03:10.0110489Z ##[error]apps/api/src/routes/publicContract.ts(343,22): error TS2551: Property 'createdById' does not exist on type '{ client: { status: ClientStatus; name: string; email: string; id: string; createdAt: Date; updatedAt: Date; phone: string; company: string; address: string; city: string; ... 7 more ...; preferredContactMethod: string; }; } & { ...; }'. Did you mean 'createdBy'?
+2025-12-16T17:03:10.0112516Z ##[error]apps/api/src/routes/publicContract.ts(349,74): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0113651Z   Overload 1 of 3, '(obj: "Failed to send contract signed notification:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0114255Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0114963Z   Overload 2 of 3, '(obj: "Failed to send contract signed notification:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0115797Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0116608Z ##[error]apps/api/src/routes/publicGallery.ts(141,71): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0117762Z   Overload 1 of 3, '(obj: "Failed to send gallery view notification:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0118341Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0119026Z   Overload 2 of 3, '(obj: "Failed to send gallery view notification:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0119658Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0120959Z ##[error]apps/api/src/routes/publicGallery.ts(181,42): error TS2551: Property 'getGalleryStyle' does not exist on type 'typeof GalleryService'. Did you mean 'getGalleryItems'?
+2025-12-16T17:03:10.0122837Z ##[error]apps/api/src/routes/publicGallery.ts(211,48): error TS2339: Property 'getViewerPreferences' does not exist on type 'typeof GalleryService'.
+2025-12-16T17:03:10.0124632Z ##[error]apps/api/src/routes/publicGallery.ts(264,48): error TS2339: Property 'updateViewerPreferences' does not exist on type 'typeof GalleryService'.
+2025-12-16T17:03:10.0126637Z ##[error]apps/api/src/routes/publicInvoice.ts(99,36): error TS2339: Property 'generateForInvoice' does not exist on type 'typeof OTPService'.
+2025-12-16T17:03:10.0128403Z ##[error]apps/api/src/routes/publicInvoice.ts(161,44): error TS2339: Property 'markInvoiceAsPaid' does not exist on type 'typeof InvoiceService'.
+2025-12-16T17:03:10.0129838Z ##[error]apps/api/src/routes/publicInvoice.ts(229,20): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0131262Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0132336Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0133308Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0134299Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:03:10.0165813Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0166930Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0168258Z ##[error]apps/api/src/routes/publicProposal.ts(308,22): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0169912Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0170828Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0171776Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0172754Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:03:10.0173834Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0174805Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0175899Z ##[error]apps/api/src/routes/publicProposal.ts(313,20): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0177389Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0178298Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0179256Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0180242Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:03:10.0181332Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:03:10.0182302Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0183124Z ##[error]apps/api/src/routes/rbac.ts(46,17): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:03:10.0184331Z ##[error]apps/api/src/routes/rbac.ts(79,50): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0185338Z   Overload 1 of 3, '(obj: "Error fetching roles:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0186090Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0186686Z   Overload 2 of 3, '(obj: "Error fetching roles:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0187280Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0188064Z ##[error]apps/api/src/routes/rbac.ts(118,51): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0189313Z   Overload 1 of 3, '(obj: "Error fetching role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0189842Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0190434Z   Overload 2 of 3, '(obj: "Error fetching role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0190995Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0191737Z ##[error]apps/api/src/routes/rbac.ts(166,49): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0192745Z   Overload 1 of 3, '(obj: "Error creating role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0193288Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0194026Z   Overload 2 of 3, '(obj: "Error creating role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0194595Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0195510Z ##[error]apps/api/src/routes/rbac.ts(226,51): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0196580Z   Overload 1 of 3, '(obj: "Error updating role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0197106Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0197699Z   Overload 2 of 3, '(obj: "Error updating role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0198250Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0199015Z ##[error]apps/api/src/routes/rbac.ts(268,51): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0199998Z   Overload 1 of 3, '(obj: "Error deleting role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0200521Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0201125Z   Overload 2 of 3, '(obj: "Error deleting role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0201736Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0202452Z ##[error]apps/api/src/routes/rbac.ts(295,56): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0203467Z   Overload 1 of 3, '(obj: "Error fetching permissions:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0204016Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0204648Z   Overload 2 of 3, '(obj: "Error fetching permissions:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0205250Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0206233Z ##[error]apps/api/src/routes/rbac.ts(337,55): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0207337Z   Overload 1 of 3, '(obj: "Error creating permission:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0207909Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0208546Z   Overload 2 of 3, '(obj: "Error creating permission:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0209143Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0209870Z ##[error]apps/api/src/routes/rbac.ts(370,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0210893Z   Overload 1 of 3, '(obj: "Error deleting permission:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0211461Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0212068Z   Overload 2 of 3, '(obj: "Error deleting permission:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0212676Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0213594Z ##[error]apps/api/src/routes/rbac.ts(427,58): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0214645Z   Overload 1 of 3, '(obj: "Error assigning permission:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0215204Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0216004Z   Overload 2 of 3, '(obj: "Error assigning permission:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0216608Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0217357Z ##[error]apps/api/src/routes/rbac.ts(459,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0218423Z   Overload 1 of 3, '(obj: "Error removing permission:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0219128Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0219760Z   Overload 2 of 3, '(obj: "Error removing permission:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0220347Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0221084Z ##[error]apps/api/src/routes/rbac.ts(496,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0222098Z   Overload 1 of 3, '(obj: "Error fetching user roles:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0222646Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0223269Z   Overload 2 of 3, '(obj: "Error fetching user roles:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0223836Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0224578Z ##[error]apps/api/src/routes/rbac.ts(516,63): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0225826Z   Overload 1 of 3, '(obj: "Error fetching user permissions:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0226416Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0227065Z   Overload 2 of 3, '(obj: "Error fetching user permissions:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0227693Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0228458Z ##[error]apps/api/src/routes/rbac.ts(572,52): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0229498Z   Overload 1 of 3, '(obj: "Error assigning role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0230026Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0230625Z   Overload 2 of 3, '(obj: "Error assigning role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0231208Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0231956Z ##[error]apps/api/src/routes/rbac.ts(600,51): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0232952Z   Overload 1 of 3, '(obj: "Error removing role:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0233465Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0234055Z   Overload 2 of 3, '(obj: "Error removing role:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0234617Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0235790Z ##[error]apps/api/src/routes/rbac.ts(625,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0236931Z   Overload 1 of 3, '(obj: "Error fetching policies:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0237510Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0238118Z   Overload 2 of 3, '(obj: "Error fetching policies:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0238871Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0239653Z ##[error]apps/api/src/routes/rbac.ts(657,51): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0240675Z   Overload 1 of 3, '(obj: "Error creating policy:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0241218Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0241813Z   Overload 2 of 3, '(obj: "Error creating policy:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0242390Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0243109Z ##[error]apps/api/src/routes/rbac.ts(694,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0244252Z   Overload 1 of 3, '(obj: "Error updating policy:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0244816Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0245621Z   Overload 2 of 3, '(obj: "Error updating policy:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0246221Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0247014Z ##[error]apps/api/src/routes/rbac.ts(716,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0248124Z   Overload 1 of 3, '(obj: "Error deleting policy:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0248702Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0249315Z   Overload 2 of 3, '(obj: "Error deleting policy:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0249885Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0250639Z ##[error]apps/api/src/routes/search.ts(281,42): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0251623Z   Overload 1 of 3, '(obj: "Search error:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0252134Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0252697Z   Overload 2 of 3, '(obj: "Search error:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0253234Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0253978Z ##[error]apps/api/src/routes/search.ts(313,58): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0255016Z   Overload 1 of 3, '(obj: "Error fetching saved filters:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0255738Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0256374Z   Overload 2 of 3, '(obj: "Error fetching saved filters:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0256991Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0257746Z ##[error]apps/api/src/routes/search.ts(361,49): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0258768Z   Overload 1 of 3, '(obj: "Error saving filter:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0259288Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0259878Z   Overload 2 of 3, '(obj: "Error saving filter:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0260442Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0261156Z ##[error]apps/api/src/routes/search.ts(423,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0262176Z   Overload 1 of 3, '(obj: "Error updating filter:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0262856Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0263472Z   Overload 2 of 3, '(obj: "Error updating filter:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0264060Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0264804Z ##[error]apps/api/src/routes/search.ts(453,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0266061Z   Overload 1 of 3, '(obj: "Error deleting filter:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0266616Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0267199Z   Overload 2 of 3, '(obj: "Error deleting filter:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0267783Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0268687Z ##[error]apps/api/src/routes/search.ts(479,59): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0269771Z   Overload 1 of 3, '(obj: "Error tracking filter usage:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0270330Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0270936Z   Overload 2 of 3, '(obj: "Error tracking filter usage:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0271527Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0272305Z ##[error]apps/api/src/routes/settings.ts(30,15): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:03:10.0273537Z ##[error]apps/api/src/routes/settings.ts(31,15): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:03:10.0274737Z ##[error]apps/api/src/routes/settings.ts(73,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0275979Z   Overload 1 of 3, '(obj: "Error fetching organization:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0276550Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0277168Z   Overload 2 of 3, '(obj: "Error fetching organization:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0277763Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0278960Z ##[error]apps/api/src/routes/settings.ts(104,13): error TS2322: Type 'Record<string | number | symbol, unknown>' is not assignable to type 'JsonNull | InputJsonValue'.
+2025-12-16T17:03:10.0280454Z   Type 'Record<string | number | symbol, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:03:10.0281469Z ##[error]apps/api/src/routes/settings.ts(137,57): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0282496Z   Overload 1 of 3, '(obj: "Error updating organization:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0283047Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0283664Z   Overload 2 of 3, '(obj: "Error updating organization:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0284245Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0284959Z ##[error]apps/api/src/routes/settings.ts(167,55): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0286220Z   Overload 1 of 3, '(obj: "Error fetching settings:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0286751Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0287338Z   Overload 2 of 3, '(obj: "Error fetching settings:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0287912Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0288666Z ##[error]apps/api/src/routes/settings.ts(191,52): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0289835Z   Overload 1 of 3, '(obj: "Error fetching setting:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0290368Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0290944Z   Overload 2 of 3, '(obj: "Error fetching setting:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0291506Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0292228Z ##[error]apps/api/src/routes/settings.ts(273,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0293223Z   Overload 1 of 3, '(obj: "Error updating setting:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0293739Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0294444Z   Overload 2 of 3, '(obj: "Error updating setting:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0295009Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0295951Z ##[error]apps/api/src/routes/settings.ts(333,52): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0296993Z   Overload 1 of 3, '(obj: "Error deleting setting:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0297525Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0298111Z   Overload 2 of 3, '(obj: "Error deleting setting:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0298664Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0299383Z ##[error]apps/api/src/routes/settings.ts(378,62): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0300399Z   Overload 1 of 3, '(obj: "Error fetching setting history:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0300942Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0301552Z   Overload 2 of 3, '(obj: "Error fetching setting history:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0302130Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0302838Z ##[error]apps/api/src/routes/settings.ts(402,53): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0303822Z   Overload 1 of 3, '(obj: "Error fetching features:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0304336Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0304915Z   Overload 2 of 3, '(obj: "Error fetching features:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0305675Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0306413Z ##[error]apps/api/src/routes/settings.ts(462,54): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0307458Z   Overload 1 of 3, '(obj: "Error updating feature:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0307983Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0308551Z   Overload 2 of 3, '(obj: "Error updating feature:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0309101Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0309830Z ##[error]apps/api/src/routes/settings.ts(487,25): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:03:10.0310986Z ##[error]apps/api/src/routes/settings.ts(548,60): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0311970Z   Overload 1 of 3, '(obj: "Error bulk updating settings:", msg?: never): void', gave the following error.
+2025-12-16T17:03:10.0312508Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0313255Z   Overload 2 of 3, '(obj: "Error bulk updating settings:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:03:10.0313825Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:03:10.0315051Z ##[error]apps/api/src/routes/variables.ts(16,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0317192Z ##[error]apps/api/src/routes/variables.ts(55,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0318595Z ##[error]apps/api/src/routes/variables.ts(91,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0320527Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0321928Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0323374Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0324724Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0325785Z ##[error]apps/api/src/routes/variables.ts(125,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0327618Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0328964Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0330493Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { text: string; category?: string; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0331900Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0332765Z ##[error]apps/api/src/routes/variables.ts(199,9): error TS2769: No overload matches this call.
+2025-12-16T17:03:10.0334564Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0336084Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0337556Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { text: string; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:03:10.0338914Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:03:10.0342522Z ##[error]apps/api/src/scripts/seed-clients.ts(123,9): error TS2322: Type '{ name: string; email: string; phone: string; company: string; status: string; address: string; city: string; state: string; zipCode: string; country: string; notes: string; tags: string[]; } | { name: string; ... 10 more ...; company?: undefined; }' is not assignable to type '(Without<ClientCreateInput, ClientUncheckedCreateInput> & ClientUncheckedCreateInput) | (Without<...> & ClientCreateInput)'.
+2025-12-16T17:03:10.0345618Z   Type '{ name: string; email: string; phone: string; company: string; status: string; address: string; city: string; state: string; zipCode: string; country: string; notes: string; tags: string[]; }' is not assignable to type '(Without<ClientCreateInput, ClientUncheckedCreateInput> & ClientUncheckedCreateInput) | (Without<...> & ClientCreateInput)'.
+2025-12-16T17:03:10.0347809Z     Type '{ name: string; email: string; phone: string; company: string; status: string; address: string; city: string; state: string; zipCode: string; country: string; notes: string; tags: string[]; }' is not assignable to type 'Without<ClientUncheckedCreateInput, ClientCreateInput> & ClientCreateInput'.
+2025-12-16T17:03:10.0349450Z       Type '{ name: string; email: string; phone: string; company: string; status: string; address: string; city: string; state: string; zipCode: string; country: string; notes: string; tags: string[]; }' is not assignable to type 'ClientCreateInput'.
+2025-12-16T17:03:10.0350316Z         Types of property 'status' are incompatible.
+2025-12-16T17:03:10.0350692Z           Type 'string' is not assignable to type 'ClientStatus'.
+2025-12-16T17:03:10.0351926Z ##[error]apps/api/src/services/contract.ts(472,56): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+2025-12-16T17:03:10.0353106Z   Target signature provides too few arguments. Expected 1 or more, but got 0.
+2025-12-16T17:03:10.0353897Z ##[error]apps/api/src/services/contract.ts(600,41): error TS2554: Expected 1 arguments, but got 2.
+2025-12-16T17:03:10.0356328Z ##[error]apps/api/src/services/contract.ts(623,9): error TS2367: This comparison appears to be unintentional because the types '"ACTIVE" | "SENT" | "CANCELLED" | "DRAFT" | "VIEWED" | "EXPIRED" | "COUNTERSIGNED" | "TERMINATED" | "VOIDED"' and '"DECLINED"' have no overlap.
+2025-12-16T17:03:10.0359434Z ##[error]apps/api/src/services/contractSigning.ts(78,11): error TS2353: Object literal may only specify known properties, and 'otpAttempts' does not exist in type '(Without<ContractUpdateInput, ContractUncheckedUpdateInput> & ContractUncheckedUpdateInput) | (Without<...> & ContractUpdateInput)'.
+2025-12-16T17:03:10.0362747Z ##[error]apps/api/src/services/contractSigning.ts(120,20): error TS2339: Property 'otpAttempts' does not exist on type '{ status: ContractStatus; content: string; id: string; createdAt: Date; updatedAt: Date; title: string; clientId: string; sha256: string; createdBy: string; sentAt: Date; ... 32 more ...; templateId: string; }'.
+2025-12-16T17:03:10.0366277Z ##[error]apps/api/src/services/contractSigning.ts(120,44): error TS2339: Property 'otpAttempts' does not exist on type '{ status: ContractStatus; content: string; id: string; createdAt: Date; updatedAt: Date; title: string; clientId: string; sha256: string; createdBy: string; sentAt: Date; ... 32 more ...; templateId: string; }'.
+2025-12-16T17:03:10.0369589Z ##[error]apps/api/src/services/contractSigning.ts(141,13): error TS2353: Object literal may only specify known properties, and 'otpAttempts' does not exist in type '(Without<ContractUpdateInput, ContractUncheckedUpdateInput> & ContractUncheckedUpdateInput) | (Without<...> & ContractUpdateInput)'.
+2025-12-16T17:03:10.0372892Z ##[error]apps/api/src/services/contractSigning.ts(141,36): error TS2339: Property 'otpAttempts' does not exist on type '{ status: ContractStatus; content: string; id: string; createdAt: Date; updatedAt: Date; title: string; clientId: string; sha256: string; createdBy: string; sentAt: Date; ... 32 more ...; templateId: string; }'.
+2025-12-16T17:03:10.0376505Z ##[error]apps/api/src/services/contractSigning.ts(162,11): error TS2353: Object literal may only specify known properties, and 'otpAttempts' does not exist in type '(Without<ContractUpdateInput, ContractUncheckedUpdateInput> & ContractUncheckedUpdateInput) | (Without<...> & ContractUpdateInput)'.
+2025-12-16T17:03:10.0379763Z ##[error]apps/api/src/services/contractSigning.ts(329,11): error TS2353: Object literal may only specify known properties, and 'signatureIP' does not exist in type '(Without<ContractUpdateInput, ContractUncheckedUpdateInput> & ContractUncheckedUpdateInput) | (Without<...> & ContractUpdateInput)'.
+2025-12-16T17:03:10.0381746Z ##[error]apps/api/src/services/docgen.ts(181,32): error TS2322: Type '"degrees"' is not assignable to type 'RotationTypes'.
+2025-12-16T17:03:10.0383795Z ##[error]apps/api/src/services/envelope.ts(473,9): error TS2353: Object literal may only specify known properties, and 'envelopeId_signerId' does not exist in type 'SignatureWhereUniqueInput'.
+2025-12-16T17:03:10.0387236Z ##[error]apps/api/src/services/invoice.ts(212,43): error TS2339: Property 'depositAmount' does not exist on type '{ client: { status: ClientStatus; name: string; email: string; id: string; createdAt: Date; updatedAt: Date; phone: string; company: string; address: string; city: string; ... 7 more ...; preferredContactMethod: string; }; items: { ...; }[]; } & { ...; }'.
+2025-12-16T17:03:10.0390468Z ##[error]apps/api/src/services/invoice.ts(341,43): error TS2339: Property 'depositAmount' does not exist on type '{ client: { name: string; email: string; }; } & { status: ProposalStatus; currency: string; total: Decimal; id: string; createdAt: Date; updatedAt: Date; ... 22 more ...; pdfPath: string; }'.
+2025-12-16T17:03:10.0392475Z ##[error]apps/api/src/services/invoice.ts(671,20): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string'.
+2025-12-16T17:03:10.0394155Z ##[error]apps/api/src/services/invoice.ts(710,56): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+2025-12-16T17:03:10.0395288Z   Target signature provides too few arguments. Expected 1 or more, but got 0.
+2025-12-16T17:03:10.0396277Z ##[error]apps/api/src/services/magic-link.ts(145,26): error TS2554: Expected 2-3 arguments, but got 0.
+2025-12-16T17:03:10.0398140Z ##[error]apps/api/src/services/magic-link.ts(166,9): error TS2322: Type 'Promise<{ otpCode: string; expiresAt: Date; }>' is not assignable to type 'string | NullableStringFieldUpdateOperationsInput'.
+2025-12-16T17:03:10.0399978Z ##[error]apps/api/src/services/magic-link.ts(175,7): error TS2322: Type 'Promise<{ otpCode: string; expiresAt: Date; }>' is not assignable to type 'string'.
+2025-12-16T17:03:10.0401677Z ##[error]apps/api/src/services/magic-link.ts(196,7): error TS2322: Type 'Promise<{ otpCode: string; expiresAt: Date; }>' is not assignable to type 'string'.
+2025-12-16T17:03:10.0403255Z ##[error]apps/api/src/services/payment.ts(9,52): error TS2322: Type '"2024-12-18.acacia"' is not assignable to type '"2025-09-30.clover"'.
+2025-12-16T17:03:10.0404737Z ##[error]apps/api/src/services/pdf-generator.ts(421,30): error TS2322: Type '"degrees"' is not assignable to type 'RotationTypes'.
+2025-12-16T17:03:10.0406667Z ##[error]apps/api/src/services/proposal.ts(520,56): error TS2345: Argument of type '(value: unknown) => void' is not assignable to parameter of type '() => void'.
+2025-12-16T17:03:10.0407836Z   Target signature provides too few arguments. Expected 1 or more, but got 0.
+2025-12-16T17:03:10.0409783Z ##[error]apps/api/src/services/proposalEmailTemplate.ts(329,7): error TS2353: Object literal may only specify known properties, and 'title' does not exist in type '{ amount?: string | number; subtotal?: string | number; tax?: string | number; total?: string | number; number?: string; }'.
+2025-12-16T17:03:10.0411756Z ##[error]apps/api/src/services/proposalTemplate.ts(140,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+2025-12-16T17:03:10.0413487Z ##[error]apps/api/src/services/proposalTemplate.ts(201,52): error TS2339: Property 'errors' does not exist on type 'ZodError<unknown>'.
+2025-12-16T17:03:10.0416376Z ##[error]apps/api/src/services/signature.ts(408,32): error TS2339: Property 'DECLINED' does not exist on type '{ DRAFT: "DRAFT"; SENT: "SENT"; VIEWED: "VIEWED"; SIGNED: "SIGNED"; COUNTERSIGNED: "COUNTERSIGNED"; ACTIVE: "ACTIVE"; EXPIRED: "EXPIRED"; TERMINATED: "TERMINATED"; VOIDED: "VOIDED"; CANCELLED: "CANCELLED"; }'.
+2025-12-16T17:03:10.0418785Z ##[error]apps/api/src/services/signature.ts(476,9): error TS2353: Object literal may only specify known properties, and 'eventType' does not exist in type 'ContractEventWhereInput'.
+2025-12-16T17:03:10.0421246Z ##[error]apps/api/src/services/signature.ts(488,22): error TS2339: Property 'metadata' does not exist on type '{ type: ContractEventType; id: string; createdAt: Date; userAgent: string; ip: string; contractId: string; meta: JsonValue; }'.
+2025-12-16T17:03:10.0423313Z ##[error]apps/api/src/services/template.ts(92,9): error TS2322: Type 'TemplateVariable[]' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:03:10.0424454Z   Type 'TemplateVariable[]' is not assignable to type 'InputJsonObject'.
+2025-12-16T17:03:10.0424955Z     Index signature for type 'string' is missing in type 'TemplateVariable[]'.
+2025-12-16T17:03:10.0427524Z ##[error]apps/api/src/services/template.ts(198,28): error TS2352: Conversion of type 'string | number | boolean | JsonObject | JsonArray' to type 'TemplateVariable[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+2025-12-16T17:03:10.0429115Z   Type 'JsonArray' is not comparable to type 'TemplateVariable[]'.
+2025-12-16T17:03:10.0429556Z     Type 'JsonValue' is not comparable to type 'TemplateVariable'.
+2025-12-16T17:03:10.0430132Z       Type 'JsonValue[]' is missing the following properties from type 'TemplateVariable': key, description
+2025-12-16T17:03:10.0431411Z ##[error]apps/api/src/services/template.ts(214,9): error TS2322: Type 'TemplateVariable[]' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:03:10.0432561Z   Type 'TemplateVariable[]' is not assignable to type 'InputJsonObject'.
+2025-12-16T17:03:10.0433067Z     Index signature for type 'string' is missing in type 'TemplateVariable[]'.
+2025-12-16T17:03:10.0433953Z ##[error]apps/api/src/services/videoTools.ts(263,13): error TS2322: Type 'string' is not assignable to type 'number'.
+2025-12-16T17:03:10.0435537Z ##[error]apps/api/src/utils/signResize.ts(142,15): error TS2322: Type 'any' is not assignable to type 'never'.
+2025-12-16T17:03:10.0436921Z ##[error]apps/api/src/utils/signResize.ts(148,15): error TS2322: Type 'any' is not assignable to type 'never'.
+2025-12-16T17:03:10.0438211Z ##[error]apps/api/src/utils/signResize.ts(317,7): error TS2322: Type 'any' is not assignable to type 'never'.
+2025-12-16T17:03:10.0585277Z  ELIFECYCLE  Command failed with exit code 1.
+2025-12-16T17:03:10.0798503Z ##[error]Process completed with exit code 1.
+2025-12-16T17:03:10.0853939Z Post job cleanup.
+2025-12-16T17:03:10.1723318Z Pruning is unnecessary.
+2025-12-16T17:03:10.1833761Z Post job cleanup.
+2025-12-16T17:03:10.2790087Z [command]/usr/bin/git version
+2025-12-16T17:03:10.2825914Z git version 2.52.0
+2025-12-16T17:03:10.2868860Z Temporarily overriding HOME='/home/runner/work/_temp/b5e83ac9-b535-4506-8b1f-14f56d93af96' before making global git config changes
+2025-12-16T17:03:10.2870152Z Adding repository directory to the temporary git global config as a safe directory
+2025-12-16T17:03:10.2882374Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:03:10.2916108Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-12-16T17:03:10.2947707Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-12-16T17:03:10.3178613Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-12-16T17:03:10.3199419Z http.https://github.com/.extraheader
+2025-12-16T17:03:10.3211506Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-12-16T17:03:10.3244265Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-12-16T17:03:10.3464129Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-12-16T17:03:10.3494730Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-12-16T17:03:10.3821495Z Cleaning up orphan processes

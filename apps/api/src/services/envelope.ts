@@ -468,12 +468,21 @@ export class EnvelopeService {
       .update(signatureDataUrl)
       .digest('hex');
 
+    // Find the signature by envelope and signer
+    const existingSignature = await prisma.signature.findFirst({
+      where: {
+        envelopeId,
+        signerId,
+      },
+    });
+
+    if (!existingSignature) {
+      throw new Error('Signature not found');
+    }
+
     const signature = await prisma.signature.update({
       where: {
-        envelopeId_signerId: {
-          envelopeId,
-          signerId,
-        },
+        id: existingSignature.id,
       },
       data: {
         status: 'SIGNED',
