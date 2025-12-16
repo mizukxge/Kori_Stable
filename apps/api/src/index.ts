@@ -1,6 +1,6 @@
 import { buildServer } from './server.js';
 import { registerRoutes } from './routes/index.js';
-import { env } from '../../../config/env.js';
+import { env } from '../../config/env.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import { fileURLToPath } from 'url';
