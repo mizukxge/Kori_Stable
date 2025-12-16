@@ -1,4 +1,5 @@
-const API_BASE_URL = 'http://localhost:3002';
+// Use environment variable VITE_API_URL, fallback to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export interface UploadResponse {
   success: boolean;

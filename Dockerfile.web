@@ -15,8 +15,11 @@ COPY apps/api/package.json ./apps/api/
 # Install dependencies (skip build scripts for API postinstall)
 RUN pnpm install --ignore-scripts
 
-# Build web app
-RUN pnpm --filter @kori/web build
+# Build web app with API URL from environment
+# If VITE_API_URL not set, use default
+ARG VITE_API_URL=https://kori-api-production.up.railway.app
+ENV VITE_API_URL=${VITE_API_URL}
+RUN VITE_API_URL=${VITE_API_URL} pnpm --filter @kori/web build
 
 # Production stage
 FROM node:18-alpine
