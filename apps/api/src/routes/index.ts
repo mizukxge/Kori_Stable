@@ -18,7 +18,6 @@ import { contractsRoutes } from './contracts.js';
 import { publicContractRoutes } from './publicContract.js';
 import { clausesRoutes } from './clauses.js';
 import { contractTemplatesRoutes } from './contract-templates.js';
-import { registerTemplateSchemaRoutes } from './contract-templates-schema.js';
 import { registerContractGenerationRoutes } from './contract-generation.js';
 import { invoicesRoutes } from './invoices.js';
 import { publicInvoiceRoutes } from './publicInvoice.js';
@@ -107,9 +106,6 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Contract template management routes (admin only)
   await fastify.register(contractTemplatesRoutes);
-
-  // Contract template schema routes (admin only) - form schema and client search
-  await fastify.register(registerTemplateSchemaRoutes);
 
   // Contract routes (admin only)
   await fastify.register(contractsRoutes);
