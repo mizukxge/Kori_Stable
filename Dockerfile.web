@@ -2,10 +2,6 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Accept API URL at build time, default to production API
-ARG VITE_API_URL=https://kori-api-production.up.railway.app
-ENV VITE_API_URL=$VITE_API_URL
-
 # Install pnpm
 RUN npm install -g pnpm
 
@@ -19,9 +15,9 @@ COPY apps/api/package.json ./apps/api/
 # Install dependencies (skip build scripts for API postinstall)
 RUN pnpm install --ignore-scripts
 
-# Build web app with API URL from environment
-# VITE_API_URL is set as env var above and will be substituted by Vite during build
-RUN pnpm --filter @kori/web build
+# Build web app with production API URL
+# Set VITE_API_URL as environment variable before build so Vite can substitute it
+RUN VITE_API_URL=https://kori-api-production.up.railway.app pnpm --filter @kori/web build
 
 # Production stage
 FROM node:18-alpine
