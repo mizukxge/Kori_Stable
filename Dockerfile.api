@@ -2,17 +2,15 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm and build tools needed for native dependencies
+RUN npm install -g pnpm && \
+    apk add --no-cache python3 make g++ cairo-dev jpeg-dev pango-dev giflib-dev pixman-dev
 
 # Copy everything
 COPY . .
 
-# Install dependencies
+# Install dependencies (postinstall hook will run prisma generate)
 RUN pnpm install
-
-# Generate Prisma client from schema
-RUN pnpm --filter @kori/api db:generate
 
 # Expose port
 EXPOSE 3001
