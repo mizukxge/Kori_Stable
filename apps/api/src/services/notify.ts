@@ -468,23 +468,3 @@ export async function testNotification(eventType: string): Promise<void> {
     process.exit(1);
   }
 }
-
-// CLI execution
-if (require.main === module) {
-  const args = process.argv.slice(2);
-  const testFlag = args.indexOf('--test');
-
-  if (testFlag !== -1) {
-    const eventType = args[testFlag + 1] || 'proposal.accepted';
-    testNotification(eventType)
-      .then(() => process.exit(0))
-      .catch(() => process.exit(1));
-  } else {
-    console.log('Usage: tsx notify.ts --test [event-type]');
-    console.log('\nAvailable test events:');
-    console.log('  • proposal.accepted');
-    console.log('  • invoice.paid');
-    console.log('  • gallery.viewed');
-    process.exit(0);
-  }
-}
