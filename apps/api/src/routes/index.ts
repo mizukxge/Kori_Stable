@@ -18,7 +18,6 @@ import { contractsRoutes } from './contracts.js';
 import { publicContractRoutes } from './publicContract.js';
 import { clausesRoutes } from './clauses.js';
 import { contractTemplatesRoutes } from './contract-templates.js';
-import { registerContractGenerationRoutes } from './contract-generation.js';
 import { invoicesRoutes } from './invoices.js';
 import { publicInvoiceRoutes } from './publicInvoice.js';
 import { paymentsRoutes } from './payments.js';
@@ -109,9 +108,6 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Contract routes (admin only)
   await fastify.register(contractsRoutes);
-
-  // Contract generation routes (admin only) - variable collection, preview, draft
-  await fastify.register(registerContractGenerationRoutes);
 
   // Invoice routes (admin only)
   await fastify.register(invoicesRoutes);
