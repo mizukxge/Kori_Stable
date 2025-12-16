@@ -15,5 +15,9 @@ RUN pnpm install
 # Expose port
 EXPOSE 3001
 
-# Start API
-CMD ["pnpm", "--filter", "@kori/api", "start"]
+# Create entrypoint script that runs migrations before starting
+RUN echo '#!/bin/sh\nset -e\necho "Running database migrations..."\npnpm --filter @kori/api db:migrate:prod\necho "Starting API server..."\npnpm --filter @kori/api start' > /app/entrypoint.sh && \
+    chmod +x /app/entrypoint.sh
+
+# Start API with migrations
+CMD ["/app/entrypoint.sh"]
