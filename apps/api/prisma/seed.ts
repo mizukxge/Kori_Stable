@@ -434,6 +434,19 @@ async function main() {
   });
   console.log('✅ Created User:', user.email);
 
+  // Create Production Admin User
+  const prodAdminPassword = await argon2.hash('#Admin:123');
+  const prodAdmin = await prisma.adminUser.upsert({
+    where: { email: 'michael@shotbymizu.co.uk' },
+    update: { password: prodAdminPassword },
+    create: {
+      email: 'michael@shotbymizu.co.uk',
+      password: prodAdminPassword,
+      name: 'Michael Admin',
+    },
+  });
+  console.log('✅ Created Production Admin:', prodAdmin.email);
+
   // Create Sample Clients
   const client1 = await prisma.client.upsert({
     where: { email: 'john.doe@example.com' },
