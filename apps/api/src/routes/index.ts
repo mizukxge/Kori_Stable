@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
 import { authRoutes } from './auth.js';
 import { websocketRoutes } from './websocket.js';
-import { clientRoutes, adminClientRoutes } from './clients.js';
+import { adminClientRoutes } from './clients.js';
 import { inquiryRoutes, adminInquiryRoutes } from './inquiries.js';
 import { ingestRoutes } from './ingest.js';
 import { rightsRoutes } from './rights.js';
@@ -66,9 +66,6 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Public inquiry routes (lead capture form - no auth required)
   await fastify.register(inquiryRoutes);
-
-  // Public client signup routes (no auth required)
-  await fastify.register(clientRoutes);
 
   // Admin inquiry management routes (admin only)
   await fastify.register(adminInquiryRoutes);
