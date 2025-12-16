@@ -96,7 +96,7 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
         }
 
         // Validate asset type
-        if (asset.fileType !== 'IMAGE') {
+        if (!asset.mimeType?.startsWith('image/')) {
           return reply.status(400).send({
             statusCode: 400,
             error: 'Bad Request',
@@ -115,10 +115,10 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
         }
 
         // Process image
-        const outputPath = asset.filePath.replace(/(\.\w+)$/, `-${presetName}$1`);
-        
+        const outputPath = asset.filepath.replace(/(\.\w+)$/, `-${presetName}$1`);
+
         const result = await ImageTools.processImage({
-          inputPath: asset.filePath,
+          inputPath: asset.filepath,
           outputPath,
           ...preset.image,
         });
@@ -198,7 +198,7 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
         }
 
         // Validate asset type
-        if (asset.fileType !== 'VIDEO') {
+        if (!asset.mimeType?.startsWith('video/')) {
           return reply.status(400).send({
             statusCode: 400,
             error: 'Bad Request',
@@ -217,10 +217,10 @@ export async function mediaProcessRoutes(fastify: FastifyInstance) {
         }
 
         // Process video
-        const outputPath = asset.filePath.replace(/\.\w+$/, `-${presetName}.mp4`);
-        
+        const outputPath = asset.filepath.replace(/\.\w+$/, `-${presetName}.mp4`);
+
         const result = await VideoTools.processVideo({
-          inputPath: asset.filePath,
+          inputPath: asset.filepath,
           outputPath,
           ...preset.video,
         });

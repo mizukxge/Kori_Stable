@@ -323,14 +323,14 @@ export async function contractsRoutes(fastify: FastifyInstance) {
           throw new Error('Failed to generate PDF');
         }
 
-        return reply.sendFile(updated.pdfPath.split('/').pop()!, {
-          root: updated.pdfPath.substring(0, updated.pdfPath.lastIndexOf('/')),
-        });
+        const filename = updated.pdfPath.split('/').pop()!;
+        const root = updated.pdfPath.substring(0, updated.pdfPath.lastIndexOf('/'));
+        return reply.sendFile(filename, root);
       }
 
-      return reply.sendFile(contract.pdfPath.split('/').pop()!, {
-        root: contract.pdfPath.substring(0, contract.pdfPath.lastIndexOf('/')),
-      });
+      const filename = contract.pdfPath.split('/').pop()!;
+      const root = contract.pdfPath.substring(0, contract.pdfPath.lastIndexOf('/'));
+      return reply.sendFile(filename, root);
     } catch (error) {
       if (error instanceof Error && error.message === 'Contract not found') {
         return reply.status(404).send({
@@ -423,9 +423,6 @@ export async function contractsRoutes(fastify: FastifyInstance) {
 
       const pdfPath = await ContractService.generatePDF(id);
 
-      // Fetch updated contract
-      const contract = await ContractService.getContractById(id);
-
       request.log.info(
         {
           contractId: id,
@@ -470,12 +467,12 @@ export async function contractsRoutes(fastify: FastifyInstance) {
       const { id } = request.params as { id: string };
       const userId = request.user!.userId;
 
-      const contract = await ContractService.regeneratePDF(id, userId);
+      const pdfPath = await ContractService.regeneratePDF(id, userId);
 
       request.log.info(
         {
           contractId: id,
-          pdfPath: contract.pdfPath,
+          pdfPath,
         },
         'PDF regenerated for contract'
       );

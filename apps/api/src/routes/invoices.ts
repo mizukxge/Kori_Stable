@@ -254,12 +254,13 @@ export async function invoicesRoutes(fastify: FastifyInstance) {
       // Send notification about payment received
       try {
         await notifyPaymentReceived(
-          id,
+          request.user!.userId,
           invoice.invoiceNumber,
-          invoice.total.toString()
+          Number(invoice.total),
+          invoice.clientId || 'Client'
         );
-      } catch (notifyError) {
-        request.log.warn('Failed to send payment received notification:', notifyError);
+      } catch {
+        request.log.warn('Failed to send payment received notification');
         // Don't fail the request if notification fails
       }
 

@@ -453,7 +453,7 @@ export async function envelopesRoutes(fastify: FastifyInstance) {
    */
   fastify.post('/admin/envelopes/:id/signers/:signerId/verify', { onRequest: [requireAdmin] }, async (request, reply) => {
     try {
-      const { id, signerId } = request.params as { id: string; signerId: string };
+      const { signerId } = request.params as { id: string; signerId: string };
 
       const signature = await EnvelopeService.verifySignatureIntegrity(signerId);
 

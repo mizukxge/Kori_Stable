@@ -348,7 +348,7 @@ export async function adminInquiryRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = InquiryIdSchema.parse(request.params);
-        const { templateName, customMessage, recipientEmail } =
+        const { templateName, recipientEmail } =
           SendInquiryEmailSchema.parse(request.body);
 
         const inquiry = await InquiryService.getInquiry(id);

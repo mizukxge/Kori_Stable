@@ -654,7 +654,7 @@ async function main() {
   };
 
   // Contract 1: SIGNED (Wedding - John Doe)
-  const contract1 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(1) },
     update: {},
     create: {
@@ -680,7 +680,7 @@ async function main() {
   console.log('✅ Created Contract 1: SIGNED');
 
   // Contract 2: VIEWED (Wedding - Jane Smith)
-  const contract2 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(2) },
     update: {},
     create: {
@@ -707,7 +707,7 @@ async function main() {
   console.log('✅ Created Contract 2: VIEWED');
 
   // Contract 3: SENT (Portrait - Bob Wilson)
-  const contract3 = await prisma.contract.upsert({
+  await prisma.contract.upsert({
     where: { contractNumber: generateContractNumber(3) },
     update: {},
     create: {
@@ -994,7 +994,7 @@ async function main() {
   console.log('✅ Created Signer 3 (sequence 3):', signer3.email);
 
   // Create signature records (initially empty)
-  const sig1 = await prisma.signature.create({
+  await prisma.signature.create({
     data: {
       envelopeId: envelope1.id,
       signerId: signer1.id,
@@ -1002,7 +1002,7 @@ async function main() {
     },
   });
 
-  const sig2 = await prisma.signature.create({
+  await prisma.signature.create({
     data: {
       envelopeId: envelope1.id,
       signerId: signer2.id,

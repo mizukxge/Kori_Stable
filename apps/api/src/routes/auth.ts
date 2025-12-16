@@ -129,8 +129,6 @@ export async function authRoutes(fastify: FastifyInstance) {
    * Destroy all sessions for current user
    */
   fastify.post('/auth/logout-all', { preHandler: requireAuth }, async (request, reply) => {
-    const sessionToken = request.cookies.sessionToken;
-
     if (request.user) {
       await AuthService.deleteAllUserSessions(request.user.userId);
     }

@@ -7,7 +7,6 @@ import {
   hashUserAgent,
   getExpirationTime,
   isExpired,
-  verifyToken,
   verifyIP,
   verifyUserAgent,
   generateMagicLinkURL,

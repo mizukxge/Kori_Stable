@@ -24,7 +24,7 @@ async function linkAssets() {
           },
         });
         console.log('✅ Linked: ' + asset.filename);
-      } catch (e) {
+      } catch {
         console.log('⚠️  Already linked or error: ' + asset.filename);
       }
     }
