@@ -1,0 +1,346 @@
+﻿2025-12-16T17:27:07.1912139Z Current runner version: '2.329.0'
+2025-12-16T17:27:07.1936392Z ##[group]Runner Image Provisioner
+2025-12-16T17:27:07.1937167Z Hosted Compute Agent
+2025-12-16T17:27:07.1937732Z Version: 20251202.455
+2025-12-16T17:27:07.1938310Z Commit: 6c10caca4910e198df60de23adf20ad317c474e3
+2025-12-16T17:27:07.1939132Z Build Date: 2025-12-02T15:56:59Z
+2025-12-16T17:27:07.1939786Z Worker ID: {dc4cbb35-9684-4da7-971e-f941e236a847}
+2025-12-16T17:27:07.1940518Z ##[endgroup]
+2025-12-16T17:27:07.1941145Z ##[group]Operating System
+2025-12-16T17:27:07.1941963Z Ubuntu
+2025-12-16T17:27:07.1942449Z 24.04.3
+2025-12-16T17:27:07.1942969Z LTS
+2025-12-16T17:27:07.1943439Z ##[endgroup]
+2025-12-16T17:27:07.1943947Z ##[group]Runner Image
+2025-12-16T17:27:07.1944556Z Image: ubuntu-24.04
+2025-12-16T17:27:07.1945062Z Version: 20251208.163.1
+2025-12-16T17:27:07.1946223Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20251208.163/images/ubuntu/Ubuntu2404-Readme.md
+2025-12-16T17:27:07.1948012Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20251208.163
+2025-12-16T17:27:07.1949165Z ##[endgroup]
+2025-12-16T17:27:07.1950271Z ##[group]GITHUB_TOKEN Permissions
+2025-12-16T17:27:07.1952546Z Contents: read
+2025-12-16T17:27:07.1953598Z Metadata: read
+2025-12-16T17:27:07.1954099Z Packages: read
+2025-12-16T17:27:07.1954622Z ##[endgroup]
+2025-12-16T17:27:07.1957105Z Secret source: Actions
+2025-12-16T17:27:07.1958013Z Prepare workflow directory
+2025-12-16T17:27:07.2282559Z Prepare all required actions
+2025-12-16T17:27:07.2321267Z Getting action download info
+2025-12-16T17:27:07.6213819Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2025-12-16T17:27:07.7292718Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2025-12-16T17:27:07.8237037Z Download action repository 'pnpm/action-setup@v3' (SHA:a3252b78c470c02df07e9d59298aecedc3ccdd6d)
+2025-12-16T17:27:08.0820818Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+2025-12-16T17:27:08.2760037Z Complete job name: Type Check
+2025-12-16T17:27:08.3493127Z ##[group]Run actions/checkout@v4
+2025-12-16T17:27:08.3494050Z with:
+2025-12-16T17:27:08.3494509Z   repository: mizukxge/Kori_Stable
+2025-12-16T17:27:08.3495237Z   token: ***
+2025-12-16T17:27:08.3495673Z   ssh-strict: true
+2025-12-16T17:27:08.3496117Z   ssh-user: git
+2025-12-16T17:27:08.3496568Z   persist-credentials: true
+2025-12-16T17:27:08.3497094Z   clean: true
+2025-12-16T17:27:08.3497544Z   sparse-checkout-cone-mode: true
+2025-12-16T17:27:08.3498111Z   fetch-depth: 1
+2025-12-16T17:27:08.3498554Z   fetch-tags: false
+2025-12-16T17:27:08.3499008Z   show-progress: true
+2025-12-16T17:27:08.3499467Z   lfs: false
+2025-12-16T17:27:08.3499892Z   submodules: false
+2025-12-16T17:27:08.3500343Z   set-safe-directory: true
+2025-12-16T17:27:08.3501074Z ##[endgroup]
+2025-12-16T17:27:08.4626384Z Syncing repository: mizukxge/Kori_Stable
+2025-12-16T17:27:08.4628290Z ##[group]Getting Git version info
+2025-12-16T17:27:08.4629188Z Working directory is '/home/runner/work/Kori_Stable/Kori_Stable'
+2025-12-16T17:27:08.4630835Z [command]/usr/bin/git version
+2025-12-16T17:27:08.4703807Z git version 2.52.0
+2025-12-16T17:27:08.4729979Z ##[endgroup]
+2025-12-16T17:27:08.4744410Z Temporarily overriding HOME='/home/runner/work/_temp/cf5f1532-94b9-491c-a125-0825a9342af8' before making global git config changes
+2025-12-16T17:27:08.4746878Z Adding repository directory to the temporary git global config as a safe directory
+2025-12-16T17:27:08.4749155Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:27:08.4787804Z Deleting the contents of '/home/runner/work/Kori_Stable/Kori_Stable'
+2025-12-16T17:27:08.4791303Z ##[group]Initializing the repository
+2025-12-16T17:27:08.4795400Z [command]/usr/bin/git init /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:27:08.4914988Z hint: Using 'master' as the name for the initial branch. This default branch name
+2025-12-16T17:27:08.4918164Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2025-12-16T17:27:08.4920885Z hint: to use in all of your new repositories, which will suppress this warning,
+2025-12-16T17:27:08.4922522Z hint: call:
+2025-12-16T17:27:08.4923277Z hint:
+2025-12-16T17:27:08.4924233Z hint: 	git config --global init.defaultBranch <name>
+2025-12-16T17:27:08.4925851Z hint:
+2025-12-16T17:27:08.4927031Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2025-12-16T17:27:08.4928924Z hint: 'development'. The just-created branch can be renamed via this command:
+2025-12-16T17:27:08.4930417Z hint:
+2025-12-16T17:27:08.4931229Z hint: 	git branch -m <name>
+2025-12-16T17:27:08.4932513Z hint:
+2025-12-16T17:27:08.4933763Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2025-12-16T17:27:08.4935383Z Initialized empty Git repository in /home/runner/work/Kori_Stable/Kori_Stable/.git/
+2025-12-16T17:27:08.4937921Z [command]/usr/bin/git remote add origin https://github.com/mizukxge/Kori_Stable
+2025-12-16T17:27:08.4967937Z ##[endgroup]
+2025-12-16T17:27:08.4969065Z ##[group]Disabling automatic garbage collection
+2025-12-16T17:27:08.4973101Z [command]/usr/bin/git config --local gc.auto 0
+2025-12-16T17:27:08.5002148Z ##[endgroup]
+2025-12-16T17:27:08.5003185Z ##[group]Setting up auth
+2025-12-16T17:27:08.5009684Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-12-16T17:27:08.5041779Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-12-16T17:27:08.5411098Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-12-16T17:27:08.5446652Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-12-16T17:27:08.5682751Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-12-16T17:27:08.5719972Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-12-16T17:27:08.5962723Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2025-12-16T17:27:08.6000207Z ##[endgroup]
+2025-12-16T17:27:08.6003928Z ##[group]Fetching the repository
+2025-12-16T17:27:08.6015263Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b0704e2f0d4b38aee2da7c83be0184b2dae69fee:refs/remotes/origin/main
+2025-12-16T17:27:09.2763059Z From https://github.com/mizukxge/Kori_Stable
+2025-12-16T17:27:09.2797600Z  * [new ref]         b0704e2f0d4b38aee2da7c83be0184b2dae69fee -> origin/main
+2025-12-16T17:27:09.2802597Z ##[endgroup]
+2025-12-16T17:27:09.2805520Z ##[group]Determining the checkout info
+2025-12-16T17:27:09.2808962Z ##[endgroup]
+2025-12-16T17:27:09.2810963Z [command]/usr/bin/git sparse-checkout disable
+2025-12-16T17:27:09.2850629Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2025-12-16T17:27:09.2878908Z ##[group]Checking out the ref
+2025-12-16T17:27:09.2882111Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2025-12-16T17:27:09.3873421Z Switched to a new branch 'main'
+2025-12-16T17:27:09.3876227Z branch 'main' set up to track 'origin/main'.
+2025-12-16T17:27:09.3894343Z ##[endgroup]
+2025-12-16T17:27:09.3934266Z [command]/usr/bin/git log -1 --format=%H
+2025-12-16T17:27:09.3957641Z b0704e2f0d4b38aee2da7c83be0184b2dae69fee
+2025-12-16T17:27:09.4280672Z ##[group]Run actions/setup-node@v4
+2025-12-16T17:27:09.4281975Z with:
+2025-12-16T17:27:09.4282796Z   node-version: 22
+2025-12-16T17:27:09.4283683Z   always-auth: false
+2025-12-16T17:27:09.4284606Z   check-latest: false
+2025-12-16T17:27:09.4285799Z   token: ***
+2025-12-16T17:27:09.4286623Z ##[endgroup]
+2025-12-16T17:27:09.6203364Z Found in cache @ /opt/hostedtoolcache/node/22.21.1/x64
+2025-12-16T17:27:09.6208971Z ##[group]Environment details
+2025-12-16T17:27:10.0218421Z node: v22.21.1
+2025-12-16T17:27:10.0220442Z npm: 10.9.4
+2025-12-16T17:27:10.0221931Z yarn: 1.22.22
+2025-12-16T17:27:10.0224526Z ##[endgroup]
+2025-12-16T17:27:10.0411439Z ##[group]Run pnpm/action-setup@v3
+2025-12-16T17:27:10.0412644Z with:
+2025-12-16T17:27:10.0413367Z   version: 9
+2025-12-16T17:27:10.0414145Z   run_install: false
+2025-12-16T17:27:10.0415009Z   dest: ~/setup-pnpm
+2025-12-16T17:27:10.0415915Z   package_json_file: package.json
+2025-12-16T17:27:10.0416957Z   standalone: false
+2025-12-16T17:27:10.0417787Z ##[endgroup]
+2025-12-16T17:27:10.1325581Z ##[group]Running self-installer...
+2025-12-16T17:27:10.7485571Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2025-12-16T17:27:10.7604450Z Packages: +1
+2025-12-16T17:27:10.7604938Z +
+2025-12-16T17:27:11.2877730Z Progress: resolved 1, reused 0, downloaded 1, added 1, done
+2025-12-16T17:27:11.3150262Z 
+2025-12-16T17:27:11.3151068Z dependencies:
+2025-12-16T17:27:11.3152213Z + pnpm 9.15.9 (10.26.0 is available)
+2025-12-16T17:27:11.3152717Z 
+2025-12-16T17:27:11.3185346Z Done in 1s
+2025-12-16T17:27:11.3367669Z ##[endgroup]
+2025-12-16T17:27:11.3373066Z Installation Completed!
+2025-12-16T17:27:11.3477918Z ##[group]Run echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+2025-12-16T17:27:11.3478584Z [36;1mecho "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV[0m
+2025-12-16T17:27:11.3522426Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2025-12-16T17:27:11.3522902Z env:
+2025-12-16T17:27:11.3523244Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:27:11.3523651Z ##[endgroup]
+2025-12-16T17:27:11.8994469Z ##[group]Run actions/cache@v4
+2025-12-16T17:27:11.8994956Z with:
+2025-12-16T17:27:11.8995452Z   path: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:27:11.8996465Z   key: Linux-pnpm-store-2deb7749fcb3d9cb44ae105a587b69205ad712a3c01d2c95287e6bda82b5675d
+2025-12-16T17:27:11.8997433Z   restore-keys: Linux-pnpm-store-
+
+2025-12-16T17:27:11.8997952Z   enableCrossOsArchive: false
+2025-12-16T17:27:11.8998440Z   fail-on-cache-miss: false
+2025-12-16T17:27:11.8998885Z   lookup-only: false
+2025-12-16T17:27:11.8999281Z   save-always: false
+2025-12-16T17:27:11.8999656Z env:
+2025-12-16T17:27:11.9000085Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:27:11.9000830Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:27:11.9001476Z ##[endgroup]
+2025-12-16T17:27:12.1894123Z Cache hit for: Linux-pnpm-store-2deb7749fcb3d9cb44ae105a587b69205ad712a3c01d2c95287e6bda82b5675d
+2025-12-16T17:27:13.2542081Z Received 213909504 of 257787198 (83.0%), 204.0 MBs/sec
+2025-12-16T17:27:13.4470641Z Received 257787198 of 257787198 (100.0%), 205.7 MBs/sec
+2025-12-16T17:27:13.4474602Z Cache Size: ~246 MB (257787198 B)
+2025-12-16T17:27:13.4544630Z [command]/usr/bin/tar -xf /home/runner/work/_temp/d16ab5be-1981-438a-a0e2-f09863e8499c/cache.tzst -P -C /home/runner/work/Kori_Stable/Kori_Stable --use-compress-program unzstd
+2025-12-16T17:27:16.0718437Z Cache restored successfully
+2025-12-16T17:27:16.1344526Z Cache restored from key: Linux-pnpm-store-2deb7749fcb3d9cb44ae105a587b69205ad712a3c01d2c95287e6bda82b5675d
+2025-12-16T17:27:16.1496615Z ##[group]Run pnpm install --frozen-lockfile
+2025-12-16T17:27:16.1497241Z [36;1mpnpm install --frozen-lockfile[0m
+2025-12-16T17:27:16.1546373Z shell: /usr/bin/bash -e {0}
+2025-12-16T17:27:16.1546870Z env:
+2025-12-16T17:27:16.1547361Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:27:16.1548138Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:27:16.1548813Z ##[endgroup]
+2025-12-16T17:27:16.5889985Z Scope: all 3 workspace projects
+2025-12-16T17:27:16.6647273Z Lockfile is up to date, resolution step is skipped
+2025-12-16T17:27:16.7282083Z Progress: resolved 1, reused 0, downloaded 0, added 0
+2025-12-16T17:27:16.9073861Z Packages: +994
+2025-12-16T17:27:16.9078797Z ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+2025-12-16T17:27:17.7296495Z Progress: resolved 994, reused 994, downloaded 0, added 245
+2025-12-16T17:27:18.7011376Z Progress: resolved 994, reused 994, downloaded 0, added 994, done
+2025-12-16T17:27:19.5476378Z 
+2025-12-16T17:27:19.5477169Z dependencies:
+2025-12-16T17:27:19.5477579Z + dotenv 17.2.3
+2025-12-16T17:27:19.5477967Z + zod 4.1.12
+2025-12-16T17:27:19.5478150Z 
+2025-12-16T17:27:19.5478293Z devDependencies:
+2025-12-16T17:27:19.5478722Z + @eslint/js 9.38.0
+2025-12-16T17:27:19.5479232Z + @typescript-eslint/eslint-plugin 8.46.1
+2025-12-16T17:27:19.5479861Z + @typescript-eslint/parser 8.46.1
+2025-12-16T17:27:19.5480325Z + eslint 9.38.0
+2025-12-16T17:27:19.5480808Z + eslint-plugin-react 7.37.5
+2025-12-16T17:27:19.5482425Z + eslint-plugin-react-hooks 5.2.0
+2025-12-16T17:27:19.5483515Z + tsx 4.20.6
+2025-12-16T17:27:19.5484024Z + typescript 5.9.3
+2025-12-16T17:27:19.5484321Z 
+2025-12-16T17:27:19.5863983Z apps/api postinstall$ prisma generate
+2025-12-16T17:27:20.4186850Z apps/api postinstall: warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+2025-12-16T17:27:20.4192089Z apps/api postinstall: For more information, see: https://pris.ly/prisma-config
+2025-12-16T17:27:20.5106135Z apps/api postinstall: Prisma schema loaded from prisma/schema.prisma
+2025-12-16T17:27:21.8666184Z apps/api postinstall: ✔ Generated Prisma Client (v6.17.1) to ./../../node_modules/.pnpm/@prisma+client@6.17.1_prisma@6.17.1_typescript@5.9.3__typescript@5.9.3/node_modules/@prisma/client in 415ms
+2025-12-16T17:27:21.8668887Z apps/api postinstall: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+2025-12-16T17:27:21.8670467Z apps/api postinstall: Tip: Need your database queries to be 1000x faster? Accelerate offers you that and more: https://pris.ly/tip-2-accelerate
+2025-12-16T17:27:21.8901011Z apps/api postinstall: Done
+2025-12-16T17:27:21.9121058Z Done in 5.7s using pnpm v9.15.9
+2025-12-16T17:27:21.9354620Z ##[group]Run pnpm typecheck
+2025-12-16T17:27:21.9354941Z [36;1mpnpm typecheck[0m
+2025-12-16T17:27:21.9390256Z shell: /usr/bin/bash -e {0}
+2025-12-16T17:27:21.9390547Z env:
+2025-12-16T17:27:21.9390839Z   PNPM_HOME: /home/runner/setup-pnpm/node_modules/.bin
+2025-12-16T17:27:21.9391320Z   STORE_PATH: /home/runner/setup-pnpm/node_modules/.bin/store/v3
+2025-12-16T17:27:21.9391953Z ##[endgroup]
+2025-12-16T17:27:22.3368246Z 
+2025-12-16T17:27:22.3369227Z > kori-monorepo@1.0.0 typecheck /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:27:22.3370055Z > tsc --build
+2025-12-16T17:27:22.3370306Z 
+2025-12-16T17:27:30.3949201Z ##[error]apps/api/src/routes/notifications.ts(26,14): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:27:30.3957416Z ##[error]apps/api/src/routes/notifications.ts(312,11): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:27:30.3959131Z   Type 'Record<string, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:27:30.3960827Z ##[error]apps/api/src/routes/notifications.ts(354,13): error TS2322: Type 'Record<string, unknown>' is not assignable to type 'NullableJsonNullValueInput | InputJsonValue'.
+2025-12-16T17:27:30.3963244Z   Type 'Record<string, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:27:30.3964990Z ##[error]apps/api/src/routes/proposalTemplates.ts(20,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3966764Z ##[error]apps/api/src/routes/proposalTemplates.ts(49,84): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.3968274Z ##[error]apps/api/src/routes/proposalTemplates.ts(67,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.3970633Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3972415Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3974036Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3975481Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3976679Z ##[error]apps/api/src/routes/proposalTemplates.ts(80,100): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.3978092Z ##[error]apps/api/src/routes/proposalTemplates.ts(98,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.3980004Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3981432Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3983404Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3984843Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3985972Z ##[error]apps/api/src/routes/proposalTemplates.ts(127,84): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.3988884Z ##[error]apps/api/src/routes/proposalTemplates.ts(127,88): error TS2345: Argument of type 'unknown' is not assignable to parameter of type '{ name: string; items: { description: string; quantity: number; unitPrice?: string | number; position?: number; }[]; description?: string; title?: string; defaultTerms?: string; }'.
+2025-12-16T17:27:30.3991096Z   Type '{}' is missing the following properties from type '{ name: string; items: { description: string; quantity: number; unitPrice?: string | number; position?: number; }[]; description?: string; title?: string; defaultTerms?: string; }': name, items
+2025-12-16T17:27:30.3992668Z ##[error]apps/api/src/routes/proposalTemplates.ts(145,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.3994981Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3996435Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.3997996Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: any; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.3999591Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4000687Z ##[error]apps/api/src/routes/proposalTemplates.ts(181,103): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.4002339Z ##[error]apps/api/src/routes/proposalTemplates.ts(202,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4004306Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4005720Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4007248Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4008672Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4009723Z ##[error]apps/api/src/routes/proposalTemplates.ts(215,86): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.4011145Z ##[error]apps/api/src/routes/proposalTemplates.ts(233,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4013347Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4014949Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4016509Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4017935Z     Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4019042Z ##[error]apps/api/src/routes/proposalTemplates.ts(252,106): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.4020992Z ##[error]apps/api/src/routes/proposalTemplates.ts(270,9): error TS2353: Object literal may only specify known properties, and 'description' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4022986Z ##[error]apps/api/src/routes/proposalTemplates.ts(286,83): error TS2339: Property 'id' does not exist on type 'SessionData'.
+2025-12-16T17:27:30.4024931Z ##[error]apps/api/src/routes/proposals.ts(474,50): error TS2353: Object literal may only specify known properties, and 'emailTemplateId' does not exist in type 'UpdateProposalData'.
+2025-12-16T17:27:30.4028157Z ##[error]apps/api/src/routes/publicContract.ts(341,34): error TS2551: Property 'createdById' does not exist on type '{ client: { status: ClientStatus; name: string; email: string; id: string; createdAt: Date; updatedAt: Date; phone: string; company: string; address: string; city: string; ... 7 more ...; preferredContactMethod: string; }; } & { ...; }'. Did you mean 'createdBy'?
+2025-12-16T17:27:30.4032073Z ##[error]apps/api/src/routes/publicContract.ts(343,22): error TS2551: Property 'createdById' does not exist on type '{ client: { status: ClientStatus; name: string; email: string; id: string; createdAt: Date; updatedAt: Date; phone: string; company: string; address: string; city: string; ... 7 more ...; preferredContactMethod: string; }; } & { ...; }'. Did you mean 'createdBy'?
+2025-12-16T17:27:30.4034375Z ##[error]apps/api/src/routes/publicContract.ts(349,74): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4035497Z   Overload 1 of 3, '(obj: "Failed to send contract signed notification:", msg?: never): void', gave the following error.
+2025-12-16T17:27:30.4036112Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:27:30.4036789Z   Overload 2 of 3, '(obj: "Failed to send contract signed notification:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:27:30.4037441Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:27:30.4038235Z ##[error]apps/api/src/routes/publicGallery.ts(141,71): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4039336Z   Overload 1 of 3, '(obj: "Failed to send gallery view notification:", msg?: never): void', gave the following error.
+2025-12-16T17:27:30.4039926Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:27:30.4040573Z   Overload 2 of 3, '(obj: "Failed to send gallery view notification:", msg?: never, ...args: unknown[]): void', gave the following error.
+2025-12-16T17:27:30.4041190Z     Argument of type 'any' is not assignable to parameter of type 'never'.
+2025-12-16T17:27:30.4042681Z ##[error]apps/api/src/routes/publicGallery.ts(181,42): error TS2551: Property 'getGalleryStyle' does not exist on type 'typeof GalleryService'. Did you mean 'getGalleryItems'?
+2025-12-16T17:27:30.4044592Z ##[error]apps/api/src/routes/publicGallery.ts(211,48): error TS2339: Property 'getViewerPreferences' does not exist on type 'typeof GalleryService'.
+2025-12-16T17:27:30.4046353Z ##[error]apps/api/src/routes/publicGallery.ts(264,48): error TS2339: Property 'updateViewerPreferences' does not exist on type 'typeof GalleryService'.
+2025-12-16T17:27:30.4048325Z ##[error]apps/api/src/routes/publicInvoice.ts(99,36): error TS2339: Property 'generateForInvoice' does not exist on type 'typeof OTPService'.
+2025-12-16T17:27:30.4050058Z ##[error]apps/api/src/routes/publicInvoice.ts(161,44): error TS2339: Property 'markInvoiceAsPaid' does not exist on type 'typeof InvoiceService'.
+2025-12-16T17:27:30.4051447Z ##[error]apps/api/src/routes/publicInvoice.ts(229,20): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4053129Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4054017Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4054974Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4055956Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:27:30.4057033Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4058083Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4058963Z ##[error]apps/api/src/routes/publicProposal.ts(308,22): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4060362Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4061237Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4062577Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4063537Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:27:30.4064606Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4065548Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4066395Z ##[error]apps/api/src/routes/publicProposal.ts(313,20): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4067827Z   Overload 1 of 3, '(filename: string, rootPath?: string): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4068707Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4069687Z   Overload 2 of 3, '(filename: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4070642Z     Object literal may only specify known properties, and 'root' does not exist in type 'SendOptions'.
+2025-12-16T17:27:30.4071915Z   Overload 3 of 3, '(filename: string, rootPath?: string, options?: SendOptions): FastifyReply<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, ... 4 more ..., unknown>', gave the following error.
+2025-12-16T17:27:30.4072868Z     Argument of type '{ root: string; }' is not assignable to parameter of type 'string'.
+2025-12-16T17:27:30.4073687Z ##[error]apps/api/src/routes/rbac.ts(47,17): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:27:30.4075056Z ##[error]apps/api/src/routes/settings.ts(30,15): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:27:30.4076300Z ##[error]apps/api/src/routes/settings.ts(31,15): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:27:30.4077944Z ##[error]apps/api/src/routes/settings.ts(104,13): error TS2322: Type 'Record<string | number | symbol, unknown>' is not assignable to type 'JsonNull | InputJsonValue'.
+2025-12-16T17:27:30.4079399Z   Type 'Record<string | number | symbol, unknown>' is missing the following properties from type 'readonly InputJsonValue[]': length, concat, join, slice, and 20 more.
+2025-12-16T17:27:30.4080416Z ##[error]apps/api/src/routes/settings.ts(487,25): error TS2554: Expected 2-3 arguments, but got 1.
+2025-12-16T17:27:30.4082244Z ##[error]apps/api/src/routes/variables.ts(16,9): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4084128Z ##[error]apps/api/src/routes/variables.ts(54,9): error TS2353: Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4085516Z ##[error]apps/api/src/routes/variables.ts(89,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4087328Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4088695Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4090152Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Params: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4091868Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4092765Z ##[error]apps/api/src/routes/variables.ts(122,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4094615Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4095936Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4097472Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { text: string; category?: string; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4098887Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4099721Z ##[error]apps/api/src/routes/variables.ts(195,9): error TS2769: No overload matches this call.
+2025-12-16T17:27:30.4101699Z   Overload 1 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { ...; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger> & { ...; }, handler?: WebsocketHandler<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4103065Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4104681Z   Overload 2 of 4, '(path: string, opts: RouteShorthandOptions<RawServerDefault, IncomingMessage, ServerResponse<IncomingMessage>, { Body: { text: string; }; Reply: any; }, unknown, FastifySchema, FastifyTypeProviderDefault, FastifyBaseLogger>, handler: RouteHandlerMethod<...>): FastifyInstance<...>', gave the following error.
+2025-12-16T17:27:30.4106049Z     Object literal may only specify known properties, and 'tags' does not exist in type 'FastifySchema'.
+2025-12-16T17:27:30.4108136Z ##[error]apps/api/src/services/contract.ts(623,9): error TS2367: This comparison appears to be unintentional because the types '"ACTIVE" | "SENT" | "CANCELLED" | "DRAFT" | "VIEWED" | "EXPIRED" | "COUNTERSIGNED" | "TERMINATED" | "VOIDED"' and '"DECLINED"' have no overlap.
+2025-12-16T17:27:30.4110045Z ##[error]apps/api/src/services/docgen.ts(181,11): error TS2322: Type '{ angle: number; }' is not assignable to type 'Rotation'.
+2025-12-16T17:27:30.4111108Z   Property 'type' is missing in type '{ angle: number; }' but required in type 'Degrees'.
+2025-12-16T17:27:30.4112246Z ##[error]apps/api/src/services/invoice.ts(263,80): error TS2339: Property 'toFixed' does not exist on type 'never'.
+2025-12-16T17:27:30.4113752Z ##[error]apps/api/src/services/pdf-generator.ts(421,9): error TS2322: Type '{ angle: number; }' is not assignable to type 'Rotation'.
+2025-12-16T17:27:30.4114841Z   Property 'type' is missing in type '{ angle: number; }' but required in type 'Degrees'.
+2025-12-16T17:27:30.4117020Z ##[error]apps/api/src/services/template.ts(198,28): error TS2352: Conversion of type 'string | number | boolean | JsonObject | JsonArray' to type 'TemplateVariable[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+2025-12-16T17:27:30.4118561Z   Type 'JsonArray' is not comparable to type 'TemplateVariable[]'.
+2025-12-16T17:27:30.4119018Z     Type 'JsonValue' is not comparable to type 'TemplateVariable'.
+2025-12-16T17:27:30.4119604Z       Type 'JsonValue[]' is missing the following properties from type 'TemplateVariable': key, description
+2025-12-16T17:27:30.4586651Z  ELIFECYCLE  Command failed with exit code 1.
+2025-12-16T17:27:30.4794758Z ##[error]Process completed with exit code 1.
+2025-12-16T17:27:30.4858510Z Post job cleanup.
+2025-12-16T17:27:30.5727501Z Pruning is unnecessary.
+2025-12-16T17:27:30.5875600Z Post job cleanup.
+2025-12-16T17:27:30.6850554Z [command]/usr/bin/git version
+2025-12-16T17:27:30.6888596Z git version 2.52.0
+2025-12-16T17:27:30.6932289Z Temporarily overriding HOME='/home/runner/work/_temp/bc3d607a-5973-4a50-a38f-202e48c5a1ad' before making global git config changes
+2025-12-16T17:27:30.6934619Z Adding repository directory to the temporary git global config as a safe directory
+2025-12-16T17:27:30.6946532Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/Kori_Stable/Kori_Stable
+2025-12-16T17:27:30.6983653Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2025-12-16T17:27:30.7016686Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2025-12-16T17:27:30.7269601Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2025-12-16T17:27:30.7293139Z http.https://github.com/.extraheader
+2025-12-16T17:27:30.7307026Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2025-12-16T17:27:30.7339660Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2025-12-16T17:27:30.7572204Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2025-12-16T17:27:30.7605270Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2025-12-16T17:27:30.7965699Z Cleaning up orphan processes

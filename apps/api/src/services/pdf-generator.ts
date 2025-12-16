@@ -418,7 +418,7 @@ export class PDFGeneratorService {
         font,
         color: rgb(0.6, 0.6, 0.6),
         opacity,
-        rotate: { angle: 45 },
+        rotate: { angle: 45, type: 'degrees' as any },
       });
     }
 

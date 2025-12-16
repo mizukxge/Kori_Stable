@@ -620,8 +620,8 @@ export class ContractService {
       throw new Error('Cannot resend a signed contract');
     }
 
-    if (contract.status === 'DECLINED') {
-      throw new Error('Cannot resend a declined contract');
+    if (contract.status === 'VOIDED' || contract.status === 'CANCELLED') {
+      throw new Error('Cannot resend a voided or cancelled contract');
     }
 
     if (!contract.client || !contract.client.email) {

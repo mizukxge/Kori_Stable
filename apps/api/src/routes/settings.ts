@@ -101,7 +101,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
             timezone: data.timezone || 'Europe/London',
             locale: data.locale || 'en-GB',
             currency: data.currency || 'GBP',
-            features: data.features || {},
+            features: data.features as any || {},
             ...data,
           },
         });
@@ -110,7 +110,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
           where: { id: organization.id },
           data: {
             ...data,
-            features: data.features as any,
+            features: data.features as any as any,
             metadata: data.metadata as any,
           },
         });

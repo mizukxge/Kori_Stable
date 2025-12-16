@@ -178,7 +178,7 @@ export class DocGenService {
           font: boldFont,
           color: rgb(0.7, 0.7, 0.7),
           opacity: watermarkOpacity,
-          rotate: { angle: 45 },
+          rotate: { angle: 45, type: 'degrees' as any },
         });
       }
 
