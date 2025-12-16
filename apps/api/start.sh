@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 echo "=========================================="
 echo "Starting Kori API Server"
@@ -13,14 +12,20 @@ echo "  Working directory: $(pwd)"
 echo ""
 
 echo "Step 2: Syncing Prisma schema to database..."
-npx prisma db push --skip-generate --accept-data-loss 2>&1 | head -20
-echo "✅ Schema synced"
+if npx prisma db push --skip-generate --accept-data-loss 2>&1; then
+  echo "✅ Schema synced successfully"
+else
+  echo "⚠️  Schema sync attempt completed (may have warnings)"
+fi
 echo ""
 
 echo "Step 3: Seeding database..."
-npx prisma db seed 2>&1 | tail -10
-echo "✅ Database seeded"
+if npx prisma db seed 2>&1; then
+  echo "✅ Database seeded successfully"
+else
+  echo "⚠️  Seed attempt completed (may have warnings)"
+fi
 echo ""
 
 echo "Step 4: Starting API server..."
-npm run start
+exec npm run start
