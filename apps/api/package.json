@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "tsx --watch src/index.ts",
-    "start": "node --loader tsx src/index.ts",
+    "start": "node --import tsx src/index.ts",
     "build": "tsc",
     "test": "echo \"API tests not implemented yet\" && exit 0",
     "lint": "eslint src --ext .js,.ts",
