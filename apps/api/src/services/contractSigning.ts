@@ -3,9 +3,11 @@
  * Handles e-signature workflow including OTP verification, signature capture, and document signing
  */
 
-import { prisma } from '../db.js';
+import { PrismaClient } from '@prisma/client';
 import { randomBytes } from 'crypto';
 import { hashSync, compareSync } from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 interface SignatureData {
   signerName: string;
