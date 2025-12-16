@@ -20,4 +20,4 @@ EXPOSE 3001
 
 # Run migrations, seed database, and start API
 # Important: Migrations MUST succeed before API starts
-CMD ["sh", "-c", "cd apps/api && set -e && echo 'Starting API with migrations...' && npx prisma migrate deploy && echo 'Migrations completed successfully!' && echo 'Seeding database with default data...' && npx prisma db seed && echo 'Seed completed successfully!' && echo 'Starting API server...' && npm run start"]
+CMD ["sh", "-c", "cd apps/api && set -e && echo 'Starting API with migrations...' && echo 'Current directory:' && pwd && echo 'Migrations folder:' && ls -la prisma/migrations 2>/dev/null || echo 'Migrations folder not found!' && echo 'Running migrations...' && npx prisma migrate deploy --skip-engine-check 2>&1 && echo 'Migrations completed successfully!' && echo 'Seeding database with default data...' && npx prisma db seed 2>&1 && echo 'Seed completed successfully!' && echo 'Starting API server...' && npm run start"]
