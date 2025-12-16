@@ -420,15 +420,16 @@ export async function contractsRoutes(fastify: FastifyInstance) {
   fastify.post('/admin/contracts/:id/generate-pdf', async (request, reply) => {
     try {
       const { id } = request.params as { id: string };
-      const userId = request.user!.userId;
 
-      const contract = await ContractService.generatePDF(id, userId);
+      const pdfPath = await ContractService.generatePDF(id);
+
+      // Fetch updated contract
+      const contract = await ContractService.getContractById(id);
 
       request.log.info(
         {
           contractId: id,
-          pdfPath: contract.pdfPath,
-          pdfHash: contract.pdfHash,
+          pdfPath,
         },
         'PDF generated for contract'
       );
@@ -436,7 +437,7 @@ export async function contractsRoutes(fastify: FastifyInstance) {
       return reply.status(200).send({
         success: true,
         message: 'PDF generated successfully',
-        data: contract,
+        data: { pdfPath, contractId: id },
       });
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {

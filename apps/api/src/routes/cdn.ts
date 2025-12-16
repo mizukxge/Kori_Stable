@@ -103,7 +103,7 @@ class CloudflareCDN implements CDNProvider {
 class CloudFrontCDN implements CDNProvider {
   name = 'CloudFront';
 
-  async purge(options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
+  async purge(_options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
     // Placeholder - would use AWS SDK
     return {
       success: false,
@@ -118,7 +118,7 @@ class CloudFrontCDN implements CDNProvider {
 class FastlyCDN implements CDNProvider {
   name = 'Fastly';
 
-  async purge(options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
+  async purge(_options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
     // Placeholder - would use Fastly API
     return {
       success: false,
@@ -133,7 +133,7 @@ class FastlyCDN implements CDNProvider {
 class NoCDN implements CDNProvider {
   name = 'None';
 
-  async purge(options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
+  async purge(_options: PurgeCacheBody): Promise<{ success: boolean; message: string }> {
     return {
       success: true,
       message: 'No CDN configured - cache purge skipped',
@@ -181,20 +181,34 @@ export async function cdnRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Extract parameters
+      // Extract parameters with proper type coercion
       const params: ImageParams = {};
       if (query.w) params.w = parseInt(query.w, 10);
       if (query.h) params.h = parseInt(query.h, 10);
-      if (query.fit) params.fit = query.fit;
+      if (query.fit && ['cover', 'contain', 'fill', 'inside', 'outside'].includes(query.fit)) {
+        params.fit = query.fit as 'cover' | 'contain' | 'fill' | 'inside' | 'outside';
+      }
       if (query.q) params.q = parseInt(query.q, 10);
-      if (query.f) params.f = query.f;
-      if (query.dpr) params.dpr = parseInt(query.dpr, 10);
-      if (query.crop) params.crop = query.crop;
+      if (query.f && ['jpeg', 'png', 'webp', 'avif'].includes(query.f)) {
+        params.f = query.f as 'jpeg' | 'png' | 'webp' | 'avif';
+      }
+      if (query.dpr) {
+        const dpr = parseInt(query.dpr, 10) as 1 | 2 | 3;
+        if ([1, 2, 3].includes(dpr)) params.dpr = dpr;
+      }
+      if (query.crop && ['entropy', 'attention', 'auto'].includes(query.crop)) {
+        params.crop = query.crop as 'entropy' | 'attention' | 'auto';
+      }
       if (query.blur) params.blur = parseFloat(query.blur);
       if (query.sharpen) params.sharpen = parseFloat(query.sharpen);
       if (query.grayscale) params.grayscale = query.grayscale === 'true';
-      if (query.rotate) params.rotate = parseInt(query.rotate, 10);
-      if (query.flip) params.flip = query.flip;
+      if (query.rotate) {
+        const rotate = parseInt(query.rotate, 10) as 0 | 90 | 180 | 270;
+        if ([0, 90, 180, 270].includes(rotate)) params.rotate = rotate;
+      }
+      if (query.flip && ['h', 'v'].includes(query.flip)) {
+        params.flip = query.flip as 'h' | 'v';
+      }
       if (query.bg) params.bg = query.bg;
 
       try {

@@ -273,6 +273,39 @@ export class ClientService {
   }
 
   /**
+   * Permanently delete a client (hard delete - use with caution)
+   */
+  static async permanentlyDeleteClient(id: string, userId: string) {
+    const client = await prisma.client.findUnique({ where: { id } });
+
+    if (!client) {
+      throw new Error('Client not found');
+    }
+
+    // Create audit log before deletion
+    await prisma.auditLog.create({
+      data: {
+        action: 'DELETE',
+        entityType: 'Client',
+        entityId: id,
+        userId,
+        clientId: id,
+        changes: {
+          deleted: true,
+          email: client.email,
+          name: client.name,
+        },
+        metadata: { source: 'admin_api', action: 'hard_delete' },
+      },
+    });
+
+    // Hard delete client
+    await prisma.client.delete({ where: { id } });
+
+    return { success: true, message: 'Client permanently deleted' };
+  }
+
+  /**
    * Get client statistics
    */
   static async getClientStats() {
