@@ -35,10 +35,14 @@ import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
 import { envelopesRoutes } from './envelopes.js';
 import { diagnosticRoutes } from './diagnostic.js';
+import { debugRoutes } from './debug.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
   await fastify.register(healthRoutes);
+
+  // Debug routes (for troubleshooting environment)
+  await fastify.register(debugRoutes);
 
   // Diagnostic routes (for troubleshooting - temporary)
   await fastify.register(diagnosticRoutes);
