@@ -195,7 +195,7 @@ export class TemplateService {
     if (data.content) {
       const validation = this.validateTemplate(
         data.content,
-        data.variables || (existing.variables as TemplateVariable[])
+        data.variables || (existing.variables as unknown as TemplateVariable[])
       );
       if (!validation.valid) {
         throw new Error(`Template validation failed: ${validation.issues.join(', ')}`);

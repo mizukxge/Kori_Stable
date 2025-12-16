@@ -338,9 +338,9 @@ export async function publicContractRoutes(fastify: FastifyInstance) {
           include: { client: true },
         });
 
-        if (contract && contract.createdById) {
+        if (contract && contract.createdBy) {
           await notifyContractSigned(
-            contract.createdById,
+            contract.createdBy,
             contract.contractNumber || contractId,
             contract.client?.name || 'Client'
           );

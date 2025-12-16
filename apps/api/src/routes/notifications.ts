@@ -41,7 +41,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -94,7 +94,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/:id/read',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -157,7 +157,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -333,7 +333,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -376,7 +376,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -404,7 +404,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id/deliveries',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -461,7 +461,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:webhookId/deliveries/:deliveryId/retry',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -497,7 +497,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id/test',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -546,7 +546,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/emails',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = (request as any).user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }

@@ -209,7 +209,7 @@ export class InvoiceService {
 
     // Determine invoice details based on payment type
     let invoiceData: CreateInvoiceData;
-    const depositAmount = 0; // TODO: Implement deposit feature
+    const depositAmount: number = 0; // TODO: Implement deposit feature
     const totalAmount = Number(proposal.total);
     const remainderAmount = totalAmount - depositAmount;
 
