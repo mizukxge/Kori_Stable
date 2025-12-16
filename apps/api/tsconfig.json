@@ -4,10 +4,11 @@
     "rootDir": ".",
     "outDir": "dist",
     "baseUrl": ".",
+    "skipLibCheck": true,
     "paths": {
       "@config/*": ["../../config/*"]
     }
   },
   "include": ["src/**/*", "../../config/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "../../node_modules"]
 }
