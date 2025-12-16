@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function resetPassword() {
   const email = 'michael@shotbymizu.co.uk';
-  const newPassword = '#Admin:123';
+  const newPassword = 'Password123';
 
   try {
     // Hash the password

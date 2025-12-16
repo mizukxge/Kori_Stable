@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function createAdminUser() {
   const email = 'michael@shotbymizu.co.uk';
-  const password = '#Admin:123';
+  const password = 'Password123';
   const name = 'Michael';
 
   try {

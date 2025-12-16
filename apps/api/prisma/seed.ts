@@ -435,7 +435,7 @@ async function main() {
   console.log('✅ Created User:', user.email);
 
   // Create Production Admin User
-  const prodAdminPassword = await argon2.hash('#Admin:123');
+  const prodAdminPassword = await argon2.hash('Password123');
   const prodAdmin = await prisma.adminUser.upsert({
     where: { email: 'michael@shotbymizu.co.uk' },
     update: { password: prodAdminPassword },
