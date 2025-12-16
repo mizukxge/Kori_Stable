@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { ProposalTemplateService } from '../services/proposalTemplate';
 import { requireAuth } from '../middleware/auth';
 
