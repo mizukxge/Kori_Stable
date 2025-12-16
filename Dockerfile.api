@@ -15,9 +15,11 @@ RUN pnpm install --no-scripts
 # Generate Prisma client explicitly
 RUN pnpm --filter @kori/api exec -- npx prisma generate
 
+# Make startup script executable
+RUN chmod +x apps/api/start.sh
+
 # Expose port
 EXPOSE 3001
 
-# Run migrations, seed database, and start API
-# Important: Database schema MUST be synced before API starts
-CMD ["sh", "-c", "cd apps/api && set -e && echo 'Starting API with database sync...' && npx prisma db push --skip-generate 2>&1 && echo 'Database schema synced successfully!' && echo 'Seeding database with default data...' && npx prisma db seed 2>&1 && echo 'Seed completed successfully!' && echo 'Starting API server...' && npm run start"]
+# Start API with initialization script
+CMD ["sh", "apps/api/start.sh"]
