@@ -2,6 +2,10 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# Accept API URL at build time, default to production API
+ARG VITE_API_URL=https://kori-api-production.up.railway.app
+ENV VITE_API_URL=$VITE_API_URL
+
 # Install pnpm
 RUN npm install -g pnpm
 
@@ -16,7 +20,7 @@ COPY apps/api/package.json ./apps/api/
 RUN pnpm install --ignore-scripts
 
 # Build web app with API URL from environment
-# Railway provides RAILWAY_ENVIRONMENT and other vars, but we default to production API
+# VITE_API_URL is set as env var above and will be substituted by Vite during build
 RUN pnpm --filter @kori/web build
 
 # Production stage
