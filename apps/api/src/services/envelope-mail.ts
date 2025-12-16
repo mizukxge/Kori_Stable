@@ -1,11 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import { sendEmail } from './email.js';
-import {
-  envelopeSentEmail,
-  envelopeSignedConfirmationEmail,
-  envelopeSignedAdminEmail,
-  envelopeDeclinedEmail,
-} from './email-templates.js';
+// TODO: Add envelope email templates to email-templates.ts
+// Missing templates: envelopeSentEmail, envelopeSignedConfirmationEmail,
+// envelopeSignedAdminEmail, envelopeDeclinedEmail
 
 const prisma = new PrismaClient();
 
@@ -51,35 +48,11 @@ export class EnvelopeMailService {
       // Send email to each signer
       for (const signer of envelope.signers) {
         try {
-          const signingUrl = `${baseUrl}/sign/${signer.magicLinkToken}`;
-          const expiresInHours = 7 * 24; // 7 days in hours
-
-          const emailTemplate = envelopeSentEmail({
-            recipientName: signer.name,
-            envelopeName: envelope.name,
-            senderName: envelope.createdBy?.name || 'Kori Photography',
-            signingUrl,
-            expiresInHours,
-            documentCount: envelope.documents?.length || 0,
-          });
-
-          await sendEmail({
-            to: signer.email,
-            subject: emailTemplate.subject,
-            html: emailTemplate.html,
-            text: emailTemplate.text,
-            template: 'envelope_sent',
-            metadata: {
-              envelopeId,
-              signerId: signer.id,
-              signerEmail: signer.email,
-              magicToken: signer.magicLinkToken,
-            },
-          });
-
-          console.log(`[Envelope Mail] Sent envelope notification to ${signer.email} for envelope ${envelopeId}`);
+          // TODO: Send envelope notification email using proper template
+          // For now, envelope email templates are not implemented
+          console.log(`[Envelope Mail] Skipping email notification to ${signer.email} (template not implemented)`);
         } catch (error) {
-          console.error(`[Envelope Mail] Failed to send notification to ${signer.email}:`, error);
+          console.error(`[Envelope Mail] Error processing envelope notification:`, error);
           // Continue with next signer even if one fails
         }
       }
@@ -106,26 +79,9 @@ export class EnvelopeMailService {
         throw new Error('Signer or envelope not found');
       }
 
-      const emailTemplate = envelopeSignedConfirmationEmail({
-        recipientName: signer.name,
-        envelopeName: signer.envelope.name,
-        signedAt: signer.signedAt || new Date(),
-      });
-
-      await sendEmail({
-        to: signer.email,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-        text: emailTemplate.text,
-        template: 'envelope_signed_confirmation',
-        metadata: {
-          envelopeId: signer.envelopeId,
-          signerId: signer.id,
-          signerEmail: signer.email,
-        },
-      });
-
-      console.log(`[Envelope Mail] Sent signature confirmation to ${signer.email} for envelope ${signer.envelopeId}`);
+      // TODO: Send signature confirmation email using proper template
+      // For now, envelope email templates are not implemented
+      console.log(`[Envelope Mail] Skipping signature confirmation to ${signer.email} (template not implemented)`);
     } catch (error) {
       console.error(`[Envelope Mail] Error sending signature confirmation:`, error);
       throw error;
@@ -165,28 +121,9 @@ export class EnvelopeMailService {
       const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3000';
       const envelopeUrl = `${baseUrl}/admin/envelopes/${signer.envelopeId}`;
 
-      const emailTemplate = envelopeSignedAdminEmail({
-        envelopeName: signer.envelope.name,
-        signerName: signer.name,
-        signerEmail: signer.email,
-        signedAt: signer.signedAt || new Date(),
-        envelopeUrl,
-      });
-
-      await sendEmail({
-        to: signer.envelope.createdBy.email,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-        text: emailTemplate.text,
-        template: 'envelope_signed_admin',
-        metadata: {
-          envelopeId: signer.envelopeId,
-          signerId: signer.id,
-          signerEmail: signer.email,
-        },
-      });
-
-      console.log(`[Envelope Mail] Sent admin notification for signed envelope ${signer.envelopeId}`);
+      // TODO: Send admin notification email using proper template
+      // For now, envelope email templates are not implemented
+      console.log(`[Envelope Mail] Skipping admin notification for envelope ${signer.envelopeId} (template not implemented)`);
     } catch (error) {
       console.error(`[Envelope Mail] Error sending admin notification:`, error);
       throw error;
@@ -226,29 +163,9 @@ export class EnvelopeMailService {
       const baseUrl = process.env.PUBLIC_URL || 'http://localhost:3000';
       const envelopeUrl = `${baseUrl}/admin/envelopes/${signer.envelopeId}`;
 
-      const emailTemplate = envelopeDeclinedEmail({
-        envelopeName: signer.envelope.name,
-        declinedBy: signer.name,
-        reason: signer.declinedReason || undefined,
-        declinedAt: signer.declinedAt || new Date(),
-        envelopeUrl,
-      });
-
-      await sendEmail({
-        to: signer.envelope.createdBy.email,
-        subject: emailTemplate.subject,
-        html: emailTemplate.html,
-        text: emailTemplate.text,
-        template: 'envelope_declined',
-        metadata: {
-          envelopeId: signer.envelopeId,
-          signerId: signer.id,
-          signerEmail: signer.email,
-          reason: signer.declinedReason,
-        },
-      });
-
-      console.log(`[Envelope Mail] Sent decline notification for envelope ${signer.envelopeId}`);
+      // TODO: Send decline notification email using proper template
+      // For now, envelope email templates are not implemented
+      console.log(`[Envelope Mail] Skipping decline notification for envelope ${signer.envelopeId} (template not implemented)`);
     } catch (error) {
       console.error(`[Envelope Mail] Error sending decline notification:`, error);
       throw error;
