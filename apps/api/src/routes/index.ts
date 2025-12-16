@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { healthRoutes } from './health.js';
-import { uploadsRoutes } from './uploads.js';
 import { authRoutes } from './auth.js';
 import { websocketRoutes } from './websocket.js';
 import { clientRoutes, adminClientRoutes } from './clients.js';
@@ -37,14 +36,10 @@ import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
 import { envelopesRoutes } from './envelopes.js';
-import { appointmentsRoutes } from './appointments.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
   await fastify.register(healthRoutes);
-
-  // Uploads serving routes (public - RAW, EDIT, VIDEO assets)
-  await fastify.register(uploadsRoutes);
 
   // CDN & Image Optimization routes (public image serving + admin management)
   await fastify.register(cdnRoutes);
@@ -160,9 +155,6 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Analytics routes (admin only)
   await fastify.register(analyticsRoutes);
-
-  // Appointments scheduling routes (admin + public)
-  await fastify.register(appointmentsRoutes);
 
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
