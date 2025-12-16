@@ -8,6 +8,9 @@ RUN npm install -g pnpm
 # Copy root package files
 COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
 
+# Copy config and environment files
+COPY config ./config
+
 # Copy only API package
 COPY apps/api ./apps/api
 COPY apps/web/package.json ./apps/web/
@@ -17,9 +20,6 @@ RUN pnpm install --frozen-lockfile
 
 # Generate Prisma client
 RUN pnpm --filter @kori/api db:generate
-
-# Run migrations
-RUN pnpm --filter @kori/api db:migrate
 
 # Expose port
 EXPOSE 3001
