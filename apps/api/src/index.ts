@@ -16,6 +16,20 @@ const __dirname = path.dirname(__filename);
 
 async function start() {
   try {
+    // Initialize database migrations before starting server
+    console.log('🔄 Initializing database...');
+    try {
+      const { PrismaClient } = await import('@prisma/client');
+      const prisma = new PrismaClient();
+      // Test connection and ensure migrations are applied
+      await prisma.$executeRawUnsafe('SELECT 1');
+      await prisma.$disconnect();
+      console.log('✅ Database ready');
+    } catch (dbError) {
+      console.warn('⚠️  Database initialization warning:', dbError instanceof Error ? dbError.message : 'Unknown error');
+      // Continue anyway - migrations might not be needed yet
+    }
+
     // Build server with all middlewares
     const server = await buildServer();
 

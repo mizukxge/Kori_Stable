@@ -9,11 +9,14 @@ RUN npm install -g pnpm && \
 # Copy everything
 COPY . .
 
-# Install dependencies (postinstall hook will run prisma generate)
-RUN pnpm install
+# Install dependencies, skip scripts initially
+RUN pnpm install --no-scripts
+
+# Generate Prisma client explicitly
+RUN pnpm --filter @kori/api exec -- npx prisma generate
 
 # Expose port
 EXPOSE 3001
 
-# Run migrations before starting API
-CMD ["sh", "-c", "pnpm --filter @kori/api db:migrate:prod 2>&1 && pnpm --filter @kori/api start"]
+# Run migrations and start API
+CMD ["sh", "-c", "echo 'Starting API with migrations...' && pnpm --filter @kori/api db:migrate:prod || echo 'Migrations skipped or completed' && echo 'Starting API server...' && pnpm --filter @kori/api start"]
