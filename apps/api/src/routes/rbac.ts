@@ -1,11 +1,9 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { 
-  requirePermission, 
-  requireRole, 
+import {
   getUserPermissions,
-  clearUserCache 
+  clearUserCache
 } from '../middleware/rbac';
 
 const prisma = new PrismaClient();

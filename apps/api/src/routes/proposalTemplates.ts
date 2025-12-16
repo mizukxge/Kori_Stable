@@ -1,5 +1,5 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { ProposalTemplateService, createProposalTemplateSchema, updateProposalTemplateSchema } from '../services/proposalTemplate';
+import { FastifyInstance } from 'fastify';
+import { ProposalTemplateService } from '../services/proposalTemplate';
 import { requireAuth } from '../middleware/auth';
 
 /**
@@ -17,8 +17,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates',
     {
       schema: {
-        description: 'List all proposal templates',
-        tags: ['Proposal Templates'],
         response: {
           200: {
             type: 'array',
@@ -46,7 +44,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const templates = await ProposalTemplateService.listTemplates(request.user.id);
+        const templates = await ProposalTemplateService.listTemplates(request.user.userId);
         return reply.send(templates);
       } catch (error) {
         return reply.status(500).send({
@@ -64,8 +62,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates/:id',
     {
       schema: {
-        description: 'Get a single proposal template',
-        tags: ['Proposal Templates'],
         params: {
           type: 'object',
           required: ['id'],
@@ -77,7 +73,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
-        const template = await ProposalTemplateService.getTemplate(request.params.id, request.user.id);
+        const template = await ProposalTemplateService.getTemplate(request.params.id, request.user.userId);
         return reply.send(template);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to get template';
@@ -95,8 +91,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates',
     {
       schema: {
-        description: 'Create a new proposal template',
-        tags: ['Proposal Templates'],
         body: {
           type: 'object',
           required: ['name'],
@@ -124,7 +118,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
       try {
-        const template = await ProposalTemplateService.createTemplate(request.user.id, request.body);
+        const template = await ProposalTemplateService.createTemplate(request.user.userId, request.body);
         return reply.status(201).send(template);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to create template';
@@ -142,8 +136,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates/:id',
     {
       schema: {
-        description: 'Update a proposal template',
-        tags: ['Proposal Templates'],
         params: {
           type: 'object',
           required: ['id'],
@@ -178,7 +170,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Params: { id: string }; Body: any }>, reply: FastifyReply) => {
       try {
-        const template = await ProposalTemplateService.updateTemplate(request.params.id, request.user.id, request.body);
+        const template = await ProposalTemplateService.updateTemplate(request.params.id, request.user.userId, request.body);
         return reply.send(template);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to update template';
@@ -199,8 +191,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates/:id',
     {
       schema: {
-        description: 'Delete a proposal template',
-        tags: ['Proposal Templates'],
         params: {
           type: 'object',
           required: ['id'],
@@ -212,7 +202,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
       try {
-        await ProposalTemplateService.deleteTemplate(request.params.id, request.user.id);
+        await ProposalTemplateService.deleteTemplate(request.params.id, request.user.userId);
         return reply.status(204).send();
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to delete template';
@@ -230,8 +220,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates/:id/duplicate',
     {
       schema: {
-        description: 'Duplicate a proposal template',
-        tags: ['Proposal Templates'],
         params: {
           type: 'object',
           required: ['id'],
@@ -249,7 +237,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Params: { id: string }; Body: { name?: string } }>, reply: FastifyReply) => {
       try {
-        const template = await ProposalTemplateService.duplicateTemplate(request.params.id, request.user.id, request.body?.name);
+        const template = await ProposalTemplateService.duplicateTemplate(request.params.id, request.user.userId, request.body?.name);
         return reply.status(201).send(template);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to duplicate template';
@@ -267,8 +255,6 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     '/admin/proposal-templates/stats',
     {
       schema: {
-        description: 'Get proposal template statistics',
-        tags: ['Proposal Templates'],
         response: {
           200: {
             type: 'object',
@@ -283,7 +269,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const stats = await ProposalTemplateService.getTemplateStats(request.user.id);
+        const stats = await ProposalTemplateService.getTemplateStats(request.user.userId);
         return reply.send(stats);
       } catch (error) {
         return reply.status(500).send({
