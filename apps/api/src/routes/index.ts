@@ -34,10 +34,14 @@ import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
 import { envelopesRoutes } from './envelopes.js';
+import { diagnosticRoutes } from './diagnostic.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
   await fastify.register(healthRoutes);
+
+  // Diagnostic routes (for troubleshooting - temporary)
+  await fastify.register(diagnosticRoutes);
 
   // CDN & Image Optimization routes (public image serving + admin management)
   await fastify.register(cdnRoutes);
