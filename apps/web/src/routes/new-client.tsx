@@ -204,7 +204,7 @@ export default function NewClientPage() {
       stepErrors.company = 'Company name is required';
     }
 
-    if (formData.zipCode && !/^[a-zA-Z0-9\s\-]{1,20}$/.test(formData.zipCode)) {
+    if (formData.zipCode && !/^[a-zA-Z0-9\s-]{1,20}$/.test(formData.zipCode)) {
       stepErrors.zipCode = 'Please enter a valid postal code';
     }
 

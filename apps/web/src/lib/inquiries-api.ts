@@ -58,13 +58,6 @@ export interface InquiryResponse {
   data: Inquiry;
 }
 
-export interface InquiryStats {
-  totalThisPeriod: number;
-  newToday: number;
-  conversionRate: number;
-  avgResponseTimeHours: number;
-}
-
 /**
  * Get inquiry statistics for dashboard
  */

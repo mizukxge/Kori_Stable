@@ -77,7 +77,7 @@ export class DocGenService {
     // Format date
     Handlebars.registerHelper('date', function(value: Date | string, format = 'long') {
       const date = typeof value === 'string' ? new Date(value) : value;
-      
+
       if (format === 'short') {
         return new Intl.DateTimeFormat('en-US').format(date);
       }
@@ -113,7 +113,7 @@ export class DocGenService {
     }
 
     const templatePath = join(this.templatesDir, `${templateName}.html`);
-    
+
     if (!existsSync(templatePath)) {
       throw new Error(`Template "${templateName}" not found at ${templatePath}`);
     }
@@ -145,7 +145,7 @@ export class DocGenService {
       const html = this.renderHTML(options.template, options.data);
 
       // For now, we'll use a simple approach
-      // In production, you'd use Puppeteer or similar for HTMLÃ¢â€ â€™PDF
+      // In production, you'd use Puppeteer or similar for HTML to PDF
       // This is a placeholder implementation
 
       // Create a simple PDF document
@@ -170,7 +170,7 @@ export class DocGenService {
       // Add watermark if requested
       if (options.watermark) {
         const watermarkOpacity = options.watermark.opacity || 0.3;
-        
+
         page.drawText(options.watermark.text, {
           x: width / 2 - 100,
           y: height / 2,
@@ -229,7 +229,7 @@ export class DocGenService {
           color: rgb(0, 0, 0),
         });
         yPosition -= 20;
-        
+
         if (yPosition < 100) break;
       }
 
@@ -281,11 +281,11 @@ export class DocGenService {
     // For now, use the same method
     // In production, you'd add PDF/A compliance settings
     const result = await this.generatePDF(options);
-    
+
     if (result.success) {
       console.log('Note: PDF/A compliance not yet fully implemented');
     }
-    
+
     return result;
   }
 

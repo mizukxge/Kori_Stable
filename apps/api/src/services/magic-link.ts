@@ -43,7 +43,7 @@ export class MagicLinkService {
   /**
    * Generate a numeric OTP code
    */
-  private static generateOTP(): string {
+  private static generateOTPCode(): string {
     const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit number
     return otp.toString();
   }

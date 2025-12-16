@@ -67,7 +67,12 @@
       "Bash(timeout 15s git push origin main)",
       "Bash(set \"DATABASE_URL=postgresql://postgres:BbYmjvNwCfcOYXMaytiNkUXTGKKskftr@postgres.railway.internal:5432/railway\")",
       "Bash(move \"E:\\Applications\\kori_web_stable\\create-admin-user.ts\" \"E:\\Applications\\kori_web_stable\\apps\\api\\create-admin-user.ts\")",
-      "Bash(pnpm db:migrate:prod:*)"
+      "Bash(pnpm db:migrate:prod:*)",
+      "Bash(pnpm --version:*)",
+      "Bash(python:*)",
+      "Bash(for file in *.mjs)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then sed -i '1i/* eslint-env node */' \"$file\")"
     ],
     "deny": [],
     "ask": []
