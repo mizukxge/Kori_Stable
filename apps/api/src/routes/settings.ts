@@ -27,8 +27,8 @@ const updateOrganizationSchema = z.object({
   timezone: z.string().optional(),
   locale: z.string().optional(),
   currency: z.string().length(3).optional(),
-  features: z.record(z.boolean()).optional(),
-  metadata: z.record(z.any()).optional(),
+  features: z.record(z.string(), z.boolean()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 const updateSettingSchema = z.object({
@@ -518,7 +518,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
 
         const { settings, reason } = z
           .object({
-            settings: z.record(z.any()),
+            settings: z.record(z.string(), z.any()),
             reason: z.string().optional(),
           })
           .parse(request.body);

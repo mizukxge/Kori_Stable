@@ -23,7 +23,7 @@ const createWebhookSchema = z.object({
   secret: z.string().optional(),
   description: z.string().max(500).optional(),
   events: z.array(z.nativeEnum(NotificationType)).optional(),
-  headers: z.record(z.string()).optional(),
+  headers: z.record(z.string(), z.string()).optional(),
   maxRetries: z.number().int().min(0).max(10).default(3),
   timeoutSeconds: z.number().int().min(1).max(300).default(30),
 });

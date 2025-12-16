@@ -75,7 +75,8 @@
       "Bash(then sed -i '1i/* eslint-env node */' \"$file\")",
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(do gh run list --limit 1)"
     ],
     "deny": [],
     "ask": []

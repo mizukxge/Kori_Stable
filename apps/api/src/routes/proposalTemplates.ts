@@ -118,7 +118,7 @@ export async function registerProposalTemplateRoutes(fastify: FastifyInstance) {
     },
     async (request: FastifyRequest<{ Body: any }>, reply: FastifyReply) => {
       try {
-        const template = await ProposalTemplateService.createTemplate(request.user.userId, request.body);
+        const template = await ProposalTemplateService.createTemplate(request.user.userId, request.body as any);
         return reply.status(201).send(template);
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to create template';

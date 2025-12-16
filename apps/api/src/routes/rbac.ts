@@ -42,7 +42,7 @@ const _assignPermissionSchema = z.object({
 const createPolicyRuleSchema = z.object({
   name: z.string().min(1).max(100),
   permissionId: z.string().cuid(),
-  conditions: z.record(z.any()),
+  conditions: z.record(z.string(), z.any()),
   effect: z.enum(['ALLOW', 'DENY']).default('ALLOW'),
   priority: z.number().int().default(0),
   description: z.string().max(500).optional(),
