@@ -52,6 +52,7 @@ import EnvelopesIndex from './routes/admin/envelopes/index';
 import EnvelopeDetailPage from './routes/admin/envelopes/[id]';
 import CreateEnvelopePage from './routes/admin/envelopes/new';
 import SigningPage from './routes/sign/[token]';
+import LoginPage from './routes/login';
 
 function App() {
   return (
@@ -96,8 +97,8 @@ function App() {
           {/* Admin Login - No layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
-          {/* Redirect /login to /admin/login */}
-          <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+          {/* Default Login Route - No layout */}
+          <Route path="/login" element={<LoginPage />} />
 
           {/* Admin Routes */}
           <Route
