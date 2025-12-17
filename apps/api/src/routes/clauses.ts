@@ -161,7 +161,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     '/api/clauses',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         const clause = await ClauseService.createClause(request.body, userId);
         return reply.status(201).send(clause);
       } catch (error: any) {
@@ -179,7 +179,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         const clause = await ClauseService.updateClause(id, request.body, userId);
         return reply.send(clause);
       } catch (error: any) {
@@ -197,7 +197,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         const clause = await ClauseService.deleteClause(id, userId);
         return reply.send({ message: 'Clause deleted successfully', clause });
       } catch (error: any) {
@@ -215,7 +215,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         await ClauseService.hardDeleteClause(id, userId);
         return reply.send({ message: 'Clause permanently deleted' });
       } catch (error: any) {
@@ -233,7 +233,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         const data = {
           clauseId: id,
@@ -258,7 +258,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         const { expression, enabled } = request.body;
 
         const rule = await ClauseService.updateClauseRule(
@@ -283,7 +283,7 @@ export async function clausesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         await ClauseService.deleteClauseRule(id, userId);
         return reply.send({ message: 'Clause rule deleted successfully' });
       } catch (error: any) {

@@ -127,7 +127,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: any }>('/roles', async (request, reply) => {
     try {
       const data = createRoleSchema.parse(request.body);
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
 
       // Check if role name already exists
       const existing = await prisma.systemRole.findUnique({
@@ -386,7 +386,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
       try {
         const { roleId } = request.params;
         const { permissionId } = z.object({ permissionId: z.string().cuid() }).parse(request.body);
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         // Check if already assigned
         const existing = await prisma.rolePermission.findUnique({
@@ -532,7 +532,7 @@ export default async function rbacRoutes(fastify: FastifyInstance) {
           scope: z.string().optional(),
           expiresAt: z.string().datetime().optional(),
         }).parse(request.body);
-        const assignedBy = (request as any).user?.id;
+        const assignedBy = request.user?.userId;
 
         // Check if already assigned with same scope
         const existing = await prisma.userRole.findFirst({

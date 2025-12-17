@@ -129,7 +129,7 @@ export async function websocketRoutes(fastify: FastifyInstance) {
 
   // Optional: Health check endpoint for connection stats
   fastify.get('/ws/stats', async (request, reply) => {
-    const userId = (request as any).user?.id;
+    const userId = request.user?.userId;
 
     if (!userId) {
       return reply.code(401).send({ error: 'Unauthorized' });

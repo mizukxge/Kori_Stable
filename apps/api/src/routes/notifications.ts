@@ -124,7 +124,7 @@ export async function notificationRoutes(fastify: FastifyInstance) {
    */
   fastify.post('/notifications/read-all', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -182,7 +182,7 @@ export async function notificationRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/notifications/preferences', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -205,7 +205,7 @@ export async function notificationRoutes(fastify: FastifyInstance) {
    */
   fastify.put<{ Body: any }>('/notifications/preferences', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -261,7 +261,7 @@ export async function notificationRoutes(fastify: FastifyInstance) {
    */
   fastify.get('/notifications/webhooks', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -289,7 +289,7 @@ export async function notificationRoutes(fastify: FastifyInstance) {
    */
   fastify.post<{ Body: any }>('/notifications/webhooks', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
