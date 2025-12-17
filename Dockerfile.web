@@ -19,22 +19,19 @@ RUN pnpm install --ignore-scripts
 # Set VITE_API_URL as environment variable before build so Vite can substitute it
 RUN VITE_API_URL=https://kori-api-production.up.railway.app pnpm --filter @kori/web build
 
-# Production stage
+# Production stage - use simple HTTP server to serve static files
 FROM node:18-alpine
 
 WORKDIR /app
 
-RUN npm install -g pnpm
+# Install serve to serve the static build
+RUN npm install -g serve
 
-# Copy necessary files from builder
-COPY --from=builder /app/node_modules ./node_modules
+# Copy only the dist folder (built static files)
 COPY --from=builder /app/apps/web/dist ./dist
-COPY --from=builder /app/apps/web/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/package.json ./package.json
 
 # Expose port
 EXPOSE 3000
 
-# Start with preview server (specify the web workspace)
-CMD ["pnpm", "--filter", "@kori/web", "preview"]
+# Serve the static build with SPA routing (rewrites to index.html for React Router)
+CMD ["serve", "-s", "dist", "-l", "3000"]
