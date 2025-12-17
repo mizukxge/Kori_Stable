@@ -34,4 +34,5 @@ COPY --from=builder /app/apps/web/dist ./dist
 EXPOSE 3000
 
 # Serve the static build with SPA routing (rewrites to index.html for React Router)
+# Cache-bust: Force rebuild - v1
 CMD ["serve", "-s", "dist", "-l", "3000"]
