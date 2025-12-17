@@ -1,5 +1,8 @@
 FROM node:18-alpine AS builder
 
+# Build cache buster - change this to force rebuild
+ARG BUILD_ID=v3-2025-12-17-rebuild-attempt-3
+
 WORKDIR /app
 
 # Install pnpm
@@ -17,7 +20,7 @@ RUN pnpm install --ignore-scripts
 
 # Build web app with production API URL
 # Set VITE_API_URL as environment variable before build so Vite can substitute it
-RUN VITE_API_URL=https://kori-api-production.up.railway.app pnpm --filter @kori/web build
+RUN echo "Building with ID: ${BUILD_ID}" && VITE_API_URL=https://kori-api-production.up.railway.app pnpm --filter @kori/web build
 
 # Production stage - use simple HTTP server to serve static files
 FROM node:18-alpine
