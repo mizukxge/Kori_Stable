@@ -3,7 +3,7 @@
  * Uses magic links and OTP for access
  */
 
-const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_URL 'http://localhost:3002'#124;'http://localhost:3002'#124; 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 interface ValidationResult {
   success: boolean;
