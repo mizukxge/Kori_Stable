@@ -18,5 +18,5 @@ RUN pnpm --filter @kori/api exec -- npx prisma generate
 # Expose port
 EXPOSE 3001
 
-# Start API (database initialization is handled by npm start script)
-CMD ["sh", "-c", "cd apps/api && npm run start"]
+# Start API with explicit database migrations
+CMD ["sh", "-c", "cd apps/api && npm run db:migrate:prod && node --import tsx src/index.ts"]
