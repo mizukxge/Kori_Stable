@@ -23,7 +23,11 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(32).optional(),
     API_KEY: z.string().optional(),
 });
+// Export type for TypeScript
+export { envSchema };
+
 // Parse and validate
+/** @type {z.infer<typeof envSchema>} */
 const parseEnv = () => {
     const result = envSchema.safeParse(process.env);
     if (!result.success) {
@@ -33,6 +37,8 @@ const parseEnv = () => {
     }
     return result.data;
 };
+
+/** @type {z.infer<typeof envSchema>} */
 export const env = parseEnv();
 // Mask sensitive values for logging
 const maskSecret = (value) => {
