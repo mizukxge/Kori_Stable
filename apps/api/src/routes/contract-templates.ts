@@ -181,7 +181,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     '/api/contract-templates',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
@@ -207,7 +207,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
@@ -234,7 +234,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
@@ -257,7 +257,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
@@ -280,7 +280,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
@@ -306,7 +306,7 @@ export async function contractTemplatesRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       try {
         const { id } = request.params;
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
 
         if (!userId) {
           return reply.status(401).send({ error: 'Unauthorized' });
