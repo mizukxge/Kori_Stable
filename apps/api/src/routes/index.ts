@@ -34,6 +34,7 @@ import { mediaProcessRoutes } from './mediaProcess.js';
 import { cdnRoutes } from './cdn.js';
 import { analyticsRoutes } from './analytics.js';
 import { envelopesRoutes } from './envelopes.js';
+import { notificationRoutes } from './notifications.js';
 import { diagnosticRoutes } from './diagnostic.js';
 import { debugRoutes } from './debug.js';
 
@@ -55,6 +56,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // WebSocket routes (real-time notifications)
   await fastify.register(websocketRoutes);
+
+  // Notification routes (in-app notifications, preferences, webhooks)
+  await fastify.register(notificationRoutes);
 
   // Public gallery routes (no auth required)
   await fastify.register(publicGalleryRoutes);

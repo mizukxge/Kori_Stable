@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { PrismaClient, NotificationType, NotificationDigestFrequency } from '@prisma/client';
 import { z } from 'zod';
 import { attemptDelivery } from '../services/webhook';
+import { requireAuth } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
 
@@ -28,23 +29,23 @@ const createWebhookSchema = z.object({
   timeoutSeconds: z.number().int().min(1).max(300).default(30),
 });
 
-export default async function notificationRoutes(fastify: FastifyInstance) {
+export async function notificationRoutes(fastify: FastifyInstance) {
+  // All notification routes require authentication
+  fastify.addHook('preHandler', requireAuth);
+
   // ============================================
   // IN-APP NOTIFICATIONS
   // ============================================
 
   /**
-   * GET /api/notifications
+   * GET /notifications
    * Get user's in-app notifications
    */
   fastify.get<{ Querystring: { page?: string; limit?: string; unreadOnly?: string } }>(
-    '/',
+    '/notifications',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const page = parseInt(request.query.page || '1');
         const limit = parseInt(request.query.limit || '20');
@@ -87,17 +88,14 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   );
 
   /**
-   * PATCH /api/notifications/:id/read
+   * PATCH /notifications/:id/read
    * Mark notification as read
    */
   fastify.patch<{ Params: { id: string } }>(
-    '/:id/read',
+    '/notifications/:id/read',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const { id } = request.params;
 
@@ -121,10 +119,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   );
 
   /**
-   * POST /api/notifications/read-all
+   * POST /notifications/read-all
    * Mark all notifications as read
    */
-  fastify.post('/read-all', async (request, reply) => {
+  fastify.post('/notifications/read-all', async (request, reply) => {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -150,17 +148,14 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * DELETE /api/notifications/:id
+   * DELETE /notifications/:id
    * Delete/dismiss a notification
    */
   fastify.delete<{ Params: { id: string } }>(
-    '/:id',
+    '/notifications/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         await prisma.notification.delete({
           where: {
@@ -182,10 +177,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   // ============================================
 
   /**
-   * GET /api/notifications/preferences
+   * GET /notifications/preferences
    * Get user's notification preferences
    */
-  fastify.get('/preferences', async (request, reply) => {
+  fastify.get('/notifications/preferences', async (request, reply) => {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -205,10 +200,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * PUT /api/notifications/preferences
+   * PUT /notifications/preferences
    * Update notification preference
    */
-  fastify.put<{ Body: any }>('/preferences', async (request, reply) => {
+  fastify.put<{ Body: any }>('/notifications/preferences', async (request, reply) => {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -261,10 +256,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   // ============================================
 
   /**
-   * GET /api/notifications/webhooks
+   * GET /notifications/webhooks
    * List user's webhook endpoints
    */
-  fastify.get('/webhooks', async (request, reply) => {
+  fastify.get('/notifications/webhooks', async (request, reply) => {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -289,10 +284,10 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * POST /api/notifications/webhooks
+   * POST /notifications/webhooks
    * Create a webhook endpoint
    */
-  fastify.post<{ Body: any }>('/webhooks', async (request, reply) => {
+  fastify.post<{ Body: any }>('/notifications/webhooks', async (request, reply) => {
     try {
       const userId = (request as any).user?.id;
       if (!userId) {
@@ -333,10 +328,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const data = createWebhookSchema.partial().parse(request.body);
 
@@ -376,10 +368,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         await prisma.webhookEndpoint.delete({
           where: {
@@ -404,10 +393,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id/deliveries',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const page = parseInt(request.query.page || '1');
         const limit = parseInt(request.query.limit || '50');
@@ -461,10 +447,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:webhookId/deliveries/:deliveryId/retry',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         // Verify ownership
         const webhook = await prisma.webhookEndpoint.findFirst({
@@ -497,10 +480,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/webhooks/:id/test',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const webhook = await prisma.webhookEndpoint.findFirst({
           where: {
@@ -546,10 +526,7 @@ export default async function notificationRoutes(fastify: FastifyInstance) {
     '/emails',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.userId;
-        if (!userId) {
-          return reply.code(401).send({ error: 'Authentication required' });
-        }
+        const userId = request.user?.userId;
 
         const page = parseInt(request.query.page || '1');
         const limit = parseInt(request.query.limit || '50');

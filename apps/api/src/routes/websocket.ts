@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import { PrismaClient } from '@prisma/client';
+import { AuthService } from '../services/auth.js';
 import {
   registerConnection,
   unregisterConnection,
@@ -26,14 +27,25 @@ const prisma = new PrismaClient();
 export async function websocketRoutes(fastify: FastifyInstance) {
   // WebSocket upgrade endpoint
   fastify.get('/ws/notifications', { websocket: true }, async (socket: WebSocket, request: FastifyRequest) => {
-    // Extract userId from session
-    const userId = (request as any).user?.id;
+    // Manually validate session for WebSocket (preHandler doesn't work with WebSocket upgrades)
+    const sessionToken = request.cookies.sessionToken;
 
-    if (!userId) {
-      console.log('[WS] Connection rejected: No authentication');
+    if (!sessionToken) {
+      console.log('[WS] Connection rejected: No session token');
       socket.close(4001, 'Unauthorized - authentication required');
       return;
     }
+
+    // Validate session token
+    const user = await AuthService.validateSession(sessionToken);
+
+    if (!user) {
+      console.log('[WS] Connection rejected: Invalid or expired session');
+      socket.close(4001, 'Unauthorized - invalid session');
+      return;
+    }
+
+    const userId = user.userId;
 
     console.log(`[WS] User ${userId} connecting...`);
 
