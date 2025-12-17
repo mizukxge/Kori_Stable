@@ -13,6 +13,9 @@ const envSchema = z.object({
     API_HOST: z.string().default('0.0.0.0'),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
     LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
+    // Session/Cookie configuration
+    SESSION_COOKIE_SECURE: z.string().optional().transform(v => v === 'true'),
+    SESSION_COOKIE_SAMESITE: z.enum(['Strict', 'Lax', 'None']).optional().default('Lax'),
     // Database
     DATABASE_URL: z.string(),
     // Secrets (will be masked in logs)
@@ -46,6 +49,8 @@ export const printConfig = () => {
     console.log('  API_HOST:', env.API_HOST);
     console.log('  CORS_ORIGIN:', env.CORS_ORIGIN);
     console.log('  LOG_LEVEL:', env.LOG_LEVEL);
+    console.log('  SESSION_COOKIE_SECURE:', env.SESSION_COOKIE_SECURE);
+    console.log('  SESSION_COOKIE_SAMESITE:', env.SESSION_COOKIE_SAMESITE);
     console.log('  DATABASE_URL:', maskSecret(env.DATABASE_URL));
     console.log('  SESSION_SECRET:', maskSecret(env.SESSION_SECRET));
     console.log('  JWT_SECRET:', maskSecret(env.JWT_SECRET));
