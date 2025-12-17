@@ -18,15 +18,11 @@ RUN pnpm install --frozen-lockfile --ignore-scripts
 # Build web app - Force rebuild with timestamp
 RUN echo "Building at $(date)" && \
     VITE_API_URL=https://kori-api-production.up.railway.app \
+    VITE_WS_URL=wss://kori-api-production.up.railway.app \
     pnpm --filter @kori/web build
 
-# Verify build output and create simple dist structure for serve
-RUN echo "=== Dist directory contents ===" && \
-    ls -la /app/apps/web/dist/ && \
-    echo "=== index.html preview ===" && \
-    head -20 /app/apps/web/dist/index.html && \
-    mkdir -p /app/server && \
-    cp -r /app/apps/web/dist /app/server/
+# Create simple dist structure for serve
+RUN mkdir -p /app/server && cp -r /app/apps/web/dist /app/server/
 
 # Expose port
 EXPOSE 3000
