@@ -81,7 +81,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
    */
   fastify.patch<{ Body: any }>('/organization', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -235,7 +235,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
     '/:key',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -316,7 +316,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
    */
   fastify.delete<{ Params: { key: string } }>('/:key', async (request, reply) => {
     try {
-      const userId = (request as any).user?.id;
+      const userId = request.user?.userId;
       if (!userId) {
         return reply.code(401).send({ error: 'Authentication required' });
       }
@@ -446,7 +446,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
     '/features/:feature',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
@@ -511,7 +511,7 @@ export default async function settingsRoutes(fastify: FastifyInstance) {
     '/bulk',
     async (request, reply) => {
       try {
-        const userId = (request as any).user?.id;
+        const userId = request.user?.userId;
         if (!userId) {
           return reply.code(401).send({ error: 'Authentication required' });
         }
