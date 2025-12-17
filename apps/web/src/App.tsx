@@ -54,6 +54,7 @@ import CreateEnvelopePage from './routes/admin/envelopes/new';
 import SigningPage from './routes/sign/[token]';
 import LoginPage from './routes/login';
 
+// Force rebuild: 2025-12-17-rebuild-v4
 function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="kori-theme">

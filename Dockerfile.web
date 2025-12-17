@@ -1,41 +1,30 @@
-FROM node:18-alpine AS builder
-
-# Build cache buster - change this to force rebuild
-ARG BUILD_ID=v3-2025-12-17-rebuild-attempt-3
-
-WORKDIR /app
-
-# Install pnpm
-RUN npm install -g pnpm
-
-# Copy root package files
-COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
-
-# Copy web app
-COPY apps/web ./apps/web
-COPY apps/api/package.json ./apps/api/
-
-# Install dependencies (skip build scripts for API postinstall)
-RUN pnpm install --ignore-scripts
-
-# Build web app with production API URL
-# Set VITE_API_URL as environment variable before build so Vite can substitute it
-RUN echo "Building with ID: ${BUILD_ID}" && VITE_API_URL=https://kori-api-production.up.railway.app pnpm --filter @kori/web build
-
-# Production stage - use simple HTTP server to serve static files
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install serve to serve the static build
-RUN npm install -g serve
+# Install pnpm and serve
+RUN npm install -g pnpm serve
 
-# Copy only the dist folder (built static files)
-COPY --from=builder /app/apps/web/dist ./dist
+# Copy package files
+COPY pnpm-lock.yaml package.json pnpm-workspace.yaml ./
+
+# Copy source files
+COPY apps/web ./apps/web
+COPY apps/api/package.json ./apps/api/
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Build web app - Force rebuild with timestamp
+RUN echo "Building at $(date)" && \
+    VITE_API_URL=https://kori-api-production.up.railway.app \
+    pnpm --filter @kori/web build
+
+# Create simple dist structure for serve
+RUN mkdir -p /app/server && cp -r /app/apps/web/dist /app/server/
 
 # Expose port
 EXPOSE 3000
 
-# Serve the static build with SPA routing (rewrites to index.html for React Router)
-# Cache-bust: Force rebuild - v1
-CMD ["serve", "-s", "dist", "-l", "3000"]
+# Serve the static build with SPA routing
+CMD ["serve", "-s", "server/dist", "-l", "3000"]
