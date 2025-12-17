@@ -96,7 +96,9 @@ function App() {
           {/* Admin Login - No layout */}
           <Route path="/admin/login" element={<AdminLogin />} />
 
-          
+          {/* Redirect /login to /admin/login */}
+          <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+
           {/* Admin Routes */}
           <Route
             path="/"
