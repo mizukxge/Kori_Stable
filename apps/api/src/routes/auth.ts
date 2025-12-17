@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { AuthService } from '../services/auth.js';
 import { requireAuth } from '../middleware/auth.js';
+import { env } from '../../../../config/env.js';
 
 // Request body schemas
 interface LoginBody {
@@ -48,8 +49,8 @@ export async function authRoutes(fastify: FastifyInstance) {
       reply.setCookie('sessionToken', sessionToken, {
         path: '/',
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: env.SESSION_COOKIE_SECURE ?? (env.NODE_ENV === 'production'),
+        sameSite: (env.SESSION_COOKIE_SAMESITE?.toLowerCase() || 'lax') as 'strict' | 'lax' | 'none',
         maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
       });
 
