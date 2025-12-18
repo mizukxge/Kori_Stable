@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Settings, X, Images, Shield, FileSignature, FileCheck, Receipt, Mail } from 'lucide-react';
+import { Home, Users, FileText, Settings, X, Images, Shield, FileSignature, FileCheck, Receipt, Mail, Calendar } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/Button';
 import { cn } from '../../lib/utils';
@@ -13,6 +13,7 @@ const navigation = [
   { name: 'Galleries', icon: Images, href: '/admin/galleries' },
   { name: 'Inquiries', icon: Mail, href: '/admin/inquiries' },
   { name: 'Clients', icon: Users, href: '/admin/clients' },
+  { name: 'Appointments', icon: Calendar, href: '/admin/appointments' },
   { name: 'Proposals', icon: FileCheck, href: '/admin/proposals' },
   { name: 'Invoices', icon: Receipt, href: '/admin/invoices' },
   { name: 'Contracts', icon: FileSignature, href: '/admin/contracts' },
