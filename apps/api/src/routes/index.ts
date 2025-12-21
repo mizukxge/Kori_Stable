@@ -37,6 +37,7 @@ import { envelopesRoutes } from './envelopes.js';
 import { notificationRoutes } from './notifications.js';
 import { diagnosticRoutes } from './diagnostic.js';
 import { debugRoutes } from './debug.js';
+import { appointmentsRoutes } from './appointments.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -157,11 +158,14 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Analytics routes (admin only)
   await fastify.register(analyticsRoutes);
 
+  // Appointments and scheduling routes (admin only)
+  await fastify.register(appointmentsRoutes);
+
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
-    return { 
-      message: 'Hello from Kori API!', 
-      timestamp: new Date().toISOString() 
+    return {
+      message: 'Hello from Kori API!',
+      timestamp: new Date().toISOString()
     };
   });
 }
