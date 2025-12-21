@@ -905,3 +905,92 @@ export async function getAppointmentSettings(): Promise<{ success: boolean; data
 
   return response.json();
 }
+
+export async function updateAppointmentSettings(data: {
+  workdayStart?: number;
+  workdayEnd?: number;
+  bookingWindowDays?: number;
+  bufferMinutes?: number;
+  allowedTypes?: string[];
+  timezone?: string;
+}): Promise<{ success: boolean; data: any; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/settings`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update settings');
+  }
+
+  return response.json();
+}
+
+export async function getBlockedTimes(params?: {
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ success: boolean; data: any[]; pagination: any }> {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/appointments/blocked-times?${queryParams}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get blocked times');
+  }
+
+  return response.json();
+}
+
+export async function createBlockedTime(data: {
+  reason: string;
+  startTime: string;
+  endTime: string;
+}): Promise<{ success: boolean; data: any; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/blocked-times`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create blocked time');
+  }
+
+  return response.json();
+}
+
+export async function deleteBlockedTime(id: string): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/blocked-times/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete blocked time');
+  }
+
+  return response.json();
+}

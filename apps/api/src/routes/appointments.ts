@@ -350,6 +350,26 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
   });
 
   /**
+   * DELETE /admin/appointments/blocked-times/:id
+   * Delete a blocked time entry
+   */
+  fastify.delete('/admin/appointments/blocked-times/:id', async (request, reply) => {
+    try {
+      const { id } = request.params as { id: string };
+
+      await AppointmentService.deleteBlockedTime(id);
+
+      return reply.status(200).send({
+        success: true,
+        message: 'Blocked time deleted successfully',
+      });
+    } catch (error) {
+      request.log.error(error, 'Error deleting blocked time');
+      throw error;
+    }
+  });
+
+  /**
    * GET /admin/appointments/settings
    * Get appointment settings
    */
