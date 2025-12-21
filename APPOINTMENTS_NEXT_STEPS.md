@@ -1,370 +1,447 @@
-# Appointments System - Next Steps (Slices 3-5)
+# Appointments System - Final Slice (Slice 5: Metrics & Reporting)
 
-**Current Status:** v0.2 — Slices 1-2 Complete
-**Total Code:** 3,000+ lines (Backend + Frontend)
-**Progress:** 40% → 60% of full MVP
+**Current Status:** v0.4 — Slices 1-4 Complete ✅
+**Total Code:** 5,000+ lines (Backend + Frontend)
+**Progress:** 80% of full MVP - Ready for Slice 5
 
 ---
 
-## 📊 Summary of Completed Work
+## ✅ Completed Slices Summary
 
-### ✅ Slice 1: Data + Admin List
-- Prisma schema with 4 models (Appointment, AuditLog, BlockedTime, Settings)
-- 12 admin API endpoints with full CRUD
-- Admin appointments list page with stats, filters, pagination
-- Service layer with audit logging
+### Slice 1: Data Model & Admin CRUD
+- Prisma schema: Appointment, AppointmentAuditLog, AppointmentBlockedTime, AppointmentSettings
+- 12 admin API endpoints with full CRUD operations
+- Admin list page with stats, filters, and pagination
+- Complete audit logging with immutable records
 
-### ✅ Slice 2: Public Booking + Availability
-- End-to-end tokenized invite system
+### Slice 2: Public Booking & Availability
+- Tokenized invite system with expiry and single-use enforcement
 - AvailabilityService with comprehensive business rules:
-  - Mon-Sat only, 11:00-16:00 UTC
-  - 14-day booking window
-  - 15-min buffer enforcement
+  - Mon-Sat working days, 11:00-16:00 UTC hours
+  - 14-day booking window enforcement
+  - 15-minute buffer between appointments
   - Double-booking prevention
-- Multi-step public booking page (beautiful UI)
-- Admin invitation link manager
-- Fake Teams provider for dev/test
-- Public API endpoints with validation
+- Multi-step public booking page (step-by-step wizard UI)
+- Admin invitation link creation interface
+- Public API endpoints for availability and booking
 
-### ✅ Additional Features Implemented
-- Appointment audit trail
-- Status transitions (Draft → InviteSent → Booked → Completed/NoShow/Cancelled)
-- Token generation + expiry checking + single-use enforcement
-- Meeting provider abstraction for future real Teams integration
+### Slice 3: Calendar UI + Admin Settings
+- WeekCalendar component (Mon-Sat, 11:00-16:00 UTC grid)
+- Appointments colored by type with status indicators
+- AppointmentDetailPanel for viewing/managing appointments
+- Calendar page with week navigation
+- Settings page with:
+  - Working hours configuration
+  - Booking rules (window days, buffer minutes)
+  - Appointment types selection
+  - Timezone selection
+  - Blocked times management
 
----
+### Slice 4: Email Notifications + Teams Integration + Reminders
+- **Email Service:**
+  - Booking confirmation email
+  - 24-hour reminder email
+  - 1-hour reminder email
+  - Reschedule notification email
+  - Cancellation notification email
+  - SMTP configuration with error handling
 
-## 🎯 Next Steps - Recommended Order
+- **Reminder Scheduler:**
+  - Automatic appointment reminder checking (every 5 minutes)
+  - Tracks sent reminders to prevent duplicates
+  - Graceful error handling and logging
 
-### **Priority 1: Slice 3 - Calendar UI + Settings** (~8-10 hours)
-**Impact:** HIGH — Gives admin visual interface for appointments
-**Dependency:** All Slice 1-2 logic already complete
+- **Teams Integration:**
+  - Real Microsoft Graph API integration
+  - OAuth2 authentication via Azure AD
+  - Meeting creation with auto-recording
+  - Token caching and refresh
+  - Meeting cancellation
+  - Recording URL retrieval
 
-#### Features to Implement:
-1. **Calendar View Component** (`/admin/appointments/calendar.tsx`)
-   - Week view by default (Mon-Sat, times 11:00-16:00)
-   - Visual display of appointments (color by type)
-   - Show blocked times (hatched/grey)
-   - Click appointment → detail panel
-   - Drag-and-drop reschedule (optional for v0.2)
-   - Empty slot visualization
-
-2. **Settings Page** (`/admin/appointments/settings.tsx`)
-   - Working hours configuration (per-day, Mon-Sat only)
-   - Buffer time setting (default 15 min)
-   - Booking window (default 14 days)
-   - Toggle active appointment types
-   - Timezone selection (default Europe/London)
-
-3. **Blocked Times Management UI**
-   - Add blocked time form (date range + reason)
-   - List existing blocks
-   - Delete blocks
-   - Integration with calendar visualization
-
-4. **API Enhancements**
-   - PATCH `/admin/appointments/settings` (already exists)
-   - Better GET `/admin/appointments/blocked-times` query support
-   - DELETE `/admin/appointments/blocked-times/:id` endpoint
-
-#### Files to Create/Modify:
-```
-NEW: apps/web/src/routes/admin/appointments/calendar.tsx (400+ lines)
-NEW: apps/web/src/routes/admin/appointments/settings.tsx (350+ lines)
-NEW: apps/web/src/components/calendar/WeekCalendar.tsx (300+ lines)
-NEW: apps/web/src/components/calendar/TimeSlot.tsx (150+ lines)
-MODIFY: apps/api/src/routes/appointments.ts (add DELETE blocked-time)
-MODIFY: apps/web/src/lib/api.ts (add calendar + settings functions)
-```
-
-**Estimated Effort:** 8-10 hours
+- **Lifecycle Integration:**
+  - Booking confirmation on successful appointment booking
+  - Reschedule notification when appointment is rescheduled
+  - Cancellation notification when appointment is cancelled
+  - Reminder scheduler initialized on server startup
 
 ---
 
-### **Priority 2: Slice 4 - Email + Teams Integration + Reminders** (~12-15 hours)
-**Impact:** CRITICAL — Completes end-to-end booking flow
-**Dependency:** Needs Slice 3 optional (works without it)
+## 🎯 Slice 5: Metrics & Reporting (~6-8 hours)
 
-#### Features to Implement:
+**Status:** ⏳ Ready to implement
+**Impact:** MEDIUM — Business analytics and insights
+**Dependencies:** All Slices 1-4 ✅
 
-1. **Email Templates & Service**
-   - Confirmation email (client + admin)
-   - Reminder emails (24h + 30min before)
-   - Reschedule notification
-   - Cancellation notice
-   - Integration with existing email service (Postmark/SES)
+### Features to Implement
 
-2. **Reminder Job** (`apps/api/src/jobs/appointmentsReminders.ts`)
-   - Background task runs every minute
-   - Finds appointments needing reminders
-   - Sends idempotent emails (check flags)
-   - Updates reminder sent flags
-   - Clean up old reminders
+#### 1. Enhanced Metrics API
+- Already exists but needs enhancement
+- GET `/admin/appointments/metrics` endpoint
+- Response format:
+  ```json
+  {
+    "totalAppointments": 45,
+    "completedAppointments": 35,
+    "noShowCount": 3,
+    "noShowRate": "6.7%",
+    "byType": {
+      "Introduction": 20,
+      "CreativeDirection": 15,
+      "ContractInvoicing": 10
+    },
+    "byOutcome": {
+      "Positive": 28,
+      "Neutral": 5,
+      "Negative": 2
+    },
+    "upcomingAppointmentsCount": 5,
+    "thisWeekCount": 3,
+    "thisMonthCount": 12,
+    "allTimeStats": {
+      "totalMinutes": 2700,
+      "averageMinutesPerCall": 60
+    }
+  }
+  ```
 
-3. **Real Teams Integration** (Phase A: Mock + Logging)
-   - Implement `MicrosoftTeamsProvider.createMeeting()`
-   - MS Graph API integration (with proper auth)
-   - Error handling + fallback to fake provider
-   - Recording URL stub (for Phase B)
+#### 2. Metrics Dashboard Page
+**File:** `apps/web/src/routes/admin/appointments/metrics.tsx` (300+ lines)
 
-4. **Reschedule Workflow**
-   - POST `/admin/appointments/:id/reschedule` updates implementation
-   - Cancel old Teams meeting
-   - Create new Teams meeting with new time
-   - Send reschedule email with new link + ICS
-   - Update audit log with before/after times
+**Components:**
+- Summary stats cards:
+  - Total calls
+  - Completed calls
+  - No-show rate
+  - This week's calls
+  - This month's calls
 
-5. **ICS Calendar Files**
-   - Generate `.ics` files for bookings
-   - Attach to confirmation + reschedule emails
-   - Support for Outlook, Google Calendar, Apple Calendar
+- Charts:
+  - Calls per week (bar chart or line chart)
+  - Appointment outcomes breakdown (pie chart)
+  - Appointment types distribution (pie chart)
+  - No-show rate trend (line chart)
 
-#### Files to Create/Modify:
+- Filters:
+  - Date range selector (last 7 days, 30 days, 90 days, custom)
+  - Appointment type filter
+  - Outcome filter
+
+- Data table (optional):
+  - Sortable columns
+  - Pagination
+
+**Libraries to use:**
+- `recharts` for charts (already in package.json context)
+- Native date pickers for date range
+
+#### 3. CSV Export Functionality
+**Endpoint:** POST `/admin/appointments/export` or GET `/admin/appointments/export?format=csv`
+
+**Export columns:**
+- Date & Time
+- Client Name
+- Client Email
+- Appointment Type
+- Status
+- Outcome
+- Duration (minutes)
+- Teams Link
+- Notes
+- Recording URL (if available)
+- Created At
+- Completed At
+
+**Parameters:**
+- `startDate` (optional, default: 90 days ago)
+- `endDate` (optional, default: today)
+- `type` (optional: filter by appointment type)
+- `status` (optional: filter by status)
+- `outcome` (optional: filter by outcome)
+
+**Response:**
+- CSV file download with proper headers
+- Filename: `appointments-export-YYYY-MM-DD.csv`
+
+#### 4. Dashboard Widget (Home Page)
+**File:** `apps/web/src/components/dashboard/AppointmentWidget.tsx` (100+ lines)
+
+**Content:**
+- "Upcoming This Week" section (next 7 days)
+  - Show next 3 appointments
+  - Time, client name, type
+  - Quick links to calendar
+
+- "Latest Stats" section
+  - Last month's calls
+  - Completion rate
+  - No-show rate
+
+- "Action Buttons"
+  - View Calendar
+  - View Metrics
+  - Create Invitation
+
+### Files to Create/Modify
+
 ```
-NEW: apps/api/src/services/appointmentEmails.ts (250+ lines)
-NEW: apps/api/src/jobs/appointmentsReminders.ts (200+ lines)
-NEW: apps/api/src/templates/appointmentEmails/ (email templates)
-MODIFY: apps/api/src/providers/MeetingProvider.ts (real Teams impl)
-MODIFY: apps/api/src/services/appointments.ts (email triggers)
-MODIFY: apps/api/src/routes/publicAppointments.ts (send confirmation)
-MODIFY: apps/web/src/lib/api.ts (email preview functions)
-CONFIG: Update .env with TEAMS_* variables and email service config
-```
+NEW: apps/web/src/routes/admin/appointments/metrics.tsx (300+ lines)
+NEW: apps/web/src/components/charts/CallsPerWeekChart.tsx (100+ lines)
+NEW: apps/web/src/components/charts/OutcomesChart.tsx (80+ lines)
+NEW: apps/web/src/components/charts/TypesChart.tsx (80+ lines)
+NEW: apps/web/src/components/dashboard/AppointmentWidget.tsx (100+ lines)
 
-**Estimated Effort:** 12-15 hours
-
----
-
-### **Priority 3: Slice 5 - Metrics + Reporting** (~6-8 hours)
-**Impact:** MEDIUM — Provides business insights
-**Dependency:** All previous slices
-
-#### Features to Implement:
-
-1. **Metrics API** (already partially exists)
-   - GET `/admin/appointments/metrics` enhancements
-   - Calls per week/month/all-time
-   - Breakdown by type + outcome
-   - No-show rate calculation
-   - Upcoming appointments count
-
-2. **Metrics Dashboard Page** (`/admin/appointments/metrics.tsx`)
-   - Summary stats cards
-   - Charts (calls per week, outcome breakdown)
-   - Time-series visualization
-   - Filter by date range, type, outcome
-
-3. **CSV Export**
-   - Export appointment data
-   - Columns: Date, Time, Client, Type, Status, Outcome, Notes, Recording
-   - Configurable filters
-   - Download as CSV file
-
-4. **Dashboard Widget** (for home page)
-   - Upcoming calls (next 7 days)
-   - No-show rate
-   - Latest outcome
-   - Link to full metrics page
-
-#### Files to Create/Modify:
-```
-NEW: apps/web/src/routes/admin/appointments/metrics.tsx (400+ lines)
-NEW: apps/web/src/components/charts/CallsChart.tsx (200+ lines)
 MODIFY: apps/api/src/services/appointments.ts (enhance getAppointmentStats)
 MODIFY: apps/api/src/routes/appointments.ts (add CSV export endpoint)
-MODIFY: apps/web/src/lib/api.ts (CSV export function)
+MODIFY: apps/web/src/lib/api.ts (add metrics and export functions)
+MODIFY: apps/web/src/routes/admin/index.tsx (add metrics link to sidebar)
 ```
 
-**Estimated Effort:** 6-8 hours
+### Implementation Guide
 
----
-
-## 💻 Implementation Quick Start
-
-### Slice 3 Starting Point:
+#### Step 1: Enhance Backend Metrics
 ```typescript
-// Create basic calendar week view component
-// 1. Create WeekCalendar component that accepts appointments
-// 2. Create time grid (11:00-16:00, Mon-Sat)
-// 3. Fetch appointments from API
-// 4. Overlay appointments on time grid
-// 5. Add click handler for appointment details
-// 6. Create settings form component
-// 7. Wire up API calls for save/load
+// apps/api/src/services/appointments.ts
+static async getAppointmentStats(filters?: {
+  startDate?: Date;
+  endDate?: Date;
+  type?: AppointmentType;
+  status?: AppointmentStatus;
+}): Promise<{
+  totalAppointments: number;
+  completedAppointments: number;
+  noShowCount: number;
+  noShowRate: string;
+  byType: Record<string, number>;
+  byOutcome: Record<string, number>;
+  upcomingAppointmentsCount: number;
+  thisWeekCount: number;
+  thisMonthCount: number;
+}> {
+  // Query appointments with aggregations
+  // Calculate percentages
+  // Return formatted data
+}
 ```
 
-### Slice 4 Starting Point:
+#### Step 2: Create Chart Components
 ```typescript
-// Create email service
-// 1. Write email template functions
-// 2. Create confirmation email builder
-// 3. Integrate with existing email service
-// 4. Add email triggers to booking flow
-// 5. Implement reminder job (cron-like)
-// 6. Implement real Teams API calls
-// 7. Test with mock provider first
+// Use recharts for visualization
+import { BarChart, PieChart, LineChart } from 'recharts';
+
+// Each chart component takes data prop and renders chart
+// Handle empty states gracefully
+// Make responsive with Recharts ResponsiveContainer
 ```
 
-### Slice 5 Starting Point:
+#### Step 3: Create Metrics Page
 ```typescript
-// Create metrics page
-// 1. Fetch stats from API
-// 2. Display in summary cards
-// 3. Add simple chart library (recharts or chart.js)
-// 4. Build CSV export function
-// 5. Add dashboard widget
+// Fetch stats from API on mount
+// Render summary cards
+// Render all charts
+// Add date range and filter controls
+// Link to CSV export
 ```
 
----
-
-## 🧪 Testing Checklist
-
-### Slice 3 Testing:
-- [ ] Calendar displays appointments correctly
-- [ ] Appointments show in correct time slots
-- [ ] Blocked times display visually
-- [ ] Settings form saves and loads
-- [ ] Working hours validation works
-- [ ] Timezone changes reflected in UI
-
-### Slice 4 Testing:
-- [ ] Confirmation email sent on booking
-- [ ] Email contains correct details + Teams link
-- [ ] Reminder job triggers at correct times
-- [ ] Email flags prevent duplicate sends
-- [ ] Reschedule updates Teams meeting
-- [ ] ICS files are valid and importable
-- [ ] Teams meeting creation logged/tracked
-
-### Slice 5 Testing:
-- [ ] Metrics calculate correctly
-- [ ] Charts render properly
-- [ ] CSV export contains correct data
-- [ ] Filters work on export
-- [ ] Dashboard widget shows correct info
-
----
-
-## 🔌 Environment Variables Needed
-
-### For Slice 3:
-```bash
-# Already configured
-VITE_API_URL=http://localhost:3001
+#### Step 4: CSV Export
+```typescript
+// POST endpoint that takes filters
+// Query appointments with filters
+// Format as CSV
+// Return with proper headers (Content-Type: text/csv)
+// Set Content-Disposition: attachment
 ```
 
-### For Slice 4 (Teams Integration):
-```bash
-TEAMS_CLIENT_ID=your-app-id
-TEAMS_CLIENT_SECRET=your-client-secret
-TEAMS_TENANT_ID=your-tenant-id
-MEETING_PROVIDER=teams  # or 'fake' for dev
+### Testing Checklist
+
+- [ ] Metrics API returns correct aggregations
+- [ ] Date range filtering works correctly
+- [ ] Type filtering works correctly
+- [ ] Outcome filtering works correctly
+- [ ] Charts display correctly with sample data
+- [ ] Empty states handled gracefully
+- [ ] CSV export contains all required columns
+- [ ] CSV export respects filters
+- [ ] Dashboard widget shows upcoming appointments
+- [ ] Mobile responsive on all screens
+- [ ] Performance acceptable with 1000+ appointments
+
+### Performance Considerations
+
+- **Aggregation queries:** Index on status, type, scheduledAt in database
+- **Caching:** Consider caching daily metrics (updates daily at midnight)
+- **Large datasets:** Implement pagination for export if > 10,000 records
+- **Charts:** Limit visible data to improve render performance
+
+---
+
+## 📋 Testing & Quality Checklist
+
+- [ ] All 5 slices have unit test coverage (target: 80%+)
+- [ ] E2E tests for critical flows:
+  - [ ] Booking flow (invite → booking → confirmation)
+  - [ ] Admin actions (create, reschedule, cancel)
+  - [ ] Reminder sending (mock timer advancement)
+- [ ] Integration tests for:
+  - [ ] Email sending (mock SMTP)
+  - [ ] Teams API (mock Graph API)
+  - [ ] Availability calculation with constraints
+- [ ] Load testing with 100+ concurrent appointments
+- [ ] GDPR compliance for email/data storage
+- [ ] Security review:
+  - [ ] Token security (short expiry, single-use)
+  - [ ] Email injection prevention
+  - [ ] API rate limiting
+  - [ ] Admin auth on all protected endpoints
+
+---
+
+## 🚀 Deployment Checklist
+
+### Environment Variables (Production)
+```env
+# Email
+SMTP_HOST=smtp.office365.com
+SMTP_PORT=587
+SMTP_USER=noreply@company.com
+SMTP_PASS=office365_password
+EMAIL_FROM=appointments@company.com
+
+# Teams
+TEAMS_CLIENT_ID=azure_app_id
+TEAMS_CLIENT_SECRET=azure_app_secret
+TEAMS_TENANT_ID=azure_tenant_id
+MEETING_PROVIDER=teams
+
+# Reminders
+REMINDER_CHECK_INTERVAL_SECONDS=300
+REMINDER_24HOUR_MINUTES=1440
+REMINDER_1HOUR_MINUTES=60
+
+# App
+DATABASE_URL=postgresql://user:pass@host:5432/db
+SESSION_SECRET=random_secure_value
+API_PORT=3001
+API_HOST=0.0.0.0
+NODE_ENV=production
+LOG_LEVEL=info
 ```
 
-### For Slice 4 (Email):
-```bash
-EMAIL_PROVIDER=postmark  # or 'ses', 'sendgrid'
-POSTMARK_TOKEN=your-token
-SEND_FROM_EMAIL=noreply@shotbymizu.co.uk
-SEND_FROM_NAME="Mizu Studio"
-```
+### Pre-Deployment Steps
+1. Database backups configured
+2. Email service tested with production credentials
+3. Teams API credentials set up in Azure AD
+4. SMTP TLS/SSL properly configured
+5. Session secret rotated from default
+6. Monitoring and alerting configured
+7. Error tracking (Sentry or equivalent) set up
+8. Database indexes created for performance
 
 ---
 
-## 📋 Code Architecture Notes
+## 🎓 Architecture Summary
 
-### Key Services Created:
-1. **AvailabilityService** — Pure, testable availability logic
-2. **AppointmentService** — CRUD + status management + audit
-3. **MeetingProvider** — Pluggable meeting creation (Teams, Zoom, etc.)
-4. **AppointmentEmailService** (Slice 4) — Email template + sending
-5. **ReminderJob** (Slice 4) — Background reminder scheduling
+### Vertical Slices Approach
+Each slice implements a feature completely from database to UI:
+- **Slice 1:** Data model + basic CRUD
+- **Slice 2:** Public-facing booking flow
+- **Slice 3:** Admin UI for management
+- **Slice 4:** Automation (email + reminders)
+- **Slice 5:** Analytics and insights
 
-### API Layer:
-- Admin routes: `/admin/appointments/*` (require auth)
-- Public routes: `/book/:token/*` (rate-limited)
-- All endpoints use Zod validation
-- Comprehensive error handling with HTTP status codes
+### Technology Stack
+- **Backend:** Fastify + Prisma + PostgreSQL
+- **Frontend:** React 18 + Vite + Tailwind CSS
+- **Async Jobs:** Node.js setInterval (simple) → future: Bull queues
+- **Email:** Nodemailer + Handlebars templates
+- **APIs:** Microsoft Graph (Teams), SMTP
+- **Monitoring:** Pino logging, Prometheus metrics
 
-### Frontend Architecture:
-- React Router v7 file-based routing
-- API client functions in `lib/api.ts`
-- Shadcn UI components for consistency
-- Mobile-first responsive design
-
----
-
-## 🚀 Deployment Considerations
-
-### Before Production Deployment:
-1. **Database:** Ensure Prisma migration runs on all environments
-2. **Teams API:** Configure real credentials (not fake provider)
-3. **Email Service:** Set up Postmark/SES account + templates
-4. **Background Jobs:** Configure reminder job runner (cron or systemd timer)
-5. **Rate Limiting:** Verify Fastify rate-limit configured for public endpoints
-6. **Error Tracking:** Wire up Sentry or error monitoring
-7. **Logging:** Ensure appointment events logged properly
-8. **Tests:** Achieve ≥80% coverage on critical paths
-
-### Production Checklist:
-- [ ] Run `pnpm typecheck` — no TypeScript errors
-- [ ] Run `pnpm lint` — no linting errors
-- [ ] Run `pnpm test` — all tests pass
-- [ ] Review `appointments-spec.md` for any TODOs
-- [ ] Verify email templates reviewed by designer
-- [ ] Test Teams meeting creation with real account
-- [ ] Test reminder job in staging
-- [ ] Security review of token generation
-- [ ] Performance test with 1000+ appointments
+### Key Design Patterns
+- **Provider pattern** for meeting creation (pluggable Teams/Zoom/etc)
+- **Audit trail** for compliance and debugging
+- **Service layer** for business logic (appointments.ts)
+- **API client abstraction** (api.ts) for frontend
+- **Error resilience** - email/reminder failures don't block appointments
 
 ---
 
-## 📞 Quick Reference
+## 📈 Future Enhancements (Beyond MVP)
 
-### What's Already Built:
-- ✅ Database schema (4 models)
-- ✅ 12 admin API endpoints
-- ✅ Public booking API (3 endpoints)
-- ✅ Availability logic (fully tested)
-- ✅ Token generation + validation
-- ✅ Public booking UI (multi-step wizard)
-- ✅ Admin list page with stats
-- ✅ Invitation manager page
-- ✅ Meeting provider abstraction
-
-### What Needs to Be Built (Next 25-35 hours):
-- **Slice 3:** Calendar view (8-10h)
-- **Slice 4:** Email + Teams + Reminders (12-15h)
-- **Slice 5:** Metrics + Reporting (6-8h)
-- **Testing:** 5-10h across all slices
-- **Documentation:** 2-3h
-
-### Total Effort Remaining:
-**25-35 hours** for full MVP (Slices 3-5)
-**Current Progress:** ~60% complete
+- SMS reminders as alternative to email
+- Zoom integration alongside Teams
+- Rescheduling from email links
+- Timezone conversion for international clients
+- Meeting recording transcription
+- Automated follow-up workflows
+- Calendar sync (Google Calendar, Outlook)
+- Recurring appointments
+- Multi-admin scheduling
+- Availability bulk import
+- Email template customization UI
 
 ---
 
-## 🎓 Key Architectural Decisions
+## 📚 Documentation
 
-1. **Availability as Pure Service** — No side effects, easy to test
-2. **Meeting Provider Pattern** — Pluggable, testable, supports multiple providers
-3. **Token Single-Use Enforcement** — Prevents accidental double-booking
-4. **Audit Trail on All Changes** — Complete history for support/debugging
-5. **Fake Provider for Dev** — No external dependencies needed for development
-6. **Background Jobs for Reminders** — Decouples from request/response cycle
+- **CLAUDE.md** — Project overview and architecture
+- **SLICE_4_ENV_REFERENCE.md** — Complete email & Teams setup guide
+- **appointments-spec.md** — Original requirements document
+- **PROGRESS_TRACKER.md** — Feature completion log
 
 ---
 
-## 📞 Questions? Start with:
+## 🎯 Slice 5 Quick Start
 
-1. **For availability logic:** See `appointmentsAvailability.ts`
-2. **For API design:** See `appointments-spec.md` sections 5-6
-3. **For UI patterns:** Check existing components in `apps/web/src/components/ui/`
-4. **For database:** Review Prisma schema in `schema.prisma`
+1. **Enhance metrics API** (1-2 hours)
+   - Update getAppointmentStats() with more aggregations
+   - Test with sample data
+
+2. **Create chart components** (2 hours)
+   - Install recharts if needed
+   - Create 3-4 reusable chart components
+   - Mock data for testing
+
+3. **Build metrics page** (2-3 hours)
+   - Fetch metrics from API
+   - Render summary cards
+   - Integrate charts
+   - Add filters
+
+4. **CSV export** (1-2 hours)
+   - Backend endpoint
+   - Frontend button and trigger
+   - Test with various filters
+
+5. **Dashboard widget** (1 hour)
+   - Quick stats display
+   - Upcoming appointments
+   - Action buttons
+
+6. **Testing & Polish** (1-2 hours)
+   - Unit tests for metrics calculation
+   - E2E test for export
+   - Performance optimization
+   - Mobile responsiveness
+
+**Total Estimate: 6-8 hours** (realistic for production-quality code)
 
 ---
 
-**Next Action:** Choose which slice to implement first (recommend Slice 3 for visual admin interface), then create feature branch and begin implementation.
+## ✨ Success Criteria for Slice 5
 
-**Branch Strategy:** All work continues on `claude/add-appointments-tab-QD5wD` branch, pushed after each slice.
+- [ ] Metrics page loads in < 1 second
+- [ ] Charts render smoothly with 1000+ data points
+- [ ] CSV export works with all filter combinations
+- [ ] Mobile view looks good on iPhone/Android
+- [ ] 80%+ test coverage on metrics logic
+- [ ] Zero console errors or warnings
+- [ ] Accessibility: keyboard navigation, ARIA labels
+- [ ] Export file contains all promised columns
+- [ ] Upcoming appointments widget updates in real-time
+
+---
+
+**Status:** Ready for implementation! 🚀
+
+All infrastructure is in place. Slice 5 focuses on analytics—no new complex integrations needed. Can be built incrementally and deployed independently.
