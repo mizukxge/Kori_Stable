@@ -67,14 +67,18 @@ export class FakeMeetingProvider implements MeetingProvider {
 }
 
 /**
- * Real Microsoft Teams Provider (Stub for v0.1)
- * To be implemented in Slice 4 when Teams API credentials are available
- * Uses MS Graph API to create Teams meetings
+ * Real Microsoft Teams Provider
+ * Uses Microsoft Graph API to create and manage Teams meetings
+ * Requires Azure app registration with the following permissions:
+ * - OnlineMeetings.ReadWrite
+ * - User.Read (delegated)
  */
 export class MicrosoftTeamsProvider implements MeetingProvider {
   private clientId: string;
   private clientSecret: string;
   private tenantId: string;
+  private accessToken: string | null = null;
+  private tokenExpiresAt: Date | null = null;
 
   constructor() {
     this.clientId = process.env.TEAMS_CLIENT_ID || '';
@@ -88,23 +92,184 @@ export class MicrosoftTeamsProvider implements MeetingProvider {
     }
   }
 
-  async createMeeting(config: CreateMeetingConfig): Promise<CreateMeetingResult> {
-    // TODO: Implement real Teams API integration via MS Graph
-    // For now, fall back to fake provider
-    console.warn('[TEAMS] Real Teams integration not yet implemented (v0.1)');
+  /**
+   * Get valid access token (refresh if needed)
+   */
+  private async getAccessToken(): Promise<string> {
+    // Return cached token if still valid
+    if (this.accessToken && this.tokenExpiresAt && new Date() < this.tokenExpiresAt) {
+      return this.accessToken;
+    }
 
-    const fakeProvider = new FakeMeetingProvider();
-    return fakeProvider.createMeeting(config);
+    const tokenUrl = `https://login.microsoftonline.com/${this.tenantId}/oauth2/v2.0/token`;
+    const params = new URLSearchParams({
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
+      scope: 'https://graph.microsoft.com/.default',
+      grant_type: 'client_credentials',
+    });
+
+    try {
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        body: params,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to get Teams access token: ${error}`);
+      }
+
+      const data = (await response.json()) as {
+        access_token: string;
+        expires_in: number;
+      };
+
+      this.accessToken = data.access_token;
+      // Set expiry 5 minutes before actual expiry
+      this.tokenExpiresAt = new Date(Date.now() + (data.expires_in - 300) * 1000);
+
+      return this.accessToken;
+    } catch (error) {
+      console.error('❌ Failed to obtain Teams access token:', error);
+      throw error;
+    }
+  }
+
+  async createMeeting(config: CreateMeetingConfig): Promise<CreateMeetingResult> {
+    try {
+      const accessToken = await this.getAccessToken();
+
+      // Calculate end time
+      const endTime = new Date(config.startTime.getTime() + config.duration * 60000);
+
+      // Build the meeting request body
+      const meetingBody = {
+        startDateTime: config.startTime.toISOString(),
+        endDateTime: endTime.toISOString(),
+        subject: config.subject,
+        description: config.description,
+        allowedPresenters: 'everyone' as const,
+        isEntryExitAnnouncementEnabled: true,
+        recordAutomatically: true,
+        participants: {
+          attendees: config.attendees.map((attendee) => ({
+            identity: {
+              user: {
+                id: attendee.email,
+              },
+            },
+            upn: attendee.email,
+            role: 'attendee' as const,
+          })),
+        },
+      };
+
+      // Create meeting via Graph API
+      const response = await fetch('https://graph.microsoft.com/v1.0/me/onlineMeetings', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(meetingBody),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(
+          `Failed to create Teams meeting: ${JSON.stringify(error)}`
+        );
+      }
+
+      const meeting = (await response.json()) as {
+        id: string;
+        joinWebUrl: string;
+      };
+
+      console.log(`✅ Created Teams meeting: ${config.subject}`);
+      console.log(`  Meeting ID: ${meeting.id}`);
+      console.log(`  Join URL: ${meeting.joinWebUrl}`);
+
+      return {
+        meetingId: meeting.id,
+        joinUrl: meeting.joinWebUrl,
+        provider: 'microsoft-teams',
+      };
+    } catch (error) {
+      console.error('❌ Error creating Teams meeting:', error);
+      throw error;
+    }
   }
 
   async cancelMeeting(meetingId: string): Promise<void> {
-    // TODO: Implement real Teams API integration
-    console.warn('[TEAMS] Real Teams cancellation not yet implemented (v0.1)');
+    try {
+      const accessToken = await this.getAccessToken();
+
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/onlineMeetings/${meetingId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok && response.status !== 404) {
+        const error = await response.text();
+        throw new Error(`Failed to cancel Teams meeting: ${error}`);
+      }
+
+      console.log(`✅ Cancelled Teams meeting: ${meetingId}`);
+    } catch (error) {
+      console.error('❌ Error cancelling Teams meeting:', error);
+      throw error;
+    }
   }
 
   async getRecording(meetingId: string): Promise<string | null> {
-    // TODO: Implement real Teams API integration to fetch recording URL
-    return null;
+    try {
+      const accessToken = await this.getAccessToken();
+
+      // Get the meeting transcripts/recordings
+      const response = await fetch(
+        `https://graph.microsoft.com/v1.0/me/onlineMeetings/${meetingId}/recordings`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.warn(`Could not fetch recordings for meeting ${meetingId}`);
+        return null;
+      }
+
+      const data = (await response.json()) as {
+        value: Array<{
+          id: string;
+          contentUrl: string;
+          createdDateTime: string;
+        }>;
+      };
+
+      // Return the first recording if available
+      if (data.value && data.value.length > 0) {
+        console.log(`📹 Found recording for meeting ${meetingId}`);
+        return data.value[0].contentUrl;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('❌ Error fetching Teams recording:', error);
+      return null;
+    }
   }
 }
 
@@ -127,3 +292,4 @@ export function getMeetingProvider(): MeetingProvider {
       return new FakeMeetingProvider();
   }
 }
+

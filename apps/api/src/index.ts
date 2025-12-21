@@ -1,5 +1,6 @@
 import { buildServer } from './server.js';
 import { registerRoutes } from './routes/index.js';
+import { getAppointmentRemindersService } from './services/appointmentReminders.js';
 import { env } from '../../../config/env.js';
 import fastifyStatic from '@fastify/static';
 import path from 'path';
@@ -59,9 +60,9 @@ async function start() {
     await registerRoutes(server);
 
     // Start listening
-    await server.listen({ 
-      port: env.API_PORT, 
-      host: env.API_HOST 
+    await server.listen({
+      port: env.API_PORT,
+      host: env.API_HOST
     });
 
     console.log(`🚀 API server running on http://${env.API_HOST}:${env.API_PORT}`);
@@ -70,12 +71,24 @@ async function start() {
     console.log(`✅ Readiness check: http://localhost:${env.API_PORT}/readyz`);
     console.log(`📋 Version info: http://localhost:${env.API_PORT}/version`);
 
+    // Start appointment reminder scheduler
+    if (env.NODE_ENV !== 'test') {
+      const remindersService = getAppointmentRemindersService();
+      remindersService.start();
+    }
+
     // Graceful shutdown
     const signals = ['SIGINT', 'SIGTERM'];
     signals.forEach((signal) => {
       process.on(signal, async () => {
         console.log(`\n${signal} received, shutting down gracefully...`);
         try {
+          // Stop reminder scheduler
+          if (env.NODE_ENV !== 'test') {
+            const remindersService = getAppointmentRemindersService();
+            remindersService.stop();
+          }
+
           await server.close();
           console.log('✅ Server closed successfully');
           process.exit(0);

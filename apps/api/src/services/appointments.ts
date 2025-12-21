@@ -1,5 +1,6 @@
 import { PrismaClient, AppointmentStatus, AppointmentType, Appointment, AppointmentOutcome } from '@prisma/client';
 import { randomBytes } from 'crypto';
+import { getAppointmentEmailService } from './appointmentEmails.js';
 
 const prisma = new PrismaClient();
 
@@ -195,6 +196,16 @@ export class AppointmentService {
       scheduledAt: scheduledAt.toISOString(),
     });
 
+    // Send booking confirmation email (async, don't block the response)
+    try {
+      const emailService = getAppointmentEmailService();
+      emailService.sendBookingConfirmation(booked.id).catch((error) => {
+        console.error(`Failed to send booking confirmation email for appointment ${booked.id}:`, error);
+      });
+    } catch (error) {
+      console.warn('Email service not available, skipping booking confirmation email');
+    }
+
     return booked;
   }
 
@@ -228,6 +239,16 @@ export class AppointmentService {
       oldScheduledAt: oldScheduledAt?.toISOString(),
       newScheduledAt: newScheduledAt.toISOString(),
     });
+
+    // Send reschedule notification email (async, don't block the response)
+    try {
+      const emailService = getAppointmentEmailService();
+      emailService.sendRescheduleNotification(id, newScheduledAt).catch((error) => {
+        console.error(`Failed to send reschedule notification email for appointment ${id}:`, error);
+      });
+    } catch (error) {
+      console.warn('Email service not available, skipping reschedule notification email');
+    }
 
     return updated;
   }
@@ -314,6 +335,16 @@ export class AppointmentService {
     await this.logAuditEvent(id, 'CANCEL', {
       reason,
     });
+
+    // Send cancellation notification email (async, don't block the response)
+    try {
+      const emailService = getAppointmentEmailService();
+      emailService.sendCancellationNotification(id, reason).catch((error) => {
+        console.error(`Failed to send cancellation notification email for appointment ${id}:`, error);
+      });
+    } catch (error) {
+      console.warn('Email service not available, skipping cancellation notification email');
+    }
 
     return updated;
   }
