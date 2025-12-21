@@ -38,6 +38,7 @@ import { notificationRoutes } from './notifications.js';
 import { diagnosticRoutes } from './diagnostic.js';
 import { debugRoutes } from './debug.js';
 import { appointmentsRoutes } from './appointments.js';
+import { publicAppointmentsRoutes } from './publicAppointments.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -79,6 +80,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Public inquiry routes (lead capture form - no auth required)
   await fastify.register(inquiryRoutes);
+
+  // Public appointment booking routes (no auth required)
+  await fastify.register(publicAppointmentsRoutes);
 
   // Admin inquiry management routes (admin only)
   await fastify.register(adminInquiryRoutes);
