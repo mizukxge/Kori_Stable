@@ -70,7 +70,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;
@@ -179,7 +179,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       if (error instanceof Error) {
@@ -219,7 +219,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;
@@ -249,7 +249,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;
@@ -279,7 +279,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;
@@ -311,7 +311,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;
@@ -409,7 +409,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
       throw error;

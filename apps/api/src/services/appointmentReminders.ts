@@ -1,6 +1,7 @@
-import { prisma } from '../db.js';
+import { PrismaClient, AppointmentStatus } from '@prisma/client';
 import { getAppointmentEmailService } from './appointmentEmails.js';
-import { AppointmentStatus } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 /**
  * Reminder job configuration

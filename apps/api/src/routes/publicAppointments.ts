@@ -1,8 +1,11 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { PrismaClient } from '@prisma/client';
 import { AppointmentService } from '../services/appointments.js';
 import { AvailabilityService } from '../services/appointmentsAvailability.js';
 import { getMeetingProvider } from '../providers/MeetingProvider.js';
+
+const prisma = new PrismaClient();
 
 // Validation schemas
 const bookingSchema = z.object({
@@ -26,7 +29,7 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
       const { token } = request.params as { token: string };
 
       // Validate token exists and is not expired
-      const appointment = await fastify.prisma.appointment.findUnique({
+      const appointment = await prisma.appointment.findUnique({
         where: { inviteToken: token },
         include: { client: true },
       });
@@ -117,7 +120,7 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
       const proposedStartTime = new Date(query.startTime);
 
       // Validate token and appointment
-      const appointment = await fastify.prisma.appointment.findUnique({
+      const appointment = await prisma.appointment.findUnique({
         where: { inviteToken: token },
         include: { client: true },
       });
@@ -195,7 +198,7 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
 
       // Update with Teams link if created
       if (teamsLink) {
-        await fastify.prisma.appointment.update({
+        await prisma.appointment.update({
           where: { id: bookedAppointment.id },
           data: { teamsLink },
         });
@@ -221,7 +224,7 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Validation error',
-          details: error.errors,
+          details: error.issues,
         });
       }
 
@@ -259,7 +262,7 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
       const dateObj = new Date(Date.UTC(year, month - 1, day));
 
       // Validate token
-      const appointment = await fastify.prisma.appointment.findUnique({
+      const appointment = await prisma.appointment.findUnique({
         where: { inviteToken: token },
       });
 
