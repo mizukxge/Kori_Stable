@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getAppointmentStats, listAppointments, exportAppointmentsCSV } from '../../lib/api';
+import { getAppointmentStats, listAppointments, exportAppointmentsCSV } from '../../../lib/api';
 import { ArrowUp, Download, Filter } from 'lucide-react';
 
 interface MetricsData {

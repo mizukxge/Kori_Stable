@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock } from 'lucide-react';
-import { Button } from '../../../components/ui/Button';
+import { Button } from '../ui/Button';
 
 export interface CalendarAppointment {
   id: string;
