@@ -694,3 +694,303 @@ export async function batchApplyPreset(
 
   return response.json();
 }
+
+// ============================================
+// APPOINTMENTS & SCHEDULING
+// ============================================
+
+export interface Appointment {
+  id: string;
+  type: string;
+  status: string;
+  scheduledAt?: string;
+  duration: number;
+  clientId: string;
+  client: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  teamsLink?: string;
+  outcome?: string;
+  adminNotes?: string;
+  clientNotes?: string;
+  recordingConsentGiven: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function listAppointments(filters?: {
+  clientId?: string;
+  status?: string;
+  type?: string;
+  dateRangeStart?: string;
+  dateRangeEnd?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ success: boolean; data: Appointment[]; pagination: any }> {
+  const params = new URLSearchParams();
+  if (filters?.clientId) params.append('clientId', filters.clientId);
+  if (filters?.status) params.append('status', filters.status);
+  if (filters?.type) params.append('type', filters.type);
+  if (filters?.dateRangeStart) params.append('dateRangeStart', filters.dateRangeStart);
+  if (filters?.dateRangeEnd) params.append('dateRangeEnd', filters.dateRangeEnd);
+  if (filters?.limit) params.append('limit', filters.limit.toString());
+  if (filters?.offset) params.append('offset', filters.offset.toString());
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/appointments?${params}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to list appointments');
+  }
+
+  return response.json();
+}
+
+export async function getAppointmentById(id: string): Promise<{ success: boolean; data: Appointment }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/${id}`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get appointment');
+  }
+
+  return response.json();
+}
+
+export async function createAppointmentInvitation(data: {
+  clientId: string;
+  type: string;
+  proposalId?: string;
+  contractId?: string;
+  invoiceId?: string;
+  expiresInDays?: number;
+}): Promise<{ success: boolean; data: Appointment & { bookingUrl: string } }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/invite`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create invitation');
+  }
+
+  return response.json();
+}
+
+export async function rescheduleAppointment(
+  id: string,
+  newScheduledAt: string
+): Promise<{ success: boolean; data: Appointment; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/${id}/reschedule`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ newScheduledAt }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to reschedule appointment');
+  }
+
+  return response.json();
+}
+
+export async function completeAppointment(
+  id: string,
+  outcome: string,
+  callSummary?: string
+): Promise<{ success: boolean; data: Appointment; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/${id}/complete`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ outcome, callSummary }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to complete appointment');
+  }
+
+  return response.json();
+}
+
+export async function markAppointmentNoShow(
+  id: string,
+  reason?: string
+): Promise<{ success: boolean; data: Appointment; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/${id}/no-show`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to mark as no-show');
+  }
+
+  return response.json();
+}
+
+export async function cancelAppointment(
+  id: string,
+  reason?: string
+): Promise<{ success: boolean; data: Appointment; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/${id}/cancel`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ reason }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to cancel appointment');
+  }
+
+  return response.json();
+}
+
+export async function getAppointmentStats(): Promise<{ success: boolean; data: any }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/stats`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get stats');
+  }
+
+  return response.json();
+}
+
+export async function getAppointmentSettings(): Promise<{ success: boolean; data: any }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/settings`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get settings');
+  }
+
+  return response.json();
+}
+
+export async function updateAppointmentSettings(data: {
+  workdayStart?: number;
+  workdayEnd?: number;
+  bookingWindowDays?: number;
+  bufferMinutes?: number;
+  allowedTypes?: string[];
+  timezone?: string;
+}): Promise<{ success: boolean; data: any; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/settings`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to update settings');
+  }
+
+  return response.json();
+}
+
+export async function getBlockedTimes(params?: {
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ success: boolean; data: any[]; pagination: any }> {
+  const queryParams = new URLSearchParams();
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
+  if (params?.limit) queryParams.append('limit', params.limit.toString());
+  if (params?.offset) queryParams.append('offset', params.offset.toString());
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/appointments/blocked-times?${queryParams}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to get blocked times');
+  }
+
+  return response.json();
+}
+
+export async function createBlockedTime(data: {
+  reason: string;
+  startTime: string;
+  endTime: string;
+}): Promise<{ success: boolean; data: any; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/blocked-times`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to create blocked time');
+  }
+
+  return response.json();
+}
+
+export async function deleteBlockedTime(id: string): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/admin/appointments/blocked-times/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete blocked time');
+  }
+
+  return response.json();
+}
