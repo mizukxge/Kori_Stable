@@ -54,6 +54,7 @@ import CreateEnvelopePage from './routes/admin/envelopes/new';
 import SigningPage from './routes/sign/[token]';
 import LoginPage from './routes/login';
 import AppointmentsIndex from './routes/admin/appointments/index';
+import AppointmentDetailPage from './routes/admin/appointments/[id]';
 import AppointmentsCalendarPage from './routes/admin/appointments/calendar';
 import AppointmentsLinksPage from './routes/admin/appointments/links';
 import AppointmentsSettingsPage from './routes/admin/appointments/settings';
@@ -405,6 +406,14 @@ function App() {
             element={
               <Layout>
                 <AppointmentsMetricsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments/:id"
+            element={
+              <Layout>
+                <AppointmentDetailPage />
               </Layout>
             }
           />
