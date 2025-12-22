@@ -480,7 +480,7 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
         apt.duration,
         `"${(apt.adminNotes || '').replace(/"/g, '""')}"`, // Escape quotes in CSV
         new Date(apt.createdAt).toISOString(),
-        apt.completedAt ? new Date(apt.completedAt).toISOString() : '',
+        new Date(apt.updatedAt).toISOString(),
       ]);
 
       // Create CSV content

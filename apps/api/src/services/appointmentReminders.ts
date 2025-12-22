@@ -20,7 +20,7 @@ export interface ReminderConfig {
  * Handles scheduling and sending reminder emails for appointments
  */
 export class AppointmentRemindersService {
-  private checkInterval: NodeJS.Timer | null = null;
+  private checkInterval: NodeJS.Timeout | null = null;
   private config: ReminderConfig;
   private emailService = getAppointmentEmailService();
 
