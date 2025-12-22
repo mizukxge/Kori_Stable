@@ -1,6 +1,7 @@
-import { prisma } from '../db.js';
+import { PrismaClient, AppointmentStatus } from '@prisma/client';
 import { getAppointmentEmailService } from './appointmentEmails.js';
-import { AppointmentStatus } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 /**
  * Reminder job configuration
@@ -19,7 +20,7 @@ export interface ReminderConfig {
  * Handles scheduling and sending reminder emails for appointments
  */
 export class AppointmentRemindersService {
-  private checkInterval: NodeJS.Timer | null = null;
+  private checkInterval: NodeJS.Timeout | null = null;
   private config: ReminderConfig;
   private emailService = getAppointmentEmailService();
 

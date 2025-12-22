@@ -364,47 +364,124 @@ export class AppointmentService {
   }
 
   /**
-   * Get appointment statistics
+   * Get appointment statistics with detailed metrics
    */
-  static async getAppointmentStats(): Promise<{
-    total: number;
-    booked: number;
-    completed: number;
-    cancelled: number;
-    noShow: number;
+  static async getAppointmentStats(filters?: {
+    startDate?: Date;
+    endDate?: Date;
+    type?: AppointmentType;
+    status?: AppointmentStatus;
+  }): Promise<{
+    totalAppointments: number;
+    completedAppointments: number;
+    bookedAppointments: number;
+    noShowCount: number;
+    noShowRate: string;
+    cancelledAppointments: number;
     byType: Record<string, number>;
     byOutcome: Record<string, number>;
+    upcomingAppointmentsCount: number;
+    thisWeekCount: number;
+    thisMonthCount: number;
+    allTimeStats: {
+      totalMinutes: number;
+      averageMinutesPerCall: number;
+    };
   }> {
-    const [total, booked, completed, cancelled, noShow] = await Promise.all([
-      prisma.appointment.count(),
-      prisma.appointment.count({ where: { status: 'Booked' } }),
-      prisma.appointment.count({ where: { status: 'Completed' } }),
-      prisma.appointment.count({ where: { status: 'Cancelled' } }),
-      prisma.appointment.count({ where: { status: 'NoShow' } }),
+    const now = new Date();
+    const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const monthFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    const where: any = {};
+    if (filters?.type) where.type = filters.type;
+    if (filters?.status) where.status = filters.status;
+    if (filters?.startDate || filters?.endDate) {
+      where.scheduledAt = {};
+      if (filters.startDate) where.scheduledAt.gte = filters.startDate;
+      if (filters.endDate) where.scheduledAt.lte = filters.endDate;
+    }
+
+    // Parallel queries for all counts
+    const [
+      totalAppointments,
+      completedAppointments,
+      bookedAppointments,
+      noShowCount,
+      cancelledAppointments,
+      upcomingAppointmentsCount,
+      thisWeekCount,
+      thisMonthCount,
+      completedAppointmentsData,
+    ] = await Promise.all([
+      prisma.appointment.count({ where }),
+      prisma.appointment.count({ where: { ...where, status: 'Completed' } }),
+      prisma.appointment.count({ where: { ...where, status: 'Booked' } }),
+      prisma.appointment.count({ where: { ...where, status: 'NoShow' } }),
+      prisma.appointment.count({ where: { ...where, status: 'Cancelled' } }),
+      prisma.appointment.count({
+        where: { status: 'Booked', scheduledAt: { gt: now } },
+      }),
+      prisma.appointment.count({
+        where: {
+          status: 'Booked',
+          scheduledAt: { gte: now, lte: weekFromNow },
+        },
+      }),
+      prisma.appointment.count({
+        where: {
+          status: 'Booked',
+          scheduledAt: { gte: now, lte: monthFromNow },
+        },
+      }),
+      prisma.appointment.findMany({
+        where: { status: 'Completed' },
+        select: { duration: true },
+      }),
     ]);
 
+    // Calculate by type
     const byType: Record<string, number> = {};
     for (const type of Object.values(AppointmentType)) {
       byType[type] = await prisma.appointment.count({
-        where: { type: type as AppointmentType },
+        where: { ...where, type: type as AppointmentType },
       });
     }
 
+    // Calculate by outcome
     const byOutcome: Record<string, number> = {};
     for (const outcome of Object.values(AppointmentOutcome)) {
       byOutcome[outcome] = await prisma.appointment.count({
-        where: { outcome: outcome as AppointmentOutcome },
+        where: { ...where, outcome: outcome as AppointmentOutcome },
       });
     }
 
+    // Calculate no-show rate
+    const noShowRate =
+      totalAppointments > 0 ? ((noShowCount / totalAppointments) * 100).toFixed(1) : '0.0';
+
+    // Calculate total and average minutes
+    const totalMinutes = completedAppointmentsData.reduce((sum, apt) => sum + apt.duration, 0);
+    const averageMinutesPerCall =
+      completedAppointmentsData.length > 0
+        ? Math.round(totalMinutes / completedAppointmentsData.length)
+        : 0;
+
     return {
-      total,
-      booked,
-      completed,
-      cancelled,
-      noShow,
+      totalAppointments,
+      completedAppointments,
+      bookedAppointments,
+      noShowCount,
+      noShowRate: `${noShowRate}%`,
+      cancelledAppointments,
       byType,
       byOutcome,
+      upcomingAppointmentsCount,
+      thisWeekCount,
+      thisMonthCount,
+      allTimeStats: {
+        totalMinutes,
+        averageMinutesPerCall,
+      },
     };
   }
 

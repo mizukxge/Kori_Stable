@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer';
 import Handlebars from 'handlebars';
-import { prisma } from '../db.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export interface EmailConfig {
   from: string;
