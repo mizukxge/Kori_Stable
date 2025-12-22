@@ -878,11 +878,25 @@ export async function cancelAppointment(
   return response.json();
 }
 
-export async function getAppointmentStats(): Promise<{ success: boolean; data: any }> {
-  const response = await fetch(`${API_BASE_URL}/admin/appointments/stats`, {
-    method: 'GET',
-    credentials: 'include',
-  });
+export async function getAppointmentStats(filters?: {
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+  status?: string;
+}): Promise<{ success: boolean; data: any }> {
+  const params = new URLSearchParams();
+  if (filters?.startDate) params.append('startDate', filters.startDate);
+  if (filters?.endDate) params.append('endDate', filters.endDate);
+  if (filters?.type) params.append('type', filters.type);
+  if (filters?.status) params.append('status', filters.status);
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/appointments/stats?${params}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -890,6 +904,34 @@ export async function getAppointmentStats(): Promise<{ success: boolean; data: a
   }
 
   return response.json();
+}
+
+export async function exportAppointmentsCSV(filters?: {
+  startDate?: string;
+  endDate?: string;
+  type?: string;
+  status?: string;
+}): Promise<Blob> {
+  const params = new URLSearchParams();
+  if (filters?.startDate) params.append('startDate', filters.startDate);
+  if (filters?.endDate) params.append('endDate', filters.endDate);
+  if (filters?.type) params.append('type', filters.type);
+  if (filters?.status) params.append('status', filters.status);
+
+  const response = await fetch(
+    `${API_BASE_URL}/admin/appointments/export?${params}`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  );
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to export appointments');
+  }
+
+  return response.blob();
 }
 
 export async function getAppointmentSettings(): Promise<{ success: boolean; data: any }> {

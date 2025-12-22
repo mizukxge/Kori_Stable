@@ -1,8 +1,10 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
+import { PrismaClient, AppointmentType, AppointmentStatus, AppointmentOutcome } from '@prisma/client';
 import { AppointmentService } from '../services/appointments.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { AppointmentType, AppointmentStatus, AppointmentOutcome } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 // Validation schemas
 const createInvitationSchema = z.object({
@@ -112,11 +114,19 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
 
   /**
    * GET /admin/appointments/stats
-   * Get appointment statistics
+   * Get appointment statistics with optional filters
    */
   fastify.get('/admin/appointments/stats', async (request, reply) => {
     try {
-      const stats = await AppointmentService.getAppointmentStats();
+      const query = request.query as any;
+
+      const filters: any = {};
+      if (query.startDate) filters.startDate = new Date(query.startDate);
+      if (query.endDate) filters.endDate = new Date(query.endDate);
+      if (query.type) filters.type = query.type;
+      if (query.status) filters.status = query.status;
+
+      const stats = await AppointmentService.getAppointmentStats(filters);
 
       return reply.status(200).send({
         success: true,
@@ -412,6 +422,78 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
           details: error.issues,
         });
       }
+      throw error;
+    }
+  });
+
+  /**
+   * GET /admin/appointments/export
+   * Export appointments as CSV
+   */
+  fastify.get('/admin/appointments/export', async (request, reply) => {
+    try {
+      const query = request.query as any;
+
+      const filters: any = {};
+      if (query.startDate) filters.startDate = new Date(query.startDate);
+      if (query.endDate) filters.endDate = new Date(query.endDate);
+      if (query.type) filters.type = query.type;
+      if (query.status) filters.status = query.status;
+
+      // Get all appointments matching filters
+      const appointments = await prisma.appointment.findMany({
+        where: {
+          ...(filters.type && { type: filters.type }),
+          ...(filters.status && { status: filters.status }),
+          ...(filters.startDate || filters.endDate) && {
+            scheduledAt: {
+              ...(filters.startDate && { gte: filters.startDate }),
+              ...(filters.endDate && { lte: filters.endDate }),
+            },
+          },
+        },
+        include: { client: true },
+        orderBy: { scheduledAt: 'asc' },
+      });
+
+      // Convert to CSV format
+      const headers = [
+        'Date & Time',
+        'Client Name',
+        'Client Email',
+        'Appointment Type',
+        'Status',
+        'Outcome',
+        'Duration (minutes)',
+        'Notes',
+        'Created At',
+        'Completed At',
+      ];
+
+      const rows = appointments.map((apt) => [
+        apt.scheduledAt ? new Date(apt.scheduledAt).toISOString() : '',
+        apt.client?.name || '',
+        apt.client?.email || '',
+        apt.type,
+        apt.status,
+        apt.outcome || '',
+        apt.duration,
+        `"${(apt.adminNotes || '').replace(/"/g, '""')}"`, // Escape quotes in CSV
+        new Date(apt.createdAt).toISOString(),
+        apt.completedAt ? new Date(apt.completedAt).toISOString() : '',
+      ]);
+
+      // Create CSV content
+      const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
+
+      // Set response headers
+      const filename = `appointments-export-${new Date().toISOString().split('T')[0]}.csv`;
+      reply.header('Content-Type', 'text/csv');
+      reply.header('Content-Disposition', `attachment; filename="${filename}"`);
+
+      return reply.send(csv);
+    } catch (error) {
+      request.log.error(error, 'Error exporting appointments');
       throw error;
     }
   });
