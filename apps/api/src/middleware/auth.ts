@@ -18,7 +18,15 @@ export async function requireAuth(
 ): Promise<void> {
   const sessionToken = request.cookies.sessionToken;
 
+  // Debug logging
+  console.log('🔍 [AUTH DEBUG] Request to:', request.url);
+  console.log('🔍 [AUTH DEBUG] All cookies received:', JSON.stringify(request.cookies));
+  console.log('🔍 [AUTH DEBUG] Cookie header:', request.headers.cookie);
+  console.log('🔍 [AUTH DEBUG] Origin:', request.headers.origin);
+  console.log('🔍 [AUTH DEBUG] SessionToken:', sessionToken ? '✓ Found' : '✗ Missing');
+
   if (!sessionToken) {
+    console.error('❌ [AUTH] Missing session token - cookies not sent by client');
     reply.status(401).send({
       statusCode: 401,
       error: 'Unauthorized',
