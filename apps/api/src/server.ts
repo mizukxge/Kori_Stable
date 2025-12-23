@@ -76,8 +76,8 @@ export async function buildServer() {
     secret: env.SESSION_SECRET,
     parseOptions: {
       httpOnly: true,
-      secure: (env as any).SESSION_COOKIE_SECURE ?? (env.NODE_ENV === 'production'),
-      sameSite: (env as any).SESSION_COOKIE_SAMESITE || 'Lax',
+      secure: env.SESSION_COOKIE_SECURE === true || env.NODE_ENV === 'production',
+      sameSite: env.SESSION_COOKIE_SAMESITE as 'Strict' | 'Lax' | 'None' || 'Lax',
     },
   });
 
