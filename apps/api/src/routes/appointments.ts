@@ -46,6 +46,12 @@ const updateSettingsSchema = z.object({
   bookingWindowDays: z.number().optional(),
   activeTypes: z.array(z.string()).optional(),
   timezone: z.string().optional(),
+  invitationEmailTemplate: z.string().optional(),
+  confirmationEmailTemplate: z.string().optional(),
+  reminderEmailTemplate: z.string().optional(),
+  recipientEmailCC: z.string().optional(),
+  googleCalendarEnabled: z.boolean().optional(),
+  outlookCalendarEnabled: z.boolean().optional(),
 });
 
 export async function appointmentsRoutes(fastify: FastifyInstance) {

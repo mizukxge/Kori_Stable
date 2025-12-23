@@ -4,7 +4,9 @@ import { getAppointmentSettings, type Appointment } from '../../../lib/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
 import { Label } from '../../../components/ui/Label';
-import { Settings, Plus, Trash2, Calendar } from 'lucide-react';
+import { Settings, Plus, Trash2, Calendar, Edit2 } from 'lucide-react';
+import { EmailTemplateEditor } from '../../../components/appointments/EmailTemplateEditor';
+import { CalendarSyncPanel } from '../../../components/appointments/CalendarSyncPanel';
 
 interface AppointmentSettings {
   id: string;
@@ -14,6 +16,12 @@ interface AppointmentSettings {
   bookingWindowDays: number;
   activeTypes: string[];
   timezone: string;
+  invitationEmailTemplate?: string;
+  confirmationEmailTemplate?: string;
+  reminderEmailTemplate?: string;
+  recipientEmailCC?: string;
+  googleCalendarEnabled?: boolean;
+  outlookCalendarEnabled?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -43,6 +51,9 @@ export default function AppointmentsSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // Email template editor state
+  const [editingTemplate, setEditingTemplate] = useState<'invitation' | 'confirmation' | 'reminder' | null>(null);
+
   const [showBlockedTimeForm, setShowBlockedTimeForm] = useState(false);
   const [blockedTimeForm, setBlockedTimeForm] = useState({
     startDate: '',
@@ -60,6 +71,12 @@ export default function AppointmentsSettingsPage() {
     bookingWindowDays: 14,
     activeTypes: APPOINTMENT_TYPES,
     timezone: 'Europe/London',
+    invitationEmailTemplate: '',
+    confirmationEmailTemplate: '',
+    reminderEmailTemplate: '',
+    recipientEmailCC: '',
+    googleCalendarEnabled: false,
+    outlookCalendarEnabled: false,
   });
 
   useEffect(() => {
@@ -74,6 +91,12 @@ export default function AppointmentsSettingsPage() {
           bookingWindowDays: response.data.bookingWindowDays,
           activeTypes: response.data.activeTypes,
           timezone: response.data.timezone,
+          invitationEmailTemplate: response.data.invitationEmailTemplate || '',
+          confirmationEmailTemplate: response.data.confirmationEmailTemplate || '',
+          reminderEmailTemplate: response.data.reminderEmailTemplate || '',
+          recipientEmailCC: response.data.recipientEmailCC || '',
+          googleCalendarEnabled: response.data.googleCalendarEnabled || false,
+          outlookCalendarEnabled: response.data.outlookCalendarEnabled || false,
         });
 
         // Load blocked times
@@ -197,6 +220,47 @@ export default function AppointmentsSettingsPage() {
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete blocked time');
+    }
+  };
+
+  const handleSaveEmailTemplate = async (templateType: 'invitation' | 'confirmation' | 'reminder', content: string) => {
+    const fieldMap = {
+      invitation: 'invitationEmailTemplate',
+      confirmation: 'confirmationEmailTemplate',
+      reminder: 'reminderEmailTemplate',
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      [fieldMap[templateType]]: content,
+    }));
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_BASE_URL}/admin/appointments/settings`, {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          [fieldMap[templateType]]: content,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to save email template');
+
+      const result = await response.json();
+      setSettings(result.data);
+      setSuccessMessage('Email template saved successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+      setEditingTemplate(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save email template');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -354,6 +418,43 @@ export default function AppointmentsSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Email Templates */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Email Templates</CardTitle>
+          <CardDescription>Customize appointment emails with template variables</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            {[
+              { key: 'invitation' as const, label: 'Invitation Email', desc: 'Sent when admin creates an appointment' },
+              { key: 'confirmation' as const, label: 'Confirmation Email', desc: 'Sent when client confirms appointment' },
+              { key: 'reminder' as const, label: 'Reminder Email', desc: 'Sent before appointment' },
+            ].map(({ key, label, desc }) => (
+              <div key={key} className="flex items-center justify-between p-3 rounded border border-border">
+                <div>
+                  <div className="font-medium">{label}</div>
+                  <div className="text-xs text-muted-foreground">{desc}</div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setEditingTemplate(key)}
+                  className="flex items-center gap-2"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-800">
+            ℹ️ Available variables: {'{clientName}'}, {'{appointmentType}'}, {'{proposedDate}'}, {'{teamsLink}'}, etc.
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Timezone */}
       <Card>
         <CardHeader>
@@ -498,6 +599,37 @@ export default function AppointmentsSettingsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Calendar Sync */}
+      <CalendarSyncPanel
+        settings={{
+          googleCalendarEnabled: formData.googleCalendarEnabled,
+          outlookCalendarEnabled: formData.outlookCalendarEnabled,
+        }}
+      />
+
+      {/* Email Template Editor Modal */}
+      {editingTemplate && (
+        <EmailTemplateEditor
+          templateName={
+            editingTemplate === 'invitation'
+              ? 'Invitation Email Template'
+              : editingTemplate === 'confirmation'
+              ? 'Confirmation Email Template'
+              : 'Reminder Email Template'
+          }
+          templateType={editingTemplate}
+          initialValue={
+            editingTemplate === 'invitation'
+              ? formData.invitationEmailTemplate
+              : editingTemplate === 'confirmation'
+              ? formData.confirmationEmailTemplate
+              : formData.reminderEmailTemplate
+          }
+          onSave={(content) => handleSaveEmailTemplate(editingTemplate, content)}
+          onClose={() => setEditingTemplate(null)}
+        />
+      )}
     </div>
   );
 }

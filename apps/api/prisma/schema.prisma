@@ -2592,6 +2592,16 @@ model AppointmentSettings {
 
   timezone              String   @default("Europe/London")
 
+  // Email Templates
+  invitationEmailTemplate    String   @default("Hi {clientName},\n\nYou're invited to a {appointmentType} call on {proposedDate} at {proposedTime}.\n\nPlease confirm your availability:\n{bookingLink}\n\nBest regards,\n{adminName}")
+  confirmationEmailTemplate  String   @default("Hi {clientName},\n\nYour appointment is confirmed for {confirmedDate} at {confirmedTime}.\n\nTeams Link: {teamsLink}\n\nBest regards,\n{adminName}")
+  reminderEmailTemplate      String   @default("Hi {clientName},\n\nReminder: Your appointment is on {appointmentDate} at {appointmentTime}.\n\nTeams Link: {teamsLink}\n\nBest regards,\n{adminName}")
+  recipientEmailCC           String?
+
+  // Calendar Sync (Stubs for now, OAuth to be implemented)
+  googleCalendarEnabled      Boolean  @default(false)
+  outlookCalendarEnabled     Boolean  @default(false)
+
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
