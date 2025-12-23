@@ -90,23 +90,23 @@ export function NotificationTray({
   return (
     <div
       ref={trayRef}
-      className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-96 flex flex-col"
+      className="absolute right-0 top-full mt-2 w-96 bg-card rounded-lg shadow-xl border border-border z-50 max-h-96 flex flex-col"
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-border">
         <div>
-          <h2 className="font-semibold text-gray-900">Notifications</h2>
+          <h2 className="font-semibold text-foreground">Notifications</h2>
           {unreadCount > 0 && (
-            <p className="text-sm text-gray-500">{unreadCount} unread</p>
+            <p className="text-sm text-muted-foreground">{unreadCount} unread</p>
           )}
         </div>
 
         <button
           onClick={onClose}
-          className="p-1 hover:bg-gray-100 rounded transition-colors"
+          className="p-1 hover:bg-muted rounded transition-colors"
           aria-label="Close notifications"
         >
-          <X className="w-5 h-5 text-gray-400" />
+          <X className="w-5 h-5 text-muted-foreground" />
         </button>
       </div>
 
@@ -123,18 +123,18 @@ export function NotificationTray({
           ))
         ) : (
           <div className="flex flex-col items-center justify-center py-12 px-4">
-            <p className="text-gray-500 text-center">No notifications yet</p>
+            <p className="text-muted-foreground text-center">No notifications yet</p>
           </div>
         )}
       </div>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 p-4 bg-gray-50 flex items-center justify-between gap-2">
+      <div className="border-t border-border p-4 bg-muted flex items-center justify-between gap-2">
         {unreadCount > 0 && (
           <button
             onClick={handleMarkAllAsRead}
             disabled={loading}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="text-sm text-primary hover:text-primary/90 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Mark all as read
           </button>
@@ -142,7 +142,7 @@ export function NotificationTray({
 
         <a
           href="/admin/notifications"
-          className="ml-auto text-sm text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
+          className="ml-auto text-sm text-primary hover:text-primary/90 font-medium inline-flex items-center gap-1"
         >
           View all
           <ChevronRight className="w-4 h-4" />
