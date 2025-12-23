@@ -8,10 +8,12 @@ import {
   type Appointment,
 } from '../../../lib/api';
 import { WeekCalendar } from '../../../components/calendar/WeekCalendar';
+import { MonthCalendar } from '../../../components/calendar/MonthCalendar';
 import { AppointmentDetailPanel } from '../../../components/calendar/AppointmentDetailPanel';
+import { CreateAppointmentModal } from '../../../components/appointments/CreateAppointmentModal';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/Button';
-import { Calendar, Settings } from 'lucide-react';
+import { Calendar, Settings, LayoutGrid, LayoutList } from 'lucide-react';
 
 interface CalendarBlockedTime {
   id: string;
@@ -28,6 +30,13 @@ export default function AppointmentsCalendarPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // View mode (week or month)
+  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+
+  // Create appointment modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<{ date: Date; time?: string } | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -122,6 +131,64 @@ export default function AppointmentsCalendarPage() {
     }
   };
 
+  const handleEmptySlotClick = (date: Date, time: string) => {
+    setSelectedSlot({ date, time });
+    setShowCreateModal(true);
+  };
+
+  const handleCreateAppointment = async (data: {
+    clientId: string;
+    type: string;
+    scheduledAt?: string;
+    duration: number;
+    adminNotes?: string;
+  }) => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${API_BASE_URL}/admin/appointments/invite`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) throw new Error('Failed to create appointment');
+
+    const result = await response.json();
+    setAppointments((prev) => [...prev, result.data]);
+    setShowCreateModal(false);
+    setSelectedSlot(null);
+    setSuccessMessage('Appointment created and invitation sent!');
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
+
+  const handleReschedule = async (appointmentId: string, newScheduledAt: Date) => {
+    setActionLoading(true);
+    setError(null);
+
+    try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${API_BASE_URL}/admin/appointments/${appointmentId}/reschedule`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newScheduledAt: newScheduledAt.toISOString() }),
+      });
+
+      if (!response.ok) throw new Error('Failed to reschedule appointment');
+
+      const result = await response.json();
+      setAppointments((prev) =>
+        prev.map((apt) => (apt.id === appointmentId ? result.data : apt))
+      );
+      setSuccessMessage('Appointment rescheduled successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reschedule appointment');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -139,14 +206,36 @@ export default function AppointmentsCalendarPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Appointments Calendar</h1>
-          <p className="text-muted-foreground">Visual week view of your schedule</p>
+          <p className="text-muted-foreground">Manage your appointments with drag-to-reschedule</p>
         </div>
-        <Button asChild variant="outline" className="flex items-center gap-2">
-          <Link to="/admin/appointments/settings">
-            <Settings className="h-4 w-4" />
-            Settings
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <div className="flex gap-1 bg-muted p-1 rounded-lg">
+            <Button
+              size="sm"
+              variant={viewMode === 'week' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('week')}
+              className="flex items-center gap-2"
+            >
+              <LayoutList className="h-4 w-4" />
+              Week
+            </Button>
+            <Button
+              size="sm"
+              variant={viewMode === 'month' ? 'default' : 'ghost'}
+              onClick={() => setViewMode('month')}
+              className="flex items-center gap-2"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Month
+            </Button>
+          </div>
+          <Button asChild variant="outline" className="flex items-center gap-2">
+            <Link to="/admin/appointments/settings">
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -164,11 +253,22 @@ export default function AppointmentsCalendarPage() {
       {/* Calendar */}
       <Card>
         <CardContent className="p-6">
-          <WeekCalendar
-            appointments={appointments}
-            blockedTimes={blockedTimes}
-            onAppointmentClick={setSelectedAppointment}
-          />
+          {viewMode === 'week' ? (
+            <WeekCalendar
+              appointments={appointments}
+              blockedTimes={blockedTimes}
+              onAppointmentClick={setSelectedAppointment}
+              onEmptySlotClick={handleEmptySlotClick}
+              onReschedule={handleReschedule}
+            />
+          ) : (
+            <MonthCalendar
+              appointments={appointments}
+              blockedTimes={blockedTimes}
+              onDateClick={(date) => handleEmptySlotClick(date, '')}
+              onAppointmentClick={setSelectedAppointment}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -183,6 +283,19 @@ export default function AppointmentsCalendarPage() {
         />
       )}
 
+      {/* Create Appointment Modal */}
+      {showCreateModal && (
+        <CreateAppointmentModal
+          selectedDate={selectedSlot?.date}
+          selectedTime={selectedSlot?.time}
+          onClose={() => {
+            setShowCreateModal(false);
+            setSelectedSlot(null);
+          }}
+          onSubmit={handleCreateAppointment}
+        />
+      )}
+
       {/* Quick info */}
       <Card>
         <CardHeader>
@@ -190,16 +303,22 @@ export default function AppointmentsCalendarPage() {
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <p>
-            📅 <strong>Week view:</strong> Shows appointments Mon–Sat, 11:00–16:00 UTC
+            📅 <strong>Week/Month view:</strong> Toggle between week and month calendar views
           </p>
           <p>
-            🔗 <strong>Click an appointment:</strong> View details, mark complete/no-show, reschedule, or cancel
+            ➕ <strong>Create appointment:</strong> Click any empty slot to create a new appointment
+          </p>
+          <p>
+            🔄 <strong>Drag to reschedule:</strong> Drag an appointment to another time slot to reschedule (week view only)
+          </p>
+          <p>
+            🔗 <strong>Click an appointment:</strong> View details, mark complete/no-show, or cancel
           </p>
           <p>
             🚫 <strong>Blocked times:</strong> Holidays and out-of-office periods appear greyed out
           </p>
           <p>
-            ⚙️ <strong>Settings:</strong> Configure working hours, buffer time, and blocked dates
+            ⚙️ <strong>Settings:</strong> Configure working hours, email templates, and blocked dates
           </p>
         </CardContent>
       </Card>
