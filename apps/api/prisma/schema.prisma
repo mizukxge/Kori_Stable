@@ -63,6 +63,9 @@ model AdminUser {
   createdEnvelopes  Envelope[]          @relation("CreatedEnvelopes")
   envelopeWebhooks  EnvelopeWebhook[]   @relation("CreatedEnvelopeWebhooks")
 
+  // Calendar OAuth
+  calendarCredentials CalendarCredential[]
+
   @@map("admin_users")
 }
 
@@ -2545,6 +2548,7 @@ model Appointment {
 
   // Relations
   auditLog              AppointmentAuditLog[]
+  calendarEvents        CalendarEvent[]
 
   @@index([clientId])
   @@index([status])
@@ -2606,4 +2610,69 @@ model AppointmentSettings {
   updatedAt             DateTime @updatedAt
 
   @@map("appointment_settings")
+}
+
+// Calendar OAuth Credentials and Sync Tracking
+model CalendarCredential {
+  id                String   @id @default(cuid())
+  provider          String   // "google" | "outlook"
+  adminUserId       String
+  admin             AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  // OAuth tokens (sensitive - should be encrypted at rest)
+  accessToken       String   @db.Text
+  refreshToken      String?  @db.Text
+  idToken           String?  @db.Text
+  tokenType         String   @default("Bearer")
+  expiresAt         DateTime?
+
+  // Provider-specific identifiers
+  calendarId        String?  // Google calendar ID (e.g., "xxx@gmail.com" or custom)
+  providerUserId    String?  // User ID from provider
+
+  // Sync configuration
+  syncEnabled       Boolean  @default(true)
+  autoSync          Boolean  @default(true)  // Auto-create events on appointment booking
+
+  // Metadata
+  scopes            String[] @default([])    // Requested OAuth scopes
+  lastSyncedAt      DateTime?
+  lastError         String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, adminUserId])
+  @@index([adminUserId])
+  @@index([provider])
+  @@map("calendar_credentials")
+}
+
+// Calendar Events linked to Appointments
+model CalendarEvent {
+  id                String   @id @default(cuid())
+  appointmentId     String
+  appointment       Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  provider          String   // "google" | "outlook"
+  providerEventId   String   // Remote event ID from provider
+
+  title             String
+  description       String?  @db.Text
+  startTime         DateTime
+  endTime           DateTime
+
+  // Sync tracking
+  syncedAt          DateTime @default(now())
+  lastSyncedAt      DateTime @updatedAt
+  status            String   @default("synced")  // "synced", "pending", "failed"
+  syncError         String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerEventId])
+  @@index([appointmentId])
+  @@index([provider])
+  @@map("calendar_events")
 }
