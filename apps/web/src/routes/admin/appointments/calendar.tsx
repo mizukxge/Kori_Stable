@@ -143,26 +143,22 @@ export default function AppointmentsCalendarPage() {
     duration: number;
     adminNotes?: string;
   }) => {
-    try {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE_URL}/admin/appointments/invite`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+    const response = await fetch(`${API_BASE_URL}/admin/appointments/invite`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) throw new Error('Failed to create appointment');
+    if (!response.ok) throw new Error('Failed to create appointment');
 
-      const result = await response.json();
-      setAppointments((prev) => [...prev, result.data]);
-      setShowCreateModal(false);
-      setSelectedSlot(null);
-      setSuccessMessage('Appointment created and invitation sent!');
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } catch (err) {
-      throw err;
-    }
+    const result = await response.json();
+    setAppointments((prev) => [...prev, result.data]);
+    setShowCreateModal(false);
+    setSelectedSlot(null);
+    setSuccessMessage('Appointment created and invitation sent!');
+    setTimeout(() => setSuccessMessage(null), 3000);
   };
 
   const handleReschedule = async (appointmentId: string, newScheduledAt: Date) => {
