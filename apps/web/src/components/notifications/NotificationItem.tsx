@@ -19,24 +19,24 @@ export function NotificationItem({
   const getIconAndColor = () => {
     switch (category) {
       case 'success':
-        return { icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-50' };
+        return { icon: CheckCircle, color: 'text-green-600 dark:text-green-400' };
       case 'warning':
-        return { icon: AlertTriangle, color: 'text-yellow-500', bg: 'bg-yellow-50' };
+        return { icon: AlertTriangle, color: 'text-yellow-600 dark:text-yellow-400' };
       case 'error':
-        return { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50' };
+        return { icon: AlertCircle, color: 'text-red-600 dark:text-red-400' };
       case 'info':
       default:
-        return { icon: Info, color: 'text-blue-500', bg: 'bg-blue-50' };
+        return { icon: Info, color: 'text-blue-600 dark:text-blue-400' };
     }
   };
 
-  const { icon: Icon, color, bg } = getIconAndColor();
+  const { icon: Icon, color } = getIconAndColor();
   const timeAgo = formatDistanceToNow(new Date(createdAt), { addSuffix: true });
 
   return (
     <div
-      className={`p-4 border-b border-gray-200 hover:bg-gray-50 transition-colors ${
-        !isRead ? 'bg-blue-50' : ''
+      className={`p-4 border-b border-border hover:bg-muted transition-colors ${
+        !isRead ? 'bg-primary/10' : ''
       }`}
     >
       <div className="flex gap-3">
@@ -49,17 +49,17 @@ export function NotificationItem({
         <div className="flex-1 min-w-0">
           <div className="flex items-start gap-2">
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 text-sm">{title}</h3>
-              <p className="text-gray-600 text-sm mt-1">{message}</p>
+              <h3 className="font-semibold text-foreground text-sm">{title}</h3>
+              <p className="text-muted-foreground text-sm mt-1">{message}</p>
 
               {/* Timestamp */}
-              <p className="text-gray-500 text-xs mt-2">{timeAgo}</p>
+              <p className="text-muted-foreground text-xs mt-2">{timeAgo}</p>
 
               {/* Action button */}
               {actionUrl && actionText && (
                 <a
                   href={actionUrl}
-                  className="text-blue-600 hover:text-blue-700 text-xs font-medium mt-2 inline-block hover:underline"
+                  className="text-primary hover:text-primary/90 text-xs font-medium mt-2 inline-block hover:underline"
                 >
                   {actionText} →
                 </a>
@@ -69,7 +69,7 @@ export function NotificationItem({
             {/* Unread indicator */}
             {!isRead && (
               <div className="flex-shrink-0 mt-1">
-                <div className="w-2 h-2 bg-blue-600 rounded-full" />
+                <div className="w-2 h-2 bg-primary rounded-full" />
               </div>
             )}
           </div>
@@ -80,7 +80,7 @@ export function NotificationItem({
           {!isRead && onMarkAsRead && (
             <button
               onClick={() => onMarkAsRead(id)}
-              className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded transition-colors"
+              className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded transition-colors"
               title="Mark as read"
               aria-label="Mark as read"
             >
@@ -91,7 +91,7 @@ export function NotificationItem({
           {onDelete && (
             <button
               onClick={() => onDelete(id)}
-              className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+              className="p-1 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded transition-colors"
               title="Delete"
               aria-label="Delete notification"
             >
