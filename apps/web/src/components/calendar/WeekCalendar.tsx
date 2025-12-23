@@ -29,11 +29,21 @@ interface TimeSlot {
   time: string;
 }
 
+interface RescheduleConfirmation {
+  appointmentId: string;
+  appointmentName: string;
+  oldDate: Date;
+  oldTime: string;
+  newDate: Date;
+  newTime: string;
+}
+
 interface WeekCalendarProps {
   appointments: CalendarAppointment[];
   blockedTimes: CalendarBlockedTime[];
   onAppointmentClick: (appointment: CalendarAppointment) => void;
   onEmptySlotClick?: (date: Date, time: string) => void;
+  onReschedule?: (appointmentId: string, newScheduledAt: Date) => Promise<void>;
 }
 
 /**
@@ -46,6 +56,7 @@ export function WeekCalendar({
   blockedTimes,
   onAppointmentClick,
   onEmptySlotClick,
+  onReschedule,
 }: WeekCalendarProps) {
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const today = new Date();
@@ -57,6 +68,12 @@ export function WeekCalendar({
     monday.setUTCHours(0, 0, 0, 0);
     return monday;
   });
+
+  // Drag-to-reschedule state
+  const [draggingAppointment, setDraggingAppointment] = useState<CalendarAppointment | null>(null);
+  const [dragPreview, setDragPreview] = useState<{ date: Date; hour: number } | null>(null);
+  const [rescheduleConfirm, setRescheduleConfirm] = useState<RescheduleConfirmation | null>(null);
+  const [rescheduling, setRescheduling] = useState(false);
 
   const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const HOURS = Array.from({ length: 6 }, (_, i) => 11 + i); // 11:00 to 16:00
@@ -152,6 +169,69 @@ export function WeekCalendar({
     setCurrentWeekStart(monday);
   };
 
+  const handleDragStart = (e: React.DragEvent, appointment: CalendarAppointment) => {
+    e.stopPropagation();
+    setDraggingAppointment(appointment);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, date: Date, hour: number) => {
+    if (!draggingAppointment) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragPreview({ date, hour });
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragPreview(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, date: Date, hour: number) => {
+    e.preventDefault();
+    if (!draggingAppointment) return;
+
+    const blockedTime = isSlotBlocked(date, hour);
+    if (blockedTime) {
+      alert('Cannot reschedule to a blocked time');
+      setDraggingAppointment(null);
+      setDragPreview(null);
+      return;
+    }
+
+    // Get old time for display
+    const oldDate = new Date(draggingAppointment.scheduledAt);
+    const oldHour = oldDate.getUTCHours();
+    const oldTime = `${oldHour.toString().padStart(2, '0')}:00`;
+
+    // Show confirmation dialog
+    setRescheduleConfirm({
+      appointmentId: draggingAppointment.id,
+      appointmentName: draggingAppointment.client.name,
+      oldDate,
+      oldTime,
+      newDate: date,
+      newTime: `${hour.toString().padStart(2, '0')}:00`,
+    });
+
+    setDraggingAppointment(null);
+    setDragPreview(null);
+  };
+
+  const handleConfirmReschedule = async () => {
+    if (!rescheduleConfirm || !onReschedule) return;
+
+    setRescheduling(true);
+    try {
+      const newScheduledAt = new Date(rescheduleConfirm.newDate);
+      newScheduledAt.setUTCHours(parseInt(rescheduleConfirm.newTime.split(':')[0]));
+      await onReschedule(rescheduleConfirm.appointmentId, newScheduledAt);
+      setRescheduleConfirm(null);
+    } finally {
+      setRescheduling(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Header with navigation */}
@@ -204,6 +284,8 @@ export function WeekCalendar({
                 const dayAppointments = getAppointmentsForSlot(date, hour);
                 const blockedTime = isSlotBlocked(date, hour);
 
+                const isDragPreview = dragPreview && dragPreview.date.getTime() === date.getTime() && dragPreview.hour === hour;
+
                 return (
                   <div
                     key={`${dayIdx}-${hour}`}
@@ -212,9 +294,14 @@ export function WeekCalendar({
                         onEmptySlotClick(date, `${hour.toString().padStart(2, '0')}:00`);
                       }
                     }}
-                    className={`p-2 min-h-20 relative ${
+                    onDragOver={(e) => handleDragOver(e, date, hour)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, date, hour)}
+                    className={`p-2 min-h-20 relative transition ${
                       !blockedTime && dayAppointments.length === 0 ? 'cursor-pointer hover:bg-muted/50' : ''
-                    } ${blockedTime ? 'bg-gray-200 opacity-50' : ''}`}
+                    } ${blockedTime ? 'bg-gray-200 opacity-50' : ''} ${
+                      isDragPreview ? 'bg-blue-100 border-2 border-blue-400' : ''
+                    }`}
                   >
                     {blockedTime && (
                       <div className="absolute inset-0 flex items-center justify-center">
@@ -227,10 +314,14 @@ export function WeekCalendar({
                     {dayAppointments.map((apt) => (
                       <button
                         key={apt.id}
-                        onClick={() => onAppointmentClick(apt)}
-                        className={`w-full p-2 rounded text-xs font-medium border mb-1 transition-all hover:shadow-md ${getTypeColor(
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, apt)}
+                        onClick={(e) => {
+                          if (e.button === 0) onAppointmentClick(apt);
+                        }}
+                        className={`w-full p-2 rounded text-xs font-medium border mb-1 transition-all hover:shadow-md cursor-move ${getTypeColor(
                           apt.type
-                        )} ${getStatusColor(apt.status)}`}
+                        )} ${getStatusColor(apt.status)} ${draggingAppointment?.id === apt.id ? 'opacity-50' : ''}`}
                       >
                         <div className="font-semibold truncate">{apt.client.name}</div>
                         <div className="text-xs opacity-75 truncate">{apt.type}</div>
@@ -264,6 +355,48 @@ export function WeekCalendar({
           <span>Blocked</span>
         </div>
       </div>
+
+      {/* Reschedule Confirmation Dialog */}
+      {rescheduleConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full space-y-4">
+            <h3 className="text-lg font-semibold">Confirm Reschedule</h3>
+
+            <div className="space-y-2 bg-muted p-4 rounded">
+              <p className="text-sm"><span className="font-medium">Appointment:</span> {rescheduleConfirm.appointmentName}</p>
+              <p className="text-sm">
+                <span className="font-medium">Old Time:</span>{' '}
+                {rescheduleConfirm.oldDate.toLocaleDateString('en-GB')} at {rescheduleConfirm.oldTime}
+              </p>
+              <p className="text-sm text-green-600">
+                <span className="font-medium">New Time:</span>{' '}
+                {rescheduleConfirm.newDate.toLocaleDateString('en-GB')} at {rescheduleConfirm.newTime}
+              </p>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              The client will be notified of the new appointment time via email.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setRescheduleConfirm(null)}
+                disabled={rescheduling}
+                className="flex-1 px-3 py-2 rounded border border-input hover:bg-muted transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReschedule}
+                disabled={rescheduling}
+                className="flex-1 px-3 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {rescheduling ? 'Rescheduling...' : 'Confirm'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
