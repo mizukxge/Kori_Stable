@@ -1,0 +1,10 @@
+# pnpm configuration for monorepo
+
+# Ensure pnpm uses the node-linker that works best in CI/container environments
+node-linker=hoisted
+
+# Enable strict peer dependency resolution
+strict-peer-dependencies=false
+
+# Reduce verbosity in CI environments
+loglevel=warn
