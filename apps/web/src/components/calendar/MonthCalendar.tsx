@@ -83,13 +83,13 @@ export function MonthCalendar({
   const getTypeColor = (type: string): string => {
     switch (type) {
       case 'Introduction':
-        return 'bg-blue-100 text-blue-700';
+        return 'bg-blue-900/50 text-blue-200 border border-blue-700';
       case 'CreativeDirection':
-        return 'bg-purple-100 text-purple-700';
+        return 'bg-purple-900/50 text-purple-200 border border-purple-700';
       case 'ContractInvoicing':
-        return 'bg-green-100 text-green-700';
+        return 'bg-green-900/50 text-green-200 border border-green-700';
       default:
-        return 'bg-gray-100 text-gray-700';
+        return 'bg-slate-700/50 text-slate-200 border border-slate-600';
     }
   };
 
@@ -156,10 +156,10 @@ export function MonthCalendar({
               <div
                 key={index}
                 onClick={() => isCurrentMonth && onDateClick?.(day)}
-                className={`min-h-24 p-2 border-b border-r text-sm cursor-pointer transition ${
-                  !isCurrentMonth ? 'bg-muted/50' : 'bg-white hover:bg-muted/30'
-                } ${isToday ? 'bg-blue-50 border-blue-200' : ''} ${
-                  isBlocked ? 'bg-gray-100' : ''
+                className={`min-h-24 p-2 border-b border-r border-slate-700 text-sm cursor-pointer transition ${
+                  !isCurrentMonth ? 'bg-slate-800/50' : 'bg-slate-800/30 hover:bg-slate-700/40'
+                } ${isToday ? 'bg-blue-900/30 border-blue-600' : ''} ${
+                  isBlocked ? 'bg-slate-700/40' : ''
                 }`}
               >
                 <div
@@ -171,7 +171,7 @@ export function MonthCalendar({
                 </div>
 
                 {isBlocked && (
-                  <div className="text-xs text-gray-600 font-medium mb-1">Blocked</div>
+                  <div className="text-xs text-slate-400 font-medium mb-1">Blocked</div>
                 )}
 
                 {/* Appointments */}
@@ -206,19 +206,19 @@ export function MonthCalendar({
       {/* Legend */}
       <div className="flex gap-4 text-sm text-muted-foreground">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-blue-100" />
+          <div className="w-3 h-3 rounded bg-blue-600" />
           Introduction
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-purple-100" />
+          <div className="w-3 h-3 rounded bg-purple-600" />
           Creative Direction
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-green-100" />
+          <div className="w-3 h-3 rounded bg-green-600" />
           Contract/Invoicing
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded bg-gray-100" />
+          <div className="w-3 h-3 rounded bg-slate-600" />
           Blocked
         </div>
       </div>
