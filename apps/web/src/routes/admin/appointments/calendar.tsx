@@ -209,21 +209,27 @@ export default function AppointmentsCalendarPage() {
           <p className="text-muted-foreground">Manage your appointments with drag-to-reschedule</p>
         </div>
         <div className="flex gap-3 items-center">
-          <div className="flex gap-1 bg-secondary/30 p-1 rounded-lg border border-secondary/50">
+          <div className="flex gap-1 bg-slate-700/40 p-1 rounded-lg border border-slate-600/50">
             <Button
               size="sm"
-              variant={viewMode === 'week' ? 'default' : 'ghost'}
               onClick={() => setViewMode('week')}
-              className="flex items-center gap-2 font-medium"
+              className={`flex items-center gap-2 font-medium transition-all ${
+                viewMode === 'week'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-200'
+              }`}
             >
               <LayoutList className="h-4 w-4" />
               Week
             </Button>
             <Button
               size="sm"
-              variant={viewMode === 'month' ? 'default' : 'ghost'}
               onClick={() => setViewMode('month')}
-              className="flex items-center gap-2 font-medium"
+              className={`flex items-center gap-2 font-medium transition-all ${
+                viewMode === 'month'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-slate-700/50 hover:bg-slate-600/70 text-slate-200'
+              }`}
             >
               <LayoutGrid className="h-4 w-4" />
               Month
