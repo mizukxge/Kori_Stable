@@ -53,6 +53,13 @@ import EnvelopeDetailPage from './routes/admin/envelopes/[id]';
 import CreateEnvelopePage from './routes/admin/envelopes/new';
 import SigningPage from './routes/sign/[token]';
 import LoginPage from './routes/login';
+import AppointmentsIndex from './routes/admin/appointments/index';
+import AppointmentDetailPage from './routes/admin/appointments/[id]';
+import AppointmentsCalendarPage from './routes/admin/appointments/calendar';
+import AppointmentsLinksPage from './routes/admin/appointments/links';
+import AppointmentsSettingsPage from './routes/admin/appointments/settings';
+import AppointmentsMetricsPage from './routes/admin/appointments/metrics';
+import BookAppointmentPage from './routes/book/[token]';
 
 // Force rebuild: 2025-12-17-rebuild-v4
 function App() {
@@ -367,6 +374,62 @@ function App() {
                 <EnvelopeDetailPage />
               </Layout>
             }
+          />
+
+          {/* Appointment Routes - SPECIFIC ROUTES MUST COME BEFORE DYNAMIC ROUTES */}
+          <Route
+            path="/admin/appointments/calendar"
+            element={
+              <Layout>
+                <AppointmentsCalendarPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments/links"
+            element={
+              <Layout>
+                <AppointmentsLinksPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments/settings"
+            element={
+              <Layout>
+                <AppointmentsSettingsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments/metrics"
+            element={
+              <Layout>
+                <AppointmentsMetricsPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments/:id"
+            element={
+              <Layout>
+                <AppointmentDetailPage />
+              </Layout>
+            }
+          />
+          <Route
+            path="/admin/appointments"
+            element={
+              <Layout>
+                <AppointmentsIndex />
+              </Layout>
+            }
+          />
+
+          {/* Public Appointment Booking - No auth required */}
+          <Route
+            path="/book/:token"
+            element={<BookAppointmentPage />}
           />
 
           {/* Design System Demo */}

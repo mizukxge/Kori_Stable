@@ -26,11 +26,26 @@ export async function buildServer() {
   // Parse CORS origins
   const allowedOrigins = env.CORS_ORIGIN.split(',').map(o => o.trim());
 
+  // Debug: Log environment and configuration
+  console.log('🔧 [SERVER CONFIG] Initialization');
+  console.log('🔧 [SERVER CONFIG] NODE_ENV:', env.NODE_ENV);
+  console.log('🔧 [SERVER CONFIG] SESSION_COOKIE_SECURE:', env.SESSION_COOKIE_SECURE);
+  console.log('🔧 [SERVER CONFIG] SESSION_COOKIE_SAMESITE:', env.SESSION_COOKIE_SAMESITE);
+  console.log('🔧 [SERVER CONFIG] CORS_ORIGIN:', allowedOrigins.join(', '));
+  console.log('🔧 [SERVER CONFIG] API_HOST:', env.API_HOST, 'API_PORT:', env.API_PORT);
+
   // Manual CORS handling via preHandler hook (instead of @fastify/cors plugin)
   // This ensures Access-Control-Allow-Credentials header is set correctly
   fastify.addHook('preHandler', async (request, reply) => {
     const origin = request.headers.origin as string | undefined;
     const requestMethod = request.method;
+
+    // Debug logging
+    console.log(`🔍 [CORS] ${requestMethod} ${request.url}`);
+    console.log(`🔍 [CORS] Origin: ${origin}`);
+    console.log(`🔍 [CORS] Allowed: ${allowedOrigins.join(', ')}`);
+    console.log(`🔍 [CORS] Match: ${origin && allowedOrigins.includes(origin) ? '✓ YES' : '✗ NO'}`);
+    console.log(`🔍 [CORS] Cookie header: ${request.headers.cookie ? '✓ Present' : '✗ Missing'}`);
 
     // Set CORS headers for allowed origins
     if (origin && allowedOrigins.includes(origin)) {
@@ -40,6 +55,9 @@ export async function buildServer() {
       reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
       reply.header('Access-Control-Expose-Headers', 'Content-Type, Content-Length');
       reply.header('Vary', 'Origin');
+      console.log(`✅ [CORS] Headers set for ${origin}`);
+    } else if (origin) {
+      console.warn(`⚠️ [CORS] Origin ${origin} NOT in allowed list`);
     }
 
     // Handle OPTIONS (preflight) requests
@@ -72,14 +90,23 @@ export async function buildServer() {
   });
 
   // Register cookie plugin
-  await fastify.register(cookie, {
+  const cookieConfig = {
     secret: env.SESSION_SECRET,
     parseOptions: {
       httpOnly: true,
-      secure: (env as any).SESSION_COOKIE_SECURE ?? (env.NODE_ENV === 'production'),
-      sameSite: (env as any).SESSION_COOKIE_SAMESITE || 'Lax',
+      secure: env.SESSION_COOKIE_SECURE || env.NODE_ENV === 'production',
+      sameSite: env.SESSION_COOKIE_SAMESITE.toLowerCase() as 'lax' | 'strict' | 'none',
     },
+  };
+
+  console.log('🍪 [COOKIE CONFIG] Registering cookie plugin:', {
+    httpOnly: cookieConfig.parseOptions.httpOnly,
+    secure: cookieConfig.parseOptions.secure,
+    sameSite: cookieConfig.parseOptions.sameSite,
+    secretLength: env.SESSION_SECRET.length,
   });
+
+  await fastify.register(cookie, cookieConfig);
 
   // Register WebSocket plugin for real-time notifications
   await fastify.register(websocket, {

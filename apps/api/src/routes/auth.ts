@@ -45,13 +45,28 @@ export async function authRoutes(fastify: FastifyInstance) {
         request.headers['user-agent']
       );
 
+      console.log('🔑 [LOGIN] Session token created:', sessionToken.substring(0, 20) + '...');
+
       // Set secure cookie
-      reply.setCookie('sessionToken', sessionToken, {
+      const cookieOptions = {
         path: '/',
         httpOnly: true,
         secure: (env as any).SESSION_COOKIE_SECURE ?? (env.NODE_ENV === 'production'),
         sameSite: ((env as any).SESSION_COOKIE_SAMESITE?.toLowerCase() || 'lax') as 'strict' | 'lax' | 'none',
         maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
+      };
+
+      console.log('🍪 [LOGIN] Cookie options:', {
+        ...cookieOptions,
+        sessionTokenLength: sessionToken.length,
+      });
+
+      reply.setCookie('sessionToken', sessionToken, cookieOptions);
+
+      console.log('✅ [LOGIN] Cookie set, headers:', {
+        'set-cookie': reply.getHeader('set-cookie'),
+        'access-control-allow-credentials': reply.getHeader('access-control-allow-credentials'),
+        origin: request.headers.origin,
       });
 
       // Log successful login

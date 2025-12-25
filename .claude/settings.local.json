@@ -76,7 +76,10 @@
       "Bash(gh run list:*)",
       "Bash(gh run view:*)",
       "Bash(gh api:*)",
-      "Bash(do gh run list --limit 1)"
+      "Bash(do gh run list --limit 1)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(git pull:*)"
     ],
     "deny": [],
     "ask": []

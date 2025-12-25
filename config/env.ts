@@ -15,27 +15,33 @@ const envSchema = z.object({
   API_PORT: z.string().default('3001').transform(Number),
   API_HOST: z.string().default('0.0.0.0'),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
-  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
-  
+  LOG_LEVEL: z
+    .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
+    .default('info'),
+  // Session/Cookie configuration
+  SESSION_COOKIE_SECURE: z.string().default('false').transform((v) => v === 'true'),
+  SESSION_COOKIE_SAMESITE: z
+    .enum(['Strict', 'Lax', 'None'])
+    .default('Lax'),
   // Database
   DATABASE_URL: z.string(),
-  
   // Secrets (will be masked in logs)
   SESSION_SECRET: z.string().min(32),
   JWT_SECRET: z.string().min(32).optional(),
   API_KEY: z.string().optional(),
 });
 
+// Export type for TypeScript
+export type Environment = z.infer<typeof envSchema>;
+
 // Parse and validate
-const parseEnv = () => {
+const parseEnv = (): Environment => {
   const result = envSchema.safeParse(process.env);
-  
   if (!result.success) {
     console.error('❌ Invalid environment variables:');
     console.error(result.error.format());
     process.exit(1);
   }
-  
   return result.data;
 };
 
@@ -48,13 +54,15 @@ const maskSecret = (value: string | undefined): string => {
   return value.slice(0, 4) + '***' + value.slice(-4);
 };
 
-export const printConfig = () => {
+export const printConfig = (): void => {
   console.log('📋 Configuration loaded:');
   console.log('  NODE_ENV:', env.NODE_ENV);
   console.log('  API_PORT:', env.API_PORT);
   console.log('  API_HOST:', env.API_HOST);
   console.log('  CORS_ORIGIN:', env.CORS_ORIGIN);
   console.log('  LOG_LEVEL:', env.LOG_LEVEL);
+  console.log('  SESSION_COOKIE_SECURE:', env.SESSION_COOKIE_SECURE);
+  console.log('  SESSION_COOKIE_SAMESITE:', env.SESSION_COOKIE_SAMESITE);
   console.log('  DATABASE_URL:', maskSecret(env.DATABASE_URL));
   console.log('  SESSION_SECRET:', maskSecret(env.SESSION_SECRET));
   console.log('  JWT_SECRET:', maskSecret(env.JWT_SECRET));

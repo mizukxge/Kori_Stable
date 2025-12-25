@@ -37,6 +37,9 @@ import { envelopesRoutes } from './envelopes.js';
 import { notificationRoutes } from './notifications.js';
 import { diagnosticRoutes } from './diagnostic.js';
 import { debugRoutes } from './debug.js';
+import { appointmentsRoutes } from './appointments.js';
+import { publicAppointmentsRoutes } from './publicAppointments.js';
+import { oauthRoutes } from './oauth.js';
 
 export async function registerRoutes(fastify: FastifyInstance) {
   // Health check routes (public)
@@ -78,6 +81,9 @@ export async function registerRoutes(fastify: FastifyInstance) {
 
   // Public inquiry routes (lead capture form - no auth required)
   await fastify.register(inquiryRoutes);
+
+  // Public appointment booking routes (no auth required)
+  await fastify.register(publicAppointmentsRoutes);
 
   // Admin inquiry management routes (admin only)
   await fastify.register(adminInquiryRoutes);
@@ -157,11 +163,17 @@ export async function registerRoutes(fastify: FastifyInstance) {
   // Analytics routes (admin only)
   await fastify.register(analyticsRoutes);
 
+  // Appointments and scheduling routes (admin only)
+  await fastify.register(appointmentsRoutes);
+
+  // OAuth and calendar sync routes (admin only)
+  await fastify.register(oauthRoutes);
+
   // Example API route (existing hello endpoint)
   fastify.get('/api/hello', async (_request, _reply) => {
-    return { 
-      message: 'Hello from Kori API!', 
-      timestamp: new Date().toISOString() 
+    return {
+      message: 'Hello from Kori API!',
+      timestamp: new Date().toISOString()
     };
   });
 }

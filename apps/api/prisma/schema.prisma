@@ -63,6 +63,9 @@ model AdminUser {
   createdEnvelopes  Envelope[]          @relation("CreatedEnvelopes")
   envelopeWebhooks  EnvelopeWebhook[]   @relation("CreatedEnvelopeWebhooks")
 
+  // Calendar OAuth
+  calendarCredentials CalendarCredential[]
+
   @@map("admin_users")
 }
 
@@ -121,14 +124,15 @@ model Client {
 
   auditLogs AuditLog[]
 
-  assets    Asset[]
-  releases  Release[]
-  galleries Gallery[]
-  proposals Proposal[]
-  contracts Contract[]
-  invoices  Invoice[]
-  Record    Record[]
-  inquiries Inquiry[]
+  assets       Asset[]
+  releases     Release[]
+  galleries    Gallery[]
+  proposals    Proposal[]
+  contracts    Contract[]
+  invoices     Invoice[]
+  Record       Record[]
+  inquiries    Inquiry[]
+  appointments Appointment[] @relation("ClientAppointments")
 
   @@index([email])
   @@index([status])
@@ -470,6 +474,9 @@ model Proposal {
   // Contract relationship
   contract Contract?
 
+  // Appointments relationship
+  appointments Appointment[] @relation("ProposalAppointments")
+
   // Email template tracking
   emailTemplateId String?
   emailTemplate   ProposalEmailTemplate? @relation(fields: [emailTemplateId], references: [id], onDelete: SetNull)
@@ -714,6 +721,9 @@ model Contract {
   // Invoices linked to this contract
   invoices Invoice[]
 
+  // Appointments relationship
+  appointments Appointment[] @relation("ContractAppointments")
+
   // Contract dates
   signByAt    DateTime?
   effectiveAt DateTime?
@@ -889,6 +899,9 @@ model Invoice {
   // Line items and payments
   items    InvoiceItem[]
   payments Payment[]
+
+  // Appointments relationship
+  appointments Appointment[] @relation("InvoiceAppointments")
 
   // PDF
   pdfPath String?
@@ -2454,4 +2467,212 @@ model EnvelopeWebhook {
   @@index([createdById])
   @@index([active])
   @@map("envelope_webhooks")
+}
+
+// ============================================
+// APPOINTMENTS & SCHEDULING SYSTEM
+// ============================================
+
+enum AppointmentType {
+  Introduction
+  CreativeDirection
+  ContractInvoicing
+}
+
+enum AppointmentStatus {
+  Draft
+  InviteSent
+  Booked
+  Completed
+  Cancelled
+  NoShow
+  Expired
+}
+
+enum AppointmentOutcome {
+  Positive
+  Neutral
+  Negative
+}
+
+model Appointment {
+  id                    String    @id @default(cuid())
+  type                  AppointmentType
+
+  // Scheduling
+  scheduledAt           DateTime?
+  duration              Int       @default(60)
+
+  // Linking
+  clientId              String
+  client                Client    @relation("ClientAppointments", fields: [clientId], references: [id], onDelete: Cascade)
+
+  proposalId            String?
+  proposal              Proposal? @relation("ProposalAppointments", fields: [proposalId], references: [id], onDelete: SetNull)
+
+  contractId            String?
+  contract              Contract? @relation("ContractAppointments", fields: [contractId], references: [id], onDelete: SetNull)
+
+  invoiceId             String?
+  invoice               Invoice?  @relation("InvoiceAppointments", fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  // Status
+  status                AppointmentStatus @default(Draft)
+  outcome               AppointmentOutcome?
+
+  // Meeting details
+  teamsLink             String?
+  recordingUrl          String?
+  recordingConsentGiven Boolean   @default(false)
+
+  // Notes
+  adminNotes            String?
+  clientNotes           String?
+  callSummary           String?
+  noShowReason          String?
+
+  // Invitation link
+  inviteToken           String?   @unique
+  inviteTokenExpiresAt  DateTime?
+  inviteTokenUsedAt     DateTime?
+
+  // Audit
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Reminders sent
+  clientReminder24Sent  Boolean   @default(false)
+  clientReminder15Sent  Boolean   @default(false)
+  adminReminder24Sent   Boolean   @default(false)
+  adminReminder30Sent   Boolean   @default(false)
+
+  // Relations
+  auditLog              AppointmentAuditLog[]
+  calendarEvents        CalendarEvent[]
+
+  @@index([clientId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@index([inviteToken])
+  @@index([inviteTokenExpiresAt])
+  @@map("appointments")
+}
+
+model AppointmentAuditLog {
+  id              String      @id @default(cuid())
+  appointmentId   String
+  appointment     Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  action          String
+  timestamp       DateTime    @default(now())
+  details         Json?
+
+  @@index([appointmentId])
+  @@index([timestamp])
+  @@map("appointment_audit_logs")
+}
+
+model AppointmentBlockedTime {
+  id        String   @id @default(cuid())
+  startAt   DateTime
+  endAt     DateTime
+  reason    String
+
+  createdAt DateTime @default(now())
+
+  @@index([startAt])
+  @@index([endAt])
+  @@map("appointment_blocked_times")
+}
+
+model AppointmentSettings {
+  id                    String   @id @default(cuid())
+
+  workdayStart          Int      @default(11)
+  workdayEnd            Int      @default(16)
+  bufferMinutes         Int      @default(15)
+  bookingWindowDays     Int      @default(14)
+  activeTypes           String[] @default(["Introduction", "CreativeDirection", "ContractInvoicing"])
+
+  timezone              String   @default("Europe/London")
+
+  // Email Templates
+  invitationEmailTemplate    String   @default("Hi {clientName},\n\nYou're invited to a {appointmentType} call on {proposedDate} at {proposedTime}.\n\nPlease confirm your availability:\n{bookingLink}\n\nBest regards,\n{adminName}")
+  confirmationEmailTemplate  String   @default("Hi {clientName},\n\nYour appointment is confirmed for {confirmedDate} at {confirmedTime}.\n\nTeams Link: {teamsLink}\n\nBest regards,\n{adminName}")
+  reminderEmailTemplate      String   @default("Hi {clientName},\n\nReminder: Your appointment is on {appointmentDate} at {appointmentTime}.\n\nTeams Link: {teamsLink}\n\nBest regards,\n{adminName}")
+  recipientEmailCC           String?
+
+  // Calendar Sync (Stubs for now, OAuth to be implemented)
+  googleCalendarEnabled      Boolean  @default(false)
+  outlookCalendarEnabled     Boolean  @default(false)
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@map("appointment_settings")
+}
+
+// Calendar OAuth Credentials and Sync Tracking
+model CalendarCredential {
+  id                String   @id @default(cuid())
+  provider          String   // "google" | "outlook"
+  adminUserId       String
+  admin             AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  // OAuth tokens (sensitive - should be encrypted at rest)
+  accessToken       String   @db.Text
+  refreshToken      String?  @db.Text
+  idToken           String?  @db.Text
+  tokenType         String   @default("Bearer")
+  expiresAt         DateTime?
+
+  // Provider-specific identifiers
+  calendarId        String?  // Google calendar ID (e.g., "xxx@gmail.com" or custom)
+  providerUserId    String?  // User ID from provider
+
+  // Sync configuration
+  syncEnabled       Boolean  @default(true)
+  autoSync          Boolean  @default(true)  // Auto-create events on appointment booking
+
+  // Metadata
+  scopes            String[] @default([])    // Requested OAuth scopes
+  lastSyncedAt      DateTime?
+  lastError         String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, adminUserId])
+  @@index([adminUserId])
+  @@index([provider])
+  @@map("calendar_credentials")
+}
+
+// Calendar Events linked to Appointments
+model CalendarEvent {
+  id                String   @id @default(cuid())
+  appointmentId     String
+  appointment       Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  provider          String   // "google" | "outlook"
+  providerEventId   String   // Remote event ID from provider
+
+  title             String
+  description       String?  @db.Text
+  startTime         DateTime
+  endTime           DateTime
+
+  // Sync tracking
+  syncedAt          DateTime @default(now())
+  lastSyncedAt      DateTime @updatedAt
+  status            String   @default("synced")  // "synced", "pending", "failed"
+  syncError         String?
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerEventId])
+  @@index([appointmentId])
+  @@index([provider])
+  @@map("calendar_events")
 }
