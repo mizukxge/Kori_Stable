@@ -314,24 +314,30 @@ export default function AppointmentsPage() {
       {/* Navigation Links */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
         <Card className="cursor-pointer hover:shadow-lg transition">
-          <CardHeader>
-            <CardTitle className="text-lg">Calendar View</CardTitle>
-            <CardDescription>Coming soon: Week calendar with availability</CardDescription>
-          </CardHeader>
+          <Link to="/admin/appointments/calendar">
+            <CardHeader>
+              <CardTitle className="text-lg">Calendar View</CardTitle>
+              <CardDescription>Week and month calendar with drag-to-reschedule</CardDescription>
+            </CardHeader>
+          </Link>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-lg transition">
-          <CardHeader>
-            <CardTitle className="text-lg">Invite Links</CardTitle>
-            <CardDescription>Create and manage booking invitations</CardDescription>
-          </CardHeader>
+          <Link to="/admin/appointments/links">
+            <CardHeader>
+              <CardTitle className="text-lg">Invite Links</CardTitle>
+              <CardDescription>Create and manage booking invitations</CardDescription>
+            </CardHeader>
+          </Link>
         </Card>
 
         <Card className="cursor-pointer hover:shadow-lg transition">
-          <CardHeader>
-            <CardTitle className="text-lg">Reports</CardTitle>
-            <CardDescription>Coming soon: Metrics and analytics</CardDescription>
-          </CardHeader>
+          <Link to="/admin/appointments/metrics">
+            <CardHeader>
+              <CardTitle className="text-lg">Reports</CardTitle>
+              <CardDescription>Metrics and analytics</CardDescription>
+            </CardHeader>
+          </Link>
         </Card>
       </div>
     </div>
