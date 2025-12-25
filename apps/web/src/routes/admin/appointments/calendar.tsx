@@ -203,18 +203,18 @@ export default function AppointmentsCalendarPage() {
   return (
     <div className="flex-1 space-y-4 p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold">Appointments Calendar</h1>
           <p className="text-muted-foreground">Manage your appointments with drag-to-reschedule</p>
         </div>
-        <div className="flex gap-2">
-          <div className="flex gap-1 bg-muted p-1 rounded-lg">
+        <div className="flex gap-3 items-center">
+          <div className="flex gap-1 bg-secondary/30 p-1 rounded-lg border border-secondary/50">
             <Button
               size="sm"
               variant={viewMode === 'week' ? 'default' : 'ghost'}
               onClick={() => setViewMode('week')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 font-medium"
             >
               <LayoutList className="h-4 w-4" />
               Week
@@ -223,13 +223,13 @@ export default function AppointmentsCalendarPage() {
               size="sm"
               variant={viewMode === 'month' ? 'default' : 'ghost'}
               onClick={() => setViewMode('month')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 font-medium"
             >
               <LayoutGrid className="h-4 w-4" />
               Month
             </Button>
           </div>
-          <Button asChild variant="outline" className="flex items-center gap-2">
+          <Button asChild variant="outline" size="sm" className="flex items-center gap-2">
             <Link to="/admin/appointments/settings">
               <Settings className="h-4 w-4" />
               Settings
