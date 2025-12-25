@@ -4,8 +4,25 @@ import { PrismaClient } from '@prisma/client';
 import { AppointmentService } from '../services/appointments.js';
 import { AvailabilityService } from '../services/appointmentsAvailability.js';
 import { getMeetingProvider } from '../providers/MeetingProvider.js';
+import { OAuthService } from '../services/oauth.js';
+import { CalendarSyncService } from '../services/calendarSync.js';
 
 const prisma = new PrismaClient();
+
+// Initialize OAuth service
+const oauthService = new OAuthService({
+  googleClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+  googleClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+  googleRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:3001/auth/oauth/google/callback',
+  microsoftClientId: process.env.MICROSOFT_OAUTH_CLIENT_ID || '',
+  microsoftClientSecret: process.env.MICROSOFT_OAUTH_CLIENT_SECRET || '',
+  microsoftRedirectUri: process.env.MICROSOFT_OAUTH_REDIRECT_URI || 'http://localhost:3001/auth/oauth/outlook/callback',
+  microsoftTenant: process.env.MICROSOFT_OAUTH_TENANT || 'common',
+  appUrl: process.env.APP_URL || 'http://localhost:3000',
+});
+
+// Initialize calendar sync service
+const calendarSyncService = new CalendarSyncService(oauthService);
 
 // Validation schemas
 const bookingSchema = z.object({
@@ -203,6 +220,31 @@ export async function publicAppointmentsRoutes(fastify: FastifyInstance) {
           data: { teamsLink },
         });
       }
+
+      // Sync appointment to admin calendars (async, don't block the response)
+      // Find all admins with calendar credentials configured for auto-sync
+      const calendarCredentials = await prisma.calendarCredential.findMany({
+        where: {
+          syncEnabled: true,
+          autoSync: true,
+        },
+        distinct: ['adminUserId'],
+      });
+
+      // Sync to each admin's calendar independently
+      const syncPromises = calendarCredentials.map((cred) =>
+        calendarSyncService.syncAppointment(bookedAppointment.id, cred.adminUserId).catch((error) => {
+          request.log.error(
+            error,
+            `Failed to sync appointment ${bookedAppointment.id} to calendar for admin ${cred.adminUserId}`
+          );
+        })
+      );
+
+      // Fire off all sync operations without waiting
+      Promise.all(syncPromises).catch((error) => {
+        request.log.error(error, 'Error during calendar sync operations');
+      });
 
       // TODO: Send confirmation email to client and admin
 
