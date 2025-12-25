@@ -239,6 +239,180 @@ export class CalendarSyncService {
   }
 
   /**
+   * Update calendar event when appointment is rescheduled
+   */
+  async updateAppointment(appointmentId: string, adminId: string): Promise<void> {
+    const appointment = await prisma.appointment.findUnique({
+      where: { id: appointmentId },
+      include: {
+        client: true,
+      },
+    });
+
+    if (!appointment) {
+      throw new Error(`Appointment not found: ${appointmentId}`);
+    }
+
+    if (!appointment.scheduledAt) {
+      throw new Error('Appointment must be scheduled before updating calendar');
+    }
+
+    // Find existing calendar events for this appointment
+    const existingEvents = await prisma.calendarEvent.findMany({
+      where: { appointmentId },
+    });
+
+    if (existingEvents.length === 0) {
+      // If no events exist, create them instead
+      return this.syncAppointment(appointmentId, adminId);
+    }
+
+    // Get admin's calendar credentials
+    const googleCred = await this.oauthService.getCredential(adminId, 'google');
+    const outlookCred = await this.oauthService.getCredential(adminId, 'outlook');
+
+    const eventData = {
+      title: `${appointment.type} - ${appointment.client.name}`,
+      description: this.buildEventDescription(appointment),
+      startTime: appointment.scheduledAt,
+      endTime: new Date(appointment.scheduledAt.getTime() + appointment.duration * 60000),
+      teamsLink: appointment.teamsLink || undefined,
+      clientEmail: appointment.client.email || undefined,
+    };
+
+    // Update Google Calendar events
+    const googleEvents = existingEvents.filter((e) => e.provider === 'google');
+    if (googleCred?.syncEnabled && googleEvents.length > 0) {
+      try {
+        for (const event of googleEvents) {
+          await this.updateGoogleCalendarEvent(googleCred, event.providerEventId, eventData);
+          await prisma.calendarEvent.update({
+            where: { id: event.id },
+            data: {
+              title: eventData.title,
+              description: eventData.description,
+              startTime: eventData.startTime,
+              endTime: eventData.endTime,
+              lastSyncedAt: new Date(),
+            },
+          });
+        }
+
+        await prisma.calendarCredential.update({
+          where: { id: googleCred.id },
+          data: { lastSyncedAt: new Date() },
+        });
+      } catch (error) {
+        console.error(`Failed to update Google Calendar event for appointment ${appointmentId}:`, error);
+        await prisma.calendarCredential.update({
+          where: { id: googleCred.id },
+          data: {
+            lastError: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
+    }
+
+    // Update Outlook Calendar events
+    const outlookEvents = existingEvents.filter((e) => e.provider === 'outlook');
+    if (outlookCred?.syncEnabled && outlookEvents.length > 0) {
+      try {
+        for (const event of outlookEvents) {
+          await this.updateOutlookCalendarEvent(outlookCred, event.providerEventId, eventData);
+          await prisma.calendarEvent.update({
+            where: { id: event.id },
+            data: {
+              title: eventData.title,
+              description: eventData.description,
+              startTime: eventData.startTime,
+              endTime: eventData.endTime,
+              lastSyncedAt: new Date(),
+            },
+          });
+        }
+
+        await prisma.calendarCredential.update({
+          where: { id: outlookCred.id },
+          data: { lastSyncedAt: new Date() },
+        });
+      } catch (error) {
+        console.error(`Failed to update Outlook Calendar event for appointment ${appointmentId}:`, error);
+        await prisma.calendarCredential.update({
+          where: { id: outlookCred.id },
+          data: {
+            lastError: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
+    }
+  }
+
+  /**
+   * Delete calendar events when appointment is cancelled/no-show
+   */
+  async deleteAppointment(appointmentId: string): Promise<void> {
+    // Find existing calendar events for this appointment
+    const existingEvents = await prisma.calendarEvent.findMany({
+      where: { appointmentId },
+    });
+
+    if (existingEvents.length === 0) {
+      return; // Nothing to delete
+    }
+
+    // Get all credentials that might own these events (by provider and sync status)
+    const googleCredentials = await prisma.calendarCredential.findMany({
+      where: {
+        provider: 'google',
+        syncEnabled: true,
+      },
+    });
+
+    const outlookCredentials = await prisma.calendarCredential.findMany({
+      where: {
+        provider: 'outlook',
+        syncEnabled: true,
+      },
+    });
+
+    // Delete from Google Calendar
+    const googleEvents = existingEvents.filter((e) => e.provider === 'google');
+    for (const event of googleEvents) {
+      try {
+        // Try to delete from first available Google credential
+        if (googleCredentials.length > 0) {
+          await this.deleteGoogleCalendarEvent(googleCredentials[0], event.providerEventId);
+        }
+
+        await prisma.calendarEvent.delete({
+          where: { id: event.id },
+        });
+      } catch (error) {
+        console.error(`Failed to delete Google Calendar event ${event.providerEventId}:`, error);
+        // Continue with other deletions even if one fails
+      }
+    }
+
+    // Delete from Outlook Calendar
+    const outlookEvents = existingEvents.filter((e) => e.provider === 'outlook');
+    for (const event of outlookEvents) {
+      try {
+        // Try to delete from first available Outlook credential
+        if (outlookCredentials.length > 0) {
+          await this.deleteOutlookCalendarEvent(outlookCredentials[0], event.providerEventId);
+        }
+
+        await prisma.calendarEvent.delete({
+          where: { id: event.id },
+        });
+      } catch (error) {
+        console.error(`Failed to delete Outlook Calendar event ${event.providerEventId}:`, error);
+        // Continue with other deletions even if one fails
+      }
+    }
+  }
+
+  /**
    * Build event description from appointment details
    */
   private buildEventDescription(appointment: Appointment & { client: { name: string; email?: string | null } }): string {
@@ -260,5 +434,159 @@ export class CalendarSyncService {
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Update Google Calendar event
+   */
+  private async updateGoogleCalendarEvent(
+    credential: CalendarCredential,
+    eventId: string,
+    eventData: CalendarEventData
+  ): Promise<void> {
+    const accessToken = await this.oauthService.ensureValidToken(credential);
+
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
+
+    const calendar = google.calendar('v3');
+    const calendarId = credential.calendarId || 'primary';
+
+    const eventBody = {
+      summary: eventData.title,
+      description: eventData.description,
+      start: {
+        dateTime: eventData.startTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      end: {
+        dateTime: eventData.endTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      attendees: eventData.clientEmail
+        ? [
+            {
+              email: eventData.clientEmail,
+              displayName: 'Client',
+              responseStatus: 'needsAction',
+            },
+          ]
+        : undefined,
+    };
+
+    try {
+      await calendar.events.update({
+        auth,
+        calendarId,
+        eventId,
+        requestBody: eventBody as any,
+      });
+    } catch (error) {
+      throw new Error(`Failed to update Google Calendar event: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Update Outlook Calendar event
+   */
+  private async updateOutlookCalendarEvent(
+    credential: CalendarCredential,
+    eventId: string,
+    eventData: CalendarEventData
+  ): Promise<void> {
+    const accessToken = await this.oauthService.ensureValidToken(credential);
+
+    const eventBody = {
+      subject: eventData.title,
+      bodyPreview: eventData.description,
+      body: {
+        contentType: 'HTML',
+        content: eventData.description || '',
+      },
+      start: {
+        dateTime: eventData.startTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      end: {
+        dateTime: eventData.endTime.toISOString(),
+        timeZone: 'UTC',
+      },
+      attendees: eventData.clientEmail
+        ? [
+            {
+              emailAddress: {
+                address: eventData.clientEmail,
+                name: 'Client',
+              },
+              type: 'required',
+            },
+          ]
+        : undefined,
+      isOnlineMeeting: !!eventData.teamsLink,
+      onlineMeetingProvider: eventData.teamsLink ? 'teamsForBusiness' : undefined,
+    };
+
+    try {
+      const response = await fetch(`https://graph.microsoft.com/v1.0/me/events/${eventId}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(eventBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update Outlook event: ${response.statusText}`);
+      }
+    } catch (error) {
+      throw new Error(`Failed to update Outlook Calendar event: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Delete Google Calendar event
+   */
+  private async deleteGoogleCalendarEvent(credential: CalendarCredential, eventId: string): Promise<void> {
+    const accessToken = await this.oauthService.ensureValidToken(credential);
+
+    const auth = new google.auth.OAuth2();
+    auth.setCredentials({ access_token: accessToken });
+
+    const calendar = google.calendar('v3');
+    const calendarId = credential.calendarId || 'primary';
+
+    try {
+      await calendar.events.delete({
+        auth,
+        calendarId,
+        eventId,
+      });
+    } catch (error) {
+      throw new Error(`Failed to delete Google Calendar event: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Delete Outlook Calendar event
+   */
+  private async deleteOutlookCalendarEvent(credential: CalendarCredential, eventId: string): Promise<void> {
+    const accessToken = await this.oauthService.ensureValidToken(credential);
+
+    try {
+      const response = await fetch(`https://graph.microsoft.com/v1.0/me/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete Outlook event: ${response.statusText}`);
+      }
+    } catch (error) {
+      throw new Error(`Failed to delete Outlook Calendar event: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 }

@@ -2,9 +2,26 @@ import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { PrismaClient, AppointmentType, AppointmentStatus, AppointmentOutcome } from '@prisma/client';
 import { AppointmentService } from '../services/appointments.js';
+import { CalendarSyncService } from '../services/calendarSync.js';
+import { OAuthService } from '../services/oauth.js';
 import { requireAdmin } from '../middleware/auth.js';
 
 const prisma = new PrismaClient();
+
+// Initialize OAuth service
+const oauthService = new OAuthService({
+  googleClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+  googleClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+  googleRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:3001/auth/oauth/google/callback',
+  microsoftClientId: process.env.MICROSOFT_OAUTH_CLIENT_ID || '',
+  microsoftClientSecret: process.env.MICROSOFT_OAUTH_CLIENT_SECRET || '',
+  microsoftRedirectUri: process.env.MICROSOFT_OAUTH_REDIRECT_URI || 'http://localhost:3001/auth/oauth/outlook/callback',
+  microsoftTenant: process.env.MICROSOFT_OAUTH_TENANT || 'common',
+  appUrl: process.env.APP_URL || 'http://localhost:3000',
+});
+
+// Initialize calendar sync service
+const calendarSyncService = new CalendarSyncService(oauthService);
 
 // Validation schemas
 const createInvitationSchema = z.object({
@@ -183,6 +200,25 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
 
       const appointment = await AppointmentService.rescheduleAppointment(id, new Date(payload.newScheduledAt));
 
+      // Sync updated appointment to admin calendars (async, don't block the response)
+      const calendarCredentials = await prisma.calendarCredential.findMany({
+        where: {
+          syncEnabled: true,
+          autoSync: true,
+        },
+        distinct: ['adminUserId'],
+      });
+
+      const syncPromises = calendarCredentials.map((cred) =>
+        calendarSyncService.updateAppointment(id, cred.adminUserId).catch((error) => {
+          request.log.error(error, `Failed to update appointment ${id} in calendar for admin ${cred.adminUserId}`);
+        })
+      );
+
+      Promise.all(syncPromises).catch((error) => {
+        request.log.error(error, 'Error during calendar update operations');
+      });
+
       return reply.status(200).send({
         success: true,
         data: appointment,
@@ -253,6 +289,11 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
 
       const appointment = await AppointmentService.markNoShow(id, payload);
 
+      // Delete calendar events (async, don't block the response)
+      calendarSyncService.deleteAppointment(id).catch((error) => {
+        request.log.error(error, `Failed to delete calendar events for no-show appointment ${id}`);
+      });
+
       return reply.status(200).send({
         success: true,
         data: appointment,
@@ -282,6 +323,11 @@ export async function appointmentsRoutes(fastify: FastifyInstance) {
       const payload = cancelSchema.parse(request.body);
 
       const appointment = await AppointmentService.cancelAppointment(id, payload.reason);
+
+      // Delete calendar events (async, don't block the response)
+      calendarSyncService.deleteAppointment(id).catch((error) => {
+        request.log.error(error, `Failed to delete calendar events for cancelled appointment ${id}`);
+      });
 
       return reply.status(200).send({
         success: true,
